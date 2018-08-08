@@ -262,7 +262,7 @@ const initCountdown = function() {
 		theme: "flat-colors",
 
 		// end time
-		end: new Date('2018-08-26T08:00:00+0700').getTime(),
+		end: new Date("2018-08-26T01:00:00.000Z").getTime(),
 		now: $.now(),
 
 		// whether to display the days/hours/minutes/seconds labels.
@@ -692,6 +692,10 @@ Wedding.MapInteraction = function( customSetting ) {
 				google.maps.event.addDomListener(div, "click", function(event) {
 					google.maps.event.trigger(self, "click", event);
 				});
+
+				google.maps.event.addListener(marker, 'click', function() {
+          window.open("https://goo.gl/maps/4eyojYhPLGB2", "_blank")
+     		});
 			}
 			var point = this.getProjection().fromLatLngToDivPixel(this.position);
 			if (point) {
@@ -801,8 +805,7 @@ Wedding.MapInteraction = function( customSetting ) {
 		var marker =  new CustomMarker({
 			position: defualtLatlng,
 			map: map,
-			title: 'Bogor Lakeside View',
-			onClick: "window.open('https://goo.gl/maps/4eyojYhPLGB2')"
+			title: 'Bogor Lakeside View'
 		});
 	}
 }
