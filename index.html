@@ -4,16 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Primawan Satrio — AI Forward Deployed Engineer</title>
-<meta name="description" content="AI Forward Deployed Engineer with a business mindset. Founder of Hirai.io and Satrio Consulting. I ship AI products that solve real business problems.">
+<meta name="description" content="AI Forward Deployed Engineer with a business mindset. Founder who scaled a talent company from $0 to seven figures, ex-Bukalapak PM, software engineer by training.">
 <style>
   :root {
-    --bg: #0b0e14;
-    --surface: #12161f;
-    --border: #232a38;
-    --text: #e6e9ef;
-    --muted: #8b93a5;
-    --accent: #4f8cff;
-    --accent2: #7c5cff;
+    --bg: #0b0e14; --surface: #12161f; --border: #232a38;
+    --text: #e6e9ef; --muted: #8b93a5; --accent: #4f8cff; --accent2: #7c5cff;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
@@ -27,12 +22,11 @@
   nav { display: flex; align-items: center; justify-content: space-between; height: 60px; }
   nav .logo { font-weight: 700; letter-spacing: -.02em; }
   nav .logo span { color: var(--accent); }
-  nav ul { display: flex; gap: 24px; list-style: none; font-size: 14px; }
+  nav ul { display: flex; gap: 22px; list-style: none; font-size: 14px; flex-wrap: wrap; }
   nav a { color: var(--muted); text-decoration: none; transition: color .15s; }
   nav a:hover { color: var(--text); }
 
-  /* Hero */
-  .hero { padding: 110px 0 90px; position: relative; overflow: hidden; }
+  .hero { padding: 100px 0 80px; position: relative; overflow: hidden; }
   .hero::before {
     content: ""; position: absolute; inset: -50% -20% auto auto; width: 700px; height: 700px;
     background: radial-gradient(circle, rgba(79,140,255,.12), transparent 65%); pointer-events: none;
@@ -42,9 +36,9 @@
     border: 1px solid rgba(79,140,255,.35); border-radius: 999px; padding: 4px 14px; margin-bottom: 22px;
     background: rgba(79,140,255,.08);
   }
-  h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.12; letter-spacing: -.03em; font-weight: 800; }
+  h1 { font-size: clamp(32px, 5.5vw, 52px); line-height: 1.12; letter-spacing: -.03em; font-weight: 800; }
   h1 em { font-style: normal; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .hero p.lede { margin-top: 22px; max-width: 640px; color: var(--muted); font-size: 18px; }
+  .hero p.lede { margin-top: 22px; max-width: 660px; color: var(--muted); font-size: 18px; }
   .cta { margin-top: 34px; display: flex; gap: 14px; flex-wrap: wrap; }
   .btn { padding: 11px 24px; border-radius: 10px; font-size: 15px; text-decoration: none; font-weight: 600; transition: transform .12s, box-shadow .12s; }
   .btn:hover { transform: translateY(-1px); }
@@ -55,17 +49,20 @@
   h2 { font-size: 26px; letter-spacing: -.02em; margin-bottom: 28px; display: flex; align-items: center; gap: 12px; }
   h2::before { content: ""; width: 26px; height: 3px; border-radius: 2px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
 
-  /* About */
-  .about-grid { display: grid; grid-template-columns: 1fr 260px; gap: 36px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 40px; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; }
+  .stat b { display: block; font-size: 24px; letter-spacing: -.02em; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .stat span { color: var(--muted); font-size: 13px; }
+
+  .about-grid { display: grid; grid-template-columns: 1fr 250px; gap: 36px; }
   .about-grid p { color: var(--muted); margin-bottom: 16px; }
   .about-grid p strong { color: var(--text); }
-  .facts { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; font-size: 14px; }
-  .fact { padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .facts { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; font-size: 14px; align-self: start; }
+  .fact { padding: 9px 0; border-bottom: 1px solid var(--border); }
   .fact:last-child { border: none; }
-  .fact b { display: block; color: var(--text); font-size: 17px; }
+  .fact b { display: block; color: var(--text); font-size: 15px; }
   .fact span { color: var(--muted); }
 
-  /* Projects */
   .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; }
   .card {
     background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px;
@@ -77,7 +74,6 @@
   .tagrow { display: flex; flex-wrap: wrap; gap: 6px; }
   .tag { font-size: 11.5px; color: var(--accent); background: rgba(79,140,255,.09); border-radius: 6px; padding: 2px 8px; }
 
-  /* Timeline */
   .timeline { border-left: 2px solid var(--border); margin-left: 6px; }
   .tl-item { position: relative; padding: 0 0 30px 26px; }
   .tl-item::before { content: ""; position: absolute; left: -7px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2.5px solid var(--accent); }
@@ -86,10 +82,13 @@
   .tl-item h3 { font-size: 16.5px; margin-top: 3px; }
   .tl-item p { color: var(--muted); font-size: 14.5px; margin-top: 4px; }
 
+  .talks li { color: var(--muted); margin-bottom: 10px; font-size: 15px; }
+  .talks b { color: var(--text); }
+
   footer { border-top: 1px solid var(--border); padding: 36px 0; color: var(--muted); font-size: 14px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
   footer a { color: var(--muted); text-decoration: none; }
   footer a:hover { color: var(--text); }
-  @media (max-width: 720px) { .about-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 720px) { .about-grid { grid-template-columns: 1fr; } nav ul { gap: 14px; } }
 </style>
 </head>
 <body>
@@ -100,8 +99,9 @@
       <div class="logo">primawan<span>.</span></div>
       <ul>
         <li><a href="#about">About</a></li>
-        <li><a href="#projects">Projects</a></li>
+        <li><a href="#ventures">Ventures</a></li>
         <li><a href="#experience">Experience</a></li>
+        <li><a href="#speaking">Speaking</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
     </nav>
@@ -111,49 +111,70 @@
 <main class="wrap">
 
   <div class="hero">
-    <span class="badge">● Open to AI engineering &amp; consulting work</span>
+    <span class="badge">● Founder · Engineer · Uppsala → Jakarta → Tokyo</span>
     <h1>AI Forward Deployed Engineer<br>with a <em>business mindset</em>.</h1>
-    <p class="lede">I don't just build AI systems — I build companies around them. Founder of an AI-powered recruitment platform and my own headhunting agency, shipping products where the model meets the market.</p>
+    <p class="lede">Software engineer turned product manager turned founder. I build AI products where they meet real revenue — from a job board in production on Cloudflare to an HR SaaS under development — while running a talent company that grew from zero to seven figures.</p>
     <div class="cta">
-      <a class="btn primary" href="#projects">See what I've shipped</a>
+      <a class="btn primary" href="#ventures">What I'm building</a>
       <a class="btn ghost" href="#contact">Get in touch</a>
     </div>
   </div>
 
   <section id="about">
-    <h2>About</h2>
+    <h2>Track record</h2>
+    <div class="stats">
+      <div class="stat"><b>10+ yrs</b><span>across engineering, product &amp; recruitment</span></div>
+      <div class="stat"><b>$0 → 7 figs</b><span>revenue scaled as founder</span></div>
+      <div class="stat"><b>21</b><span>core team members built &amp; led</span></div>
+      <div class="stat"><b>23k+</b><span>professional community members</span></div>
+    </div>
     <div class="about-grid">
       <div>
-        <p>I'm <strong>Primawan Satrio</strong> — an engineer who crossed to the business side and kept building. As founder of <strong>Hirai.io</strong>, I design, deploy, and operate AI systems in production: a Cloudflare Workers–based job board with vector search, WhatsApp bots that reach out to candidates automatically, and data pipelines connecting employers across Indonesia and Japan.</p>
-        <p>Running <strong>Satrio Consulting</strong>, a headhunting agency, taught me the hard part of AI isn't the model — it's the workflow adoption, unit economics, and trust. That's why I work like a forward deployed engineer: embed with the business, ship fast, measure impact.</p>
-        <p>Past lives: <strong>Global Recruitment Consultant</strong> placing talent across borders, and <strong>Product Manager</strong> translating ambiguity into roadmaps.</p>
+        <p>I'm <strong>Primawan Satrio</strong>. I started as a full-stack engineer, spent six years in software and product management — including building a B2B procurement platform at Bukalapak past eight figures GMV — then crossed to the business side and never stopped shipping.</p>
+        <p>Today I run a group of five ventures spanning contingency recruiting, employer-of-record services, Japanese-language training, and AI products. The through-line: I embed where the technology meets the customer, deploy fast, and measure everything in revenue. That's how I work as a forward deployed engineer — the model is only half the job; adoption, economics, and trust are the other half.</p>
+        <p>I stay close to the craft by reading, building AI products, and talking shop with engineers — and I mentor people leveling up their careers in STEM along the way.</p>
       </div>
       <aside class="facts">
-        <div class="fact"><b>Hirai.io</b><span>Founder · HR-tech / AI</span></div>
-        <div class="fact"><b>Satrio Consulting</b><span>Founder · Headhunting ID↔JP</span></div>
-        <div class="fact"><b>Cloudflare stack</b><span>Workers · D1 · R2 · AI</span></div>
-        <div class="fact"><b>Languages</b><span>TypeScript · Python · Java</span></div>
+        <div class="fact"><b>Bukalapak</b><span>ex-Product Manager (unicorn)</span></div>
+        <div class="fact"><b>Telkom University</b><span>Informatics Engineering, AI thesis</span></div>
+        <div class="fact"><b>Languages</b><span>Indonesian · English · Japanese · Swedish</span></div>
+        <div class="fact"><b>Based in</b><span>Uppsala, Sweden (remote worldwide)</span></div>
       </aside>
     </div>
   </section>
 
-  <section id="projects">
-    <h2>Projects</h2>
+  <section id="ventures">
+    <h2>Ventures &amp; projects</h2>
     <div class="cards">
       <div class="card">
-        <h3>KerjaBoard</h3>
-        <p>AI-powered job board at apply.satriocs.com — serverless recruiting platform on Cloudflare Workers with D1/R2, candidate-ownership workflows, automated notifications, and migrated legacy data from Strapi and Lark.</p>
-        <div class="tagrow"><span class="tag">Cloudflare Workers</span><span class="tag">D1</span><span class="tag">TypeScript</span></div>
+        <h3>Hirai.io</h3>
+        <p>AI SaaS for end-to-end HR solutions — currently in development. Includes KerjaBoard, a live serverless job board on Cloudflare Workers with candidate-ownership workflows and automated notifications.</p>
+        <div class="tagrow"><span class="tag">Cloudflare Workers</span><span class="tag">D1 / R2</span><span class="tag">TypeScript</span></div>
+      </div>
+      <div class="card">
+        <h3>Satrio Consulting</h3>
+        <p>Contingency talent search that scaled from zero to seven figures in USD, winning clients across Japan, Korea, Singapore, Australia, Malaysia, and Indonesia.</p>
+        <div class="tagrow"><span class="tag">Recruitment</span><span class="tag">B2B sales</span><span class="tag">APAC</span></div>
       </div>
       <div class="card">
         <h3>WhatsApp Candidate Outreach Bot</h3>
-        <p>Automated candidate engagement over WhatsApp — reaching out, qualifying, and scheduling candidates without recruiter busywork, integrated into the placement pipeline.</p>
+        <p>Automated candidate engagement over WhatsApp — reaching out, qualifying, and scheduling inside the placement pipeline so recruiters spend time closing, not chasing.</p>
         <div class="tagrow"><span class="tag">WhatsApp API</span><span class="tag">Automation</span><span class="tag">LLM</span></div>
       </div>
       <div class="card">
-        <h3>Global Career Expo</h3>
-        <p>Cross-border career event platform connecting Indonesian talent with Japanese employers — digital infrastructure for international hiring at scale.</p>
-        <div class="tagrow"><span class="tag">Events</span><span class="tag">Recruitment</span><span class="tag">ID ↔ Japan</span></div>
+        <h3>EoR / Outsourcing Solution</h3>
+        <p>Employer-of-record service letting foreign companies hire Indonesian talent locally or remotely without setting up a legal entity.</p>
+        <div class="tagrow"><span class="tag">HR ops</span><span class="tag">Compliance</span></div>
+      </div>
+      <div class="card">
+        <h3>Okoshi Japanese Education</h3>
+        <p>JLPT N3–N2 training program for fresh graduates and young professionals heading into the Japanese market.</p>
+        <div class="tagrow"><span class="tag">Edtech</span><span class="tag">Japan corridor</span></div>
+      </div>
+      <div class="card">
+        <h3>Kotobakari &amp; Global Career Expo</h3>
+        <p>An AI companion app for Japanese learners (in development), plus Global Career Expo 2026 — a job fair connecting foreign-owned companies in Jakarta with local talent.</p>
+        <div class="tagrow"><span class="tag">AI app</span><span class="tag">Events</span><span class="tag">Community</span></div>
       </div>
     </div>
   </section>
@@ -162,29 +183,51 @@
     <h2>Experience</h2>
     <div class="timeline">
       <div class="tl-item">
-        <span class="when">Present</span>
-        <h3>Founder — Hirai.io &amp; Satrio Consulting</h3>
-        <p>Building AI-forward recruitment products while running a headhunting agency across the Indonesia–Japan corridor.</p>
+        <span class="when">2023 – Present · Remote from Uppsala, Sweden</span>
+        <h3>Founder &amp; Executive Director — Satrio Consulting (5 ventures)</h3>
+        <p>Set strategy across five ventures and ran day-to-day operations. Scaled revenue from zero to seven figures USD, grew the team to 21 core members, built a 12k+ subscriber job broadcast channel and a 23k+ professional community, and closed clients in six countries.</p>
       </div>
       <div class="tl-item">
-        <span class="when">Earlier</span>
-        <h3>Global Recruitment Consultant</h3>
-        <p>Placed international talent between Southeast Asia and Japan; deep fluency in cross-border hiring.</p>
+        <span class="when">2019 – 2022 · Tokyo, Japan (remote)</span>
+        <h3>Career Advisor — INBOUND TECHNOLOGY, Inc.</h3>
+        <p>Full-cycle tech recruitment for non-Japanese software engineers, paid on placements. Set the firm's record for fastest first placement — one month after joining — and later placed three candidates in a single month worth over ¥5M in revenue.</p>
       </div>
       <div class="tl-item">
-        <span class="when">Earlier</span>
-        <h3>Product Manager</h3>
-        <p>Turned ambiguous business problems into shipped products and measurable outcomes.</p>
+        <span class="when">2017 – 2019 · Jakarta, Indonesia</span>
+        <h3>Product Manager — Bukalapak</h3>
+        <p>Led BukaPengadaan, a B2B procurement platform, with a 20-person squad of engineers, designers, and analysts. Took it from zero past eight figures GMV in IDR and lifted its revenue more than 40% in about two years. Represented Bukalapak speaking on product management at events across Indonesia.</p>
+      </div>
+      <div class="tl-item">
+        <span class="when">2014 – 2016 · Bandung, Indonesia</span>
+        <h3>Software Engineer &amp; Product Manager — Labtek Indie</h3>
+        <p>Managed web development projects end-to-end, coded full-stack in React and Node.js, and closed new business — onboarding a client worth ~200M IDR in the first six months. Introduced Scrum across concurrent projects. Handled ads and partnerships for media products including liputan6.com and vidio.com.</p>
+      </div>
+      <div class="tl-item">
+        <span class="when">2012 – 2015 · Jakarta–Bandung, Indonesia</span>
+        <h3>Software Engineer &amp; Product Manager — Various Startups</h3>
+        <p>Freelance and full-time roles at TMLEnergy, KMK Online, and Greeneration — including founding my own startup.</p>
       </div>
     </div>
   </section>
 
+  <section id="speaking">
+    <h2>Speaking &amp; mentoring</h2>
+    <ul class="talks" style="list-style:none;">
+      <li>🎤 <b>TEDxJakarta</b> — "Indonesia's Global Talent: Why Diaspora Matters" (2025)</li>
+      <li>🎓 Guest lecturer at <b>UMN &amp; Telkom University</b> on in-demand ICT skills; Design Thinking mentor at Telkom's Business Faculty</li>
+      <li>🚀 <b>Startup Weekend Bandung</b> pitch coach; Design Thinking facilitator at 1000 Startup workshops (Jogjakarta, Bali, Makassar)</li>
+      <li>🤝 Project-management trainer for NGO regional leaders and student ambassadors</li>
+    </ul>
+  </section>
+
   <footer id="contact">
     <div>© 2026 Primawan Satrio</div>
-    <div style="display:flex;gap:18px;">
+    <div style="display:flex;gap:18px;flex-wrap:wrap;">
       <a href="https://github.com/preemz" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://www.linkedin.com/in/primawansatrio" target="_blank" rel="noopener">LinkedIn</a>
-      <a href="mailto:developer.hirai@gmail.com">Email</a>
+      <a href="https://medium.com/@primawan.satrio" target="_blank" rel="noopener">Medium</a>
+      <a href="https://dev.to/preemz" target="_blank" rel="noopener">dev.to</a>
+      <a href="https://www.youtube.com/watch?v=Qd31Ie56oJc" target="_blank" rel="noopener">TEDx 🎥</a>
+      <a href="mailto:primawan.satrio@gmail.com">Email</a>
     </div>
   </footer>
 
