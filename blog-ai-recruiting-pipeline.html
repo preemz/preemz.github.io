@@ -36,6 +36,7 @@
   .wrap { max-width: 760px; margin: 0 auto; padding: 60px 24px 80px; }
   .back { font-size: 14px; }
   .back a { color: var(--accent); text-decoration: none; }
+  #lang-toggle { background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:3px 10px;font-size:13px;cursor:pointer;margin-left:12px;float:right; }
   h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.2; letter-spacing: -.02em; margin: 18px 0 10px; }
   .meta { color: var(--muted); font-size: 14px; margin-bottom: 40px; }
   h2 { font-size: 22px; letter-spacing: -.01em; margin: 44px 0 14px; }
@@ -68,15 +69,15 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="back"><a href="/">← primawan.github.io</a></div>
-  <h1>An End-to-End AI Recruiting Pipeline in Production</h1>
-  <div class="meta">Primawan Satrio · August 2026 · ~10 min read</div>
+  <div class="back"><a href="/">← primawan.github.io</a><button id="lang-toggle">SV</button></div>
+  <h1 data-i18n="b.title">An End-to-End AI Recruiting Pipeline in Production</h1>
+  <div class="meta" data-i18n="b.meta">Primawan Satrio · August 2026 · ~10 min read</div>
 
-  <p>Most AI demos die in the demo. The interesting question is not <em>can a model do this once</em>, but <em>can it run inside a live business every day, without a human babysitting every step</em>. I run a headhunting agency across the Indonesia–Japan corridor, and instead of bolting AI onto the side, I rebuilt our recruiting pipeline around it: parsing resumes, scoring candidate fit, reformatting CVs into client templates, and engaging candidates automatically.</p>
-  <p>This post explains how the pipeline works, why each stage is designed the way it is, and what I learned deploying LLMs where mistakes cost real placements. It runs on Cloudflare Workers with D1 for data and R2 for document storage, with no origin server anywhere.</p>
+  <p data-i18n="b.p1">Most AI demos die in the demo. The interesting question is not <em>can a model do this once</em>, but <em>can it run inside a live business every day, without a human babysitting every step</em>. I run a headhunting agency across the Indonesia–Japan corridor, and instead of bolting AI onto the side, I rebuilt our recruiting pipeline around it: parsing resumes, scoring candidate fit, reformatting CVs into client templates, and engaging candidates automatically.</p>
+  <p data-i18n="b.p2">This post explains how the pipeline works, why each stage is designed the way it is, and what I learned deploying LLMs where mistakes cost real placements. It runs on Cloudflare Workers with D1 for data and R2 for document storage, with no origin server anywhere.</p>
 
-  <h2>The pipeline at a glance</h2>
-  <p>A candidate's journey through our system touches four AI-assisted stages before a recruiter ever picks up the phone:</p>
+  <h2 data-i18n="b.h2a">The pipeline at a glance</h2>
+  <p data-i18n="b.p3">A candidate's journey through our system touches four AI-assisted stages before a recruiter ever picks up the phone:</p>
 
   <div class="diagram">
     <svg viewBox="0 0 720 150" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,sans-serif">
@@ -101,10 +102,10 @@
       <path d="M 300 118 C 340 138, 400 138, 440 118" stroke="#7c5cff" stroke-width="1" fill="none" stroke-dasharray="4 4" opacity=".6"/>
       <text x="370" y="142" text-anchor="middle" fill="#7c5cff" font-size="10.5">recruiter edits feed back into template schema</text>
     </svg>
-    <div class="caption">Figure 1. The production pipeline. Stages 2 and 4 are fully automated; stage 3 is deliberately human.</div>
+    <div class="caption" data-i18n="b.fig1">Figure 1. The production pipeline. Stages 2 and 4 are fully automated; stage 3 is deliberately human.</div>
   </div>
 
-  <h2>Stage 1: Reading any resume reliably</h2>
+  <h2 data-i18n="b.h2b">Stage 1: Reading any resume reliably</h2>
   <p>Resumes arrive as PDF or DOCX in any layout, half of them from Indonesian candidates mixing Bahasa and English. Before an LLM sees anything, deterministic code extracts plain text and mines structure with rules tuned to real-world messiness:</p>
   <ul>
     <li><strong>Tenor parsing.</strong> Employment date ranges like <code>Jan 2020 – Present</code>, <code>2021–2023</code>, or <code>s/d sekarang</code> are extracted to compute tenure months per role, which later feeds both stability scoring and seniority inference.</li>
@@ -207,5 +208,6 @@
   <p>None of the individual pieces here is exotic: regexes, weighted scoring, an LLM call behind a schema, a WhatsApp bot. The engineering value and the forward-deployed mindset lives in the seams: knowing which problems need a model and which need a regex, making automated judgments inspectable, keeping humans on the decisions that deserve them, and proving fairness claims with tests. That's the difference between an AI demo and an AI pipeline a real business runs on.</p>
   <p style="margin-top:36px;"><a href="/">← Back to portfolio</a></p>
 </div>
+<script src="blog-i18n.js"></script>
 </body>
 </html>
