@@ -1,302 +1,193 @@
 <!DOCTYPE html>
-<html dir="ltr" lang="en-US">
-
+<html lang="en">
 <head>
-	<!-- Document Meta
-    ============================================= -->
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<!--IE Compatibility Meta-->
-	<meta name="author" content="zytheme"/>
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-	<meta name="description" content="Canika wujudkan pernikahan impian">
-	<link href="assets/images/favicon/favicon.png" rel="icon">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Primawan Satrio — AI Forward Deployed Engineer</title>
+<meta name="description" content="AI Forward Deployed Engineer with a business mindset. Founder of Hirai.io and Satrio Consulting. I ship AI products that solve real business problems.">
+<style>
+  :root {
+    --bg: #0b0e14;
+    --surface: #12161f;
+    --border: #232a38;
+    --text: #e6e9ef;
+    --muted: #8b93a5;
+    --accent: #4f8cff;
+    --accent2: #7c5cff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+    line-height: 1.65; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+  header { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(12px); background: rgba(11,14,20,.75); border-bottom: 1px solid var(--border); }
+  nav { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+  nav .logo { font-weight: 700; letter-spacing: -.02em; }
+  nav .logo span { color: var(--accent); }
+  nav ul { display: flex; gap: 24px; list-style: none; font-size: 14px; }
+  nav a { color: var(--muted); text-decoration: none; transition: color .15s; }
+  nav a:hover { color: var(--text); }
 
-	<!-- Fonts
-    ============================================= -->
-	<link href='http://fonts.googleapis.com/css?family=Raleway:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i%7COpen+Sans:300,300i,400,400i,600,600i,700,700i,800,800' rel='stylesheet' type='text/css'>
+  /* Hero */
+  .hero { padding: 110px 0 90px; position: relative; overflow: hidden; }
+  .hero::before {
+    content: ""; position: absolute; inset: -50% -20% auto auto; width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(79,140,255,.12), transparent 65%); pointer-events: none;
+  }
+  .badge {
+    display: inline-block; font-size: 13px; color: var(--accent);
+    border: 1px solid rgba(79,140,255,.35); border-radius: 999px; padding: 4px 14px; margin-bottom: 22px;
+    background: rgba(79,140,255,.08);
+  }
+  h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.12; letter-spacing: -.03em; font-weight: 800; }
+  h1 em { font-style: normal; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p.lede { margin-top: 22px; max-width: 640px; color: var(--muted); font-size: 18px; }
+  .cta { margin-top: 34px; display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn { padding: 11px 24px; border-radius: 10px; font-size: 15px; text-decoration: none; font-weight: 600; transition: transform .12s, box-shadow .12s; }
+  .btn:hover { transform: translateY(-1px); }
+  .btn.primary { background: linear-gradient(90deg, var(--accent), var(--accent2)); color: #fff; box-shadow: 0 6px 24px rgba(79,140,255,.25); }
+  .btn.ghost { color: var(--text); border: 1px solid var(--border); background: var(--surface); }
 
-	<!-- Stylesheets
-    ============================================= -->
-	<link href="assets/css/external.css" rel="stylesheet">
-	<link href="assets/css/bootstrap.min.css" rel="stylesheet">
-	<link href="assets/css/style.css" rel="stylesheet">
-	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css" integrity="sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns" crossorigin="anonymous">
+  section { padding: 70px 0; border-top: 1px solid var(--border); }
+  h2 { font-size: 26px; letter-spacing: -.02em; margin-bottom: 28px; display: flex; align-items: center; gap: 12px; }
+  h2::before { content: ""; width: 26px; height: 3px; border-radius: 2px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
 
+  /* About */
+  .about-grid { display: grid; grid-template-columns: 1fr 260px; gap: 36px; }
+  .about-grid p { color: var(--muted); margin-bottom: 16px; }
+  .about-grid p strong { color: var(--text); }
+  .facts { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; font-size: 14px; }
+  .fact { padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .fact:last-child { border: none; }
+  .fact b { display: block; color: var(--text); font-size: 17px; }
+  .fact span { color: var(--muted); }
 
-	<!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
-	<!--[if lt IE 9]>
-      <script src="assets/js/html5shiv.js"></script>
-      <script src="assets/js/respond.min.js"></script>
-    <![endif]-->
+  /* Projects */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px;
+    transition: transform .15s, border-color .15s; display: flex; flex-direction: column; gap: 10px;
+  }
+  .card:hover { transform: translateY(-3px); border-color: rgba(79,140,255,.45); }
+  .card h3 { font-size: 17px; letter-spacing: -.01em; }
+  .card p { color: var(--muted); font-size: 14.5px; flex: 1; }
+  .tagrow { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { font-size: 11.5px; color: var(--accent); background: rgba(79,140,255,.09); border-radius: 6px; padding: 2px 8px; }
 
-	<!-- Document Title
-    ============================================= -->
-	<title>Canika | Wujudkan pernikahan idaman mu!</title>
+  /* Timeline */
+  .timeline { border-left: 2px solid var(--border); margin-left: 6px; }
+  .tl-item { position: relative; padding: 0 0 30px 26px; }
+  .tl-item::before { content: ""; position: absolute; left: -7px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2.5px solid var(--accent); }
+  .tl-item:last-child { padding-bottom: 0; }
+  .tl-item .when { font-size: 13px; color: var(--accent); font-weight: 600; }
+  .tl-item h3 { font-size: 16.5px; margin-top: 3px; }
+  .tl-item p { color: var(--muted); font-size: 14.5px; margin-top: 4px; }
+
+  footer { border-top: 1px solid var(--border); padding: 36px 0; color: var(--muted); font-size: 14px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--text); }
+  @media (max-width: 720px) { .about-grid { grid-template-columns: 1fr; } }
+</style>
 </head>
+<body>
 
-<body class="body-scroll">
-	<!-- Document Wrapper
-	============================================= -->
-	<div id="wrapper" class="wrapper clearfix">
+<header>
+  <div class="wrap">
+    <nav>
+      <div class="logo">primawan<span>.</span></div>
+      <ul>
+        <li><a href="#about">About</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
 
-		<!-- Header
-        ============================================= -->
-		<header id="navbar-spy" class="header header-1 header-transparent header-bordered header-fixed">
+<main class="wrap">
 
-			<nav id="primary-menu" class="navbar navbar-fixed-top">
-				<div class="container">
-					<div class="navbar-header">
-						<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-1" aria-expanded="false">
-					<span class="sr-only">Toggle navigation</span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					</button>
-						<a class="logo" href="index.html">
-							<img class="logo-dark" src="assets/images/logo/logo.png" alt="Canika Logo">
-							<img class="logo-light" src="assets/images/logo/logo-putih.png" alt="Canika Logo">
-						</a>
-					</div>
-					<div class="collapse navbar-collapse pull-right" id="navbar-collapse-1">
-						<ul class="nav navbar-nav nav-pos-right navbar-left nav-split">
-							<li class="active"><a data-scroll="scrollTo" href="#slider">home</a>
-							</li>
-							<li><a data-scroll="scrollTo" href="#feature2">feature</a>
-							</li>
-							<li><a data-scroll="scrollTo" href="#screenshots">screenshots</a>
-							</li>
-							<li><a data-scroll="scrollTo" href="#newsletter">subscribe</a>
-							</li>
-						</ul>
-					</div>
-					<!--/.nav-collapse -->
-				</div>
-			</nav>
-		</header>
+  <div class="hero">
+    <span class="badge">● Open to AI engineering &amp; consulting work</span>
+    <h1>AI Forward Deployed Engineer<br>with a <em>business mindset</em>.</h1>
+    <p class="lede">I don't just build AI systems — I build companies around them. Founder of an AI-powered recruitment platform and my own headhunting agency, shipping products where the model meets the market.</p>
+    <div class="cta">
+      <a class="btn primary" href="#projects">See what I've shipped</a>
+      <a class="btn ghost" href="#contact">Get in touch</a>
+    </div>
+  </div>
 
-		<!-- Slider #1
-		============================================= -->
-		<section id="slider" class="section slider">
-			<div class="slide--item bg-overlay bg-overlay-theme">
-				<div class="bg-section">
-					<img src="assets/images/background/wedding.jpg" alt="background">
-				</div>
-				<div class="container">
-					<div class="row">
-						<div class="col-xs-12 col-sm-12 col-md-12">
-							<div class="slide--logo mt-100 hidden-xs wow fadeInUp" data-wow-duration="1s">
-								<img src="assets/images/logo/logo-putih.png" alt="Canika">
-							</div>
-						</div>
-					</div>
-					<div class="row">
-						<div class="col-xs-12 col-sm-6 col-md-6 pt-100 wow fadeInUp" data-wow-duration="1s">
-							<div class="slide--headline">
-								<h1>Wujudkan pernikahan impian mu dengan Canika!</h1>
-							</div>
-							<div class="slide--bio">Pilih sendiri MUA, catering, dekorasi, hingga venue yang kamu inginkan dalam genggaman Android mu! <br/> Subscribe untuk info terbaru dari kami!</div>
-							<div class="slide--action">
-								<form class="mb-0 form-action">
-									<div class="input-group">
-										<input type="email" class="form-control" placeholder="E-mail address">
-										<span class="input-group-btn">
-											<input type="submit" class="btn btn--primary" value="subscribe" name="submit">
-										</span>
-									</div>
-									<!-- .input-group end -->
-								</form>
-							</div>
-						</div>
-						<div class="col-xs-12 col-sm-6 col-md-4 col-md-offset-2 wow fadeInUp" data-wow-duration="1s">
-							<img class="img-responsive pull-right" src="assets/images/mockup/Canika.png" alt="screens">
-						</div>
-					</div>
-					<!-- .row end -->
-				</div>
-				<!-- .container end -->
-			</div>
-			<!-- .slide-item end -->
-		</section>
-		<!-- #slider end -->
+  <section id="about">
+    <h2>About</h2>
+    <div class="about-grid">
+      <div>
+        <p>I'm <strong>Primawan Satrio</strong> — an engineer who crossed to the business side and kept building. As founder of <strong>Hirai.io</strong>, I design, deploy, and operate AI systems in production: a Cloudflare Workers–based job board with vector search, WhatsApp bots that reach out to candidates automatically, and data pipelines connecting employers across Indonesia and Japan.</p>
+        <p>Running <strong>Satrio Consulting</strong>, a headhunting agency, taught me the hard part of AI isn't the model — it's the workflow adoption, unit economics, and trust. That's why I work like a forward deployed engineer: embed with the business, ship fast, measure impact.</p>
+        <p>Past lives: <strong>Global Recruitment Consultant</strong> placing talent across borders, and <strong>Product Manager</strong> translating ambiguity into roadmaps.</p>
+      </div>
+      <aside class="facts">
+        <div class="fact"><b>Hirai.io</b><span>Founder · HR-tech / AI</span></div>
+        <div class="fact"><b>Satrio Consulting</b><span>Founder · Headhunting ID↔JP</span></div>
+        <div class="fact"><b>Cloudflare stack</b><span>Workers · D1 · R2 · AI</span></div>
+        <div class="fact"><b>Languages</b><span>TypeScript · Python · Java</span></div>
+      </aside>
+    </div>
+  </section>
 
-		<!-- Feature #2
-		============================================= -->
-		<section id="feature2" class="section feature feature-2 text-center bg-white">
-			<div class="container">
-				<div class="row clearfix">
-					<div class="col-xs-12 col-sm-12 col-md-6 col-md-offset-3">
-						<div class="heading heading-1 mb-80 text--center wow fadeInUp" data-wow-duration="1s">
-							<h2 class="heading--title">Kenapa Harus Canika?</h2>
-							<!-- p class="heading--desc">we shows only the best websites, portfolios ans landing pages built completely with passion, simplicity & creativity !</p -->
-						</div>
-					</div>
-					<!-- .col-md-6 end -->
-				</div>
-				<!-- .row end -->
-				<div class="row mb-60">
-					<!-- Panel #1 -->
-					<div class="col-xs-12 col-sm-4 col-md-4">
-						<div class="feature-panel wow fadeInUp" data-wow-duration="1s">
-							<div class="feature--icon">
-								<i class="fas fa-gem"></i>
-							</div>
-							<div class="feature--content">
-								<h3>Rancang pernikahan sesuai yang kamu idamkan!</h3>
-								<p>Pilih vendor yang sesuai dengan keinginanmu ratusan pilihan vendor! </p>
-							</div>
-						</div>
-						<!-- .feature-panel end -->
-					</div>
-					<!-- .col-md-4 end -->
+  <section id="projects">
+    <h2>Projects</h2>
+    <div class="cards">
+      <div class="card">
+        <h3>KerjaBoard</h3>
+        <p>AI-powered job board at apply.satriocs.com — serverless recruiting platform on Cloudflare Workers with D1/R2, candidate-ownership workflows, automated notifications, and migrated legacy data from Strapi and Lark.</p>
+        <div class="tagrow"><span class="tag">Cloudflare Workers</span><span class="tag">D1</span><span class="tag">TypeScript</span></div>
+      </div>
+      <div class="card">
+        <h3>WhatsApp Candidate Outreach Bot</h3>
+        <p>Automated candidate engagement over WhatsApp — reaching out, qualifying, and scheduling candidates without recruiter busywork, integrated into the placement pipeline.</p>
+        <div class="tagrow"><span class="tag">WhatsApp API</span><span class="tag">Automation</span><span class="tag">LLM</span></div>
+      </div>
+      <div class="card">
+        <h3>Global Career Expo</h3>
+        <p>Cross-border career event platform connecting Indonesian talent with Japanese employers — digital infrastructure for international hiring at scale.</p>
+        <div class="tagrow"><span class="tag">Events</span><span class="tag">Recruitment</span><span class="tag">ID ↔ Japan</span></div>
+      </div>
+    </div>
+  </section>
 
-					<!-- Panel #2 -->
-					<div class="col-xs-12 col-sm-4 col-md-4">
-						<div class="feature-panel wow fadeInUp" data-wow-duration="1s">
-							<div class="feature--icon">
-								<i class="fas fa-comments-dollar"></i>
-							</div>
-							<div class="feature--content">
-								<h3>Negosiasikan biaya sesuai budget yang kamu punya!</h3>
-								<p>Dengan fitur chat, kamu bisa mengkomunikasikan semuanya dengan vendor.</p>
-							</div>
-						</div>
-						<!-- .feature-panel end -->
-					</div>
-					<!-- .col-md-4 end -->
+  <section id="experience">
+    <h2>Experience</h2>
+    <div class="timeline">
+      <div class="tl-item">
+        <span class="when">Present</span>
+        <h3>Founder — Hirai.io &amp; Satrio Consulting</h3>
+        <p>Building AI-forward recruitment products while running a headhunting agency across the Indonesia–Japan corridor.</p>
+      </div>
+      <div class="tl-item">
+        <span class="when">Earlier</span>
+        <h3>Global Recruitment Consultant</h3>
+        <p>Placed international talent between Southeast Asia and Japan; deep fluency in cross-border hiring.</p>
+      </div>
+      <div class="tl-item">
+        <span class="when">Earlier</span>
+        <h3>Product Manager</h3>
+        <p>Turned ambiguous business problems into shipped products and measurable outcomes.</p>
+      </div>
+    </div>
+  </section>
 
-					<!-- Panel #3 -->
-					<div class="col-xs-12 col-sm-4 col-md-4">
-						<div class="feature-panel wow fadeInUp" data-wow-duration="1s">
-							<div class="feature--icon">
-								<i class="fas fa-hand-holding-usd"></i>
-							</div>
-							<div class="feature--content">
-								<h3>Bayar DP & pelunasan pesanan dengan aman dan nyaman!</h3>
-								<p>Pembayaran akan ditransfer ke rekening Canika terlebih dahulu agar terjamin keamanan dan kenyamanan ketika bertransaksi.</p>
-							</div>
-						</div>
-						<!-- .feature-panel end -->
-					</div>
-					<!-- .col-md-4 end -->
-				</div>
-				<!-- .row end -->
-			</div>
-			<!-- .container end -->
-		</section>
-		<!-- #feature2 end -->
+  <footer id="contact">
+    <div>© 2026 Primawan Satrio</div>
+    <div style="display:flex;gap:18px;">
+      <a href="https://github.com/preemz" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/primawansatrio" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="mailto:developer.hirai@gmail.com">Email</a>
+    </div>
+  </footer>
 
-		<!-- Screenshots
-        ============================================= -->
-		<section id="screenshots" class="section screenshots">
-			<div class="container">
-				<div class="row clearfix">
-					<div class="col-xs-12 col-sm-12 col-md-6 col-md-offset-3">
-						<div class="heading heading-1 mb-60 text--center wow fadeInUp" data-wow-duration="1s">
-							<h2 class="heading--title">Solusi untuk perencanaan pernikahan mu!</h2>
-						</div>
-					</div>
-					<!-- .col-md-6 end -->
-				</div>
-				<!-- .row end -->
-				<div class="row">
-					<div class="col-xs-12 col-sm-12 col-md-12">
-						<div class="carousel" data-slide="4" data-slide-res="2" data-autoplay="true" data-nav="false" data-dots="false" data-space="30" data-loop="true" data-speed="1000">
-							<!-- screenshot #1 -->
-							<div class="screenshot">
-								<img class="center-block" src="assets/images/screenshots/1splashscreen.png" alt="splash screen">
-							</div>
-
-							<!-- screenshot #2 -->
-							<div class="screenshot">
-								<img class="center-block" src="assets/images/screenshots/2Home.png" alt="home">
-							</div>
-
-							<!-- screenshot #3 -->
-							<div class="screenshot">
-								<img class="center-block" src="assets/images/screenshots/3Venue.png" alt="Venue">
-							</div>
-
-							<!-- screenshot #4 -->
-							<div class="screenshot">
-								<img class="center-block" src="assets/images/screenshots/4viewetalase.png" alt="Lihat Etalase">
-							</div>
-
-							<!-- screenshot #5 -->
-							<div class="screenshot">
-								<img class="center-block" src="assets/images/screenshots/5negotiation.png" alt="negosiasi">
-							</div>
-
-						</div>
-					</div>
-					<!-- .col-md-12 end -->
-				</div>
-				<!-- .row end -->
-			</div>
-			<!-- .container End -->
-		</section>
-		<!-- #screenshots End-->
-
-		<!-- Newsletter #1
-		============================================= -->
-		<section id="newsletter" class="section newsletter text-center bg-overlay bg-overlay-theme">
-			<div class="bg-section">
-				<img src="assets/images/background/bg-3.jpg" alt="Background"/>
-			</div>
-			<div class="container">
-				<div class="row clearfix">
-					<div class="col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
-						<div class="heading heading-1 mb-60 text--center wow fadeInUp" data-wow-duration="1s">
-							<h2 class="heading--title text-white">Berlangganan untuk mendapat info terbaru Canika!</h2>
-							<p class="heading--desc text-white">Dengan berlangganan email ini, kami akan tahu bahwa Canika dibutuhkan oleh banyak orang. Yuk!</p>
-						</div>
-					</div>
-					<!-- .col-md-6 end -->
-				</div>
-				<!-- .row end -->
-				<div class="row">
-					<div class="col-xs-12 col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3">
-						<form class="mb-0 form-action wow fadeInUp" data-wow-duration="1s">
-							<div class="input-group">
-								<input type="email" class="form-control" placeholder="E-mail address">
-								<span class="input-group-btn">
-									<input type="submit" class="btn btn--primary" value="Subscribe" name="submit">
-								</span>
-							</div>
-							<!-- .input-group end -->
-						</form>
-					</div>
-					<!-- .col-md-12 end -->
-				</div>
-				<!-- .row end -->
-			</div>
-			<!-- .container end -->
-		</section>
-		<!-- #newsletter end -->
-
-		<!-- Footer #5
-		============================================= -->
-		<footer id="footer" class="footer footer-5">
-			<!-- Copyrights
-			============================================= -->
-			<div class="container">
-				<div class="row">
-					<div class="col-xs-12 col-sm-12 col-md-12 text--center">
-						<div class="footer--copyright">
-							<span>&copy; 2018 Canika. Crafted with <i class="fa fa-heart"></i> by Canika team</span>
-						</div>
-					</div>
-				</div>
-			</div>
-			<!-- .container end -->
-		</footer>
-	</div>
-	<!-- #wrapper end -->
-
-	<!-- Footer Scripts
-	============================================= -->
-	<script src="assets/js/jquery-2.2.4.min.js"></script>
-	<script src="assets/js/plugins.js"></script>
-	<script src="assets/js/functions.js"></script>
+</main>
 </body>
 </html>
