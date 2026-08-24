@@ -154,3 +154,23 @@ const BLOG_I18N = {
     sv: "Ingen av delarna här är exotisk: regex, viktad poängsättning, ett LLM-anrop bakom ett schema, en WhatsApp-bot. Ingenjörsvärdet och forward deployed-tänket finns i sömmarna: att veta vilka problem som behöver en modell och vilka som behöver ett regex, göra automatiserade bedömningar inspekterbara, låta människor ta de beslut som förtjänar dem och bevisa rättviseutfästelser med tester. Det är skillnaden mellan en AI-demo och en AI-pipeline som ett riktigt företag drivs på."
   }
 };
+
+document.addEventListener('DOMContentLoaded', function(){
+  let lang = null;
+  try { lang = localStorage.getItem('lang'); } catch(e) {}
+  if (!lang) lang = (navigator.language || '').toLowerCase().startsWith('sv') ? 'sv' : 'en';
+  const btn = document.getElementById('lang-toggle');
+  function apply(l){
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+      const e = BLOG_I18N[el.dataset.i18n];
+      if (e && e[l]) el.innerHTML = e[l];   // blog strings may contain <em>/<strong>
+    });
+    document.documentElement.lang = l;
+    try { localStorage.setItem('lang', l); } catch(err){}
+    if (btn) btn.textContent = (l === 'sv') ? 'EN' : 'SV';
+  }
+  apply(lang);
+  if (btn) btn.addEventListener('click', function(){
+    apply(document.documentElement.lang === 'sv' ? 'en' : 'sv');
+  });
+});
