@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>An End-to-End AI Recruiting Pipeline in Production — Primawan Satrio</title>
+<title>An End-to-End AI Recruiting Pipeline in Production Primawan Satrio</title>
 <style>
   :root {
     --bg: #0b0e14; --surface: #12161f; --border: #232a38;
@@ -55,7 +55,7 @@
   <div class="meta">Primawan Satrio · August 2026 · ~10 min read</div>
 
   <p>Most AI demos die in the demo. The interesting question is not <em>can a model do this once</em>, but <em>can it run inside a live business every day, without a human babysitting every step</em>. I run a headhunting agency across the Indonesia–Japan corridor, and instead of bolting AI onto the side, I rebuilt our recruiting pipeline around it: parsing resumes, scoring candidate fit, reformatting CVs into client templates, and engaging candidates automatically.</p>
-  <p>This post explains how the pipeline works, why each stage is designed the way it is, and what I learned deploying LLMs where mistakes cost real placements. It runs on Cloudflare Workers with D1 for data and R2 for document storage — no origin server anywhere.</p>
+  <p>This post explains how the pipeline works, why each stage is designed the way it is, and what I learned deploying LLMs where mistakes cost real placements. It runs on Cloudflare Workers with D1 for data and R2 for document storage, with no origin server anywhere.</p>
 
   <h2>The pipeline at a glance</h2>
   <p>A candidate's journey through our system touches four AI-assisted stages before a recruiter ever picks up the phone:</p>
@@ -83,20 +83,20 @@
       <path d="M 300 118 C 340 138, 400 138, 440 118" stroke="#7c5cff" stroke-width="1" fill="none" stroke-dasharray="4 4" opacity=".6"/>
       <text x="370" y="142" text-anchor="middle" fill="#7c5cff" font-size="10.5">recruiter edits feed back into template schema</text>
     </svg>
-    <div class="caption">Figure 1 — The production pipeline. Stages 2 and 4 are fully automated; stage 3 is deliberately human.</div>
+    <div class="caption">Figure 1. The production pipeline. Stages 2 and 4 are fully automated; stage 3 is deliberately human.</div>
   </div>
 
   <h2>Stage 1: Reading any resume reliably</h2>
   <p>Resumes arrive as PDF or DOCX in any layout, half of them from Indonesian candidates mixing Bahasa and English. Before an LLM sees anything, deterministic code extracts plain text and mines structure with rules tuned to real-world messiness:</p>
   <ul>
-    <li><strong>Tenor parsing.</strong> Employment date ranges like <code>Jan 2020 – Present</code>, <code>2021–2023</code>, or <code>s/d sekarang</code> are extracted to compute tenure months per role — which later feeds both stability scoring and seniority inference.</li>
+    <li><strong>Tenor parsing.</strong> Employment date ranges like <code>Jan 2020 – Present</code>, <code>2021–2023</code>, or <code>s/d sekarang</code> are extracted to compute tenure months per role, which later feeds both stability scoring and seniority inference.</li>
     <li><strong>Skill canonicalization.</strong> An alias map collapses <code>sklearn</code>, <code>scikit-learn</code>, and <code>Scikit Learn</code> to one canonical skill so counts don't fragment.</li>
     <li><strong>Date normalization.</strong> Indonesian CVs write dates day-first (<code>14/08/1995</code>), European style. The normalizer disambiguates ambiguous numeric dates rather than guessing wrong.</li>
   </ul>
   <blockquote><strong>Design rule:</strong> use the LLM where language understanding is genuinely needed (summaries, unstructured fields, template mapping). Use deterministic parsing where a regex is more reliable, free, and auditable. Hybrid beats pure-LLM on both cost and consistency.</blockquote>
 
   <h2>Stage 2: Explainable fit scoring</h2>
-  <p>Given a job order and a parsed resume, the scoring engine estimates how well this candidate fits — but the design constraint that shaped everything was <strong>explainability</strong>: every point in the score must come with a reason a recruiter can read, agree or disagree with, and act on.</p>
+  <p>Given a job order and a parsed resume, the scoring engine estimates how well this candidate fits. But the design constraint that shaped everything was <strong>explainability</strong>: every point in the score must come with a reason a recruiter can read, agree or disagree with, and act on.</p>
 
   <div class="diagram">
     <svg viewBox="0 0 720 210" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,sans-serif">
@@ -112,8 +112,8 @@
       <text x="360" y="16" text-anchor="middle" fill="#8b93a5" font-size="11">base component weights</text>
       <!-- dynamic renorm -->
       <rect x="140" y="108" width="440" height="42" rx="8" fill="#12161f" stroke="#7c5cff" stroke-dasharray="5 4"/>
-      <text x="360" y="126" text-anchor="middle" fill="#c3b0ff" font-size="12.5">Job order doesn't mention languages? → drop weight 25 from the denominator,</text>
-      <text x="360" y="141" text-anchor="middle" fill="#c3b0ff" font-size="12.5">re-normalize remaining weights — no per-vertical tuning needed</text>
+      <text x="360" y="126" text-anchor="middle" fill="#c3b0ff" font-size="12.5">Job order doesn't mention languages? Drop weight 25 from the denominator,</text>
+      <text x="360" y="141" text-anchor="middle" fill="#c3b0ff" font-size="12.5">re-normalize remaining weights no per-vertical tuning needed</text>
       <line x1="360" y1="78" x2="360" y2="104" stroke="#4f8cff" stroke-width="1.5"/>
       <!-- output -->
       <g font-size="12.5" fill="#e6e9ef">
@@ -122,23 +122,23 @@
       </g>
       <line x1="360" y1="152" x2="360" y2="164" stroke="#4f8cff" stroke-width="1.5"/>
     </svg>
-    <div class="caption">Figure 2 — Weighted components with dynamic re-normalization. Weights only count when the job order expresses that dimension.</div>
+    <div class="caption">Figure 2. Weighted components with dynamic re-normalization. Weights only count when the job order expresses that dimension.</div>
   </div>
 
   <h3>Fairness guardrails are a feature, not a checkbox</h3>
-  <p>We collect date of birth for client paperwork. The scoring module never reads it — and there is a test asserting two identical candidates with different birth dates receive identical scores. Name, gender, nationality, photo, and university prestige are likewise excluded by construction, not by prompt politeness. If you're deploying models on people, this class of guarantee belongs in your test suite, next to your business logic.</p>
+  <p>We collect date of birth for client paperwork. The scoring module never reads it and there is a test asserting two identical candidates with different birth dates receive identical scores. Name, gender, nationality, photo, and university prestige are likewise excluded by construction, not by prompt politeness. If you're deploying models on people, this class of guarantee belongs in your test suite, next to your business logic.</p>
 
   <h2>Stage 3: The human in the loop, on purpose</h2>
-  <p>The recruiter sees the score <em>with its reasons</em>. This matters because a naked number invites either blind trust or blind dismissal; reasons invite calibration. Over time recruiters learn where the model over-weights and where their own judgment should override — which is exactly the collaboration pattern you want between humans and automated screening.</p>
+  <p>The recruiter sees the score <em>with its reasons</em>. This matters because a naked number invites either blind trust or blind dismissal; reasons invite calibration. Over time recruiters learn where the model over-weights and where their own judgment should override, which is exactly the collaboration pattern you want between humans and automated screening.</p>
   <p>Ownership stays manual by design: no application is ever auto-assigned or auto-rejected. Automation triages; humans decide. In recruiting, a false negative (rejecting someone who would have placed) costs more than a few minutes of recruiter time.</p>
 
   <h2>Stage 4: LLM-powered CV reformatting</h2>
-  <p>When a candidate advances, each client expects their own submission format — a specific DOCX template with particular sections and phrasing. Historically recruiters retyped resumes into these formats by hand: hours per placement. Now:</p>
+  <p>When a candidate advances, each client expects their own submission format: a specific DOCX template with particular sections and phrasing. Historically recruiters retyped resumes into these formats by hand: hours per placement. Now:</p>
   <ol>
     <li>Each client format is declared as a <strong>schema</strong>: field keys, labels, groupings, hints, repeating blocks (employment history).</li>
     <li>The schema generates three artifacts from one source of truth: the <strong>LLM prompt</strong>, the <strong>recruiter review form</strong>, and the <strong>template fill</strong>.</li>
     <li>The LLM (OpenAI or Anthropic, provider-swappable via config) receives the raw CV text plus the target schema and returns structured JSON.</li>
-    <li>A tolerant JSON parser handles the reality of LLM output — markdown fences, trailing commas, chatty preambles.</li>
+    <li>A tolerant JSON parser handles the reality of LLM output: markdown fences, trailing commas, chatty preambles.</li>
     <li>The recruiter reviews extracted fields in the browser and corrects anything wrong; the corrected data fills the client's DOCX.</li>
   </ol>
   <p>The schema-driven approach is the key trick: adding a new client format means writing one declarative object, not new prompt engineering. The prompt can't drift out of sync with the form or the template, because they're all projections of the same definition.</p>
@@ -159,15 +159,15 @@
         <rect x="270" y="102" width="180" height="44" rx="8" fill="#12161f" stroke="#232a38"/><text x="360" y="122" text-anchor="middle">Review form UI</text><text x="360" y="137" text-anchor="middle" fill="#8b93a5" font-size="10.5">(recruiter corrections)</text>
         <rect x="485" y="102" width="180" height="44" rx="8" fill="#12161f" stroke="#232a38"/><text x="575" y="122" text-anchor="middle">Template fill</text><text x="575" y="137" text-anchor="middle" fill="#8b93a5" font-size="10.5">(client DOCX output)</text>
       </g>
-      <text x="360" y="175" text-anchor="middle" fill="#8b93a5" font-size="11">one source of truth → the three artifacts can never disagree</text>
+      <text x="360" y="175" text-anchor="middle" fill="#8b93a5" font-size="11">one source of truth, so the three artifacts can never disagree</text>
     </svg>
-    <div class="caption">Figure 3 — Schema-as-single-source-of-truth for prompt, UI, and output generation.</div>
+    <div class="caption">Figure 3. Schema-as-single-source-of-truth for prompt, UI, and output generation.</div>
   </div>
 
   <h2>What production taught me</h2>
   <ul>
     <li><strong>Deterministic-first architecture pays twice.</strong> Rules handle the structured 80% of a resume cheaply and consistently; the LLM handles the messy 20%. Costs stay predictable and failures stay debuggable.</li>
-    <li><strong>Explainability is a product requirement, not an ethics poster.</strong> Recruiters adopted the scoring engine because they could interrogate it. A black-box score would have been ignored — correctly.</li>
+    <li><strong>Explainability is a product requirement, not an ethics poster.</strong> Recruiters adopted the scoring engine because they could interrogate it. A black-box score would have been ignored correctly.</li>
     <li><strong>Provider abstraction is cheap insurance.</strong> Supporting OpenAI-compatible and Anthropic APIs behind one interface took an afternoon and means model swaps are config changes, not migrations.</li>
     <li><strong>Human-in-the-loop is where trust compounds.</strong> Every recruiter correction is implicit labeled data. The pipeline gets better not by retraining, but because the design routes uncertainty to the person best placed to resolve it.</li>
     <li><strong>Fairness constraints belong in tests.</strong> If a protected attribute must not influence a decision, prove it with an assertion, not a policy memo.</li>
@@ -176,17 +176,17 @@
   <h2>Papers worth reading alongside this</h2>
   <p>If you want to go deeper on the research behind these design choices, start here:</p>
   <ul class="refs">
-    <li><strong>Ribeiro et al., ""Why Should I Trust You?": Explaining the Predictions of Any Classifier" (KDD 2016)</strong> — <a href="https://arxiv.org/abs/1602.04938">arXiv:1602.04938</a>. The LIME paper; foundational for why local, reason-level explanations drive user trust — the same principle behind showing recruiters <em>why</em> a candidate scored as they did.</li>
-    <li><strong>Lundberg &amp; Lee, "A Unified Approach to Interpreting Model Predictions" (NeurIPS 2017)</strong> — <a href="https://arxiv.org/abs/1705.07874">arXiv:1705.07874</a>. SHAP: attribute decisions to input features fairly. Useful mental model even when your "model" is a weighted rule engine.</li>
-    <li><strong>Buolamwini &amp; Gebru, "Gender Shades" (FAT* 2018)</strong> — <a href="http://proceedings.mlr.press/v81/buolamwini18a.html">PMLR v81</a>. The canonical demonstration that systems processing people carry bias unless audited. Motivates testing fairness properties explicitly.</li>
-    <li><strong>Raji et al., "Closing the AI Accountability Gap: Defining an End-to-End Framework for Internal Algorithmic Auditing" (2020)</strong> — <a href="https://arxiv.org/abs/2001.00973">arXiv:2001.00973</a>. How to build audit scaffolding (like our birth-date-blindness test) into the development lifecycle.</li>
-    <li><strong>Wang et al., "Human-AI Collaboration in Data Science" and related work on human-in-the-loop ML</strong> — a good entry point is Amershi et al., "Guidelines for Human-AI Interaction" (CHI 2019) — <a href="https://www.microsoft.com/en-us/research/publication/guidelines-for-human-ai-interaction/">Microsoft Research</a>. Eighteen concrete guidelines; our "show reasons, keep the decision human" pattern maps directly onto several of them.</li>
-    <li><strong>Kocijan et al. / resume-parsing literature:</strong> for the information-extraction side, see the SemEval shared tasks on CV parsing and Decorte et al., "Skill Detection in Job Profiles" (2021) — <a href="https://arxiv.org/abs/2111.13319">arXiv:2111.13319</a> — on extracting and normalizing skills from noisy professional text.</li>
-    <li><strong>Vaswani et al., "Attention Is All You Need" (2017)</strong> — <a href="https://arxiv.org/abs/1706.03762">arXiv:1706.03762</a>. Included for completeness: the transformer backbone under every LLM stage of this pipeline.</li>
+    <li><strong>Ribeiro et al., ""Why Should I Trust You?": Explaining the Predictions of Any Classifier" (KDD 2016)</strong> <a href="https://arxiv.org/abs/1602.04938">arXiv:1602.04938</a>. The LIME paper; foundational for why local, reason-level explanations drive user trust the same principle behind showing recruiters <em>why</em> a candidate scored as they did.</li>
+    <li><strong>Lundberg &amp; Lee, "A Unified Approach to Interpreting Model Predictions" (NeurIPS 2017)</strong> <a href="https://arxiv.org/abs/1705.07874">arXiv:1705.07874</a>. SHAP: attribute decisions to input features fairly. Useful mental model even when your "model" is a weighted rule engine.</li>
+    <li><strong>Buolamwini &amp; Gebru, "Gender Shades" (FAT* 2018)</strong> <a href="http://proceedings.mlr.press/v81/buolamwini18a.html">PMLR v81</a>. The canonical demonstration that systems processing people carry bias unless audited. Motivates testing fairness properties explicitly.</li>
+    <li><strong>Raji et al., "Closing the AI Accountability Gap: Defining an End-to-End Framework for Internal Algorithmic Auditing" (2020)</strong> <a href="https://arxiv.org/abs/2001.00973">arXiv:2001.00973</a>. How to build audit scaffolding (like our birth-date-blindness test) into the development lifecycle.</li>
+    <li><strong>Wang et al., "Human-AI Collaboration in Data Science" and related work on human-in-the-loop ML</strong> a good entry point is Amershi et al., "Guidelines for Human-AI Interaction" (CHI 2019) <a href="https://www.microsoft.com/en-us/research/publication/guidelines-for-human-ai-interaction/">Microsoft Research</a>. Eighteen concrete guidelines; our "show reasons, keep the decision human" pattern maps directly onto several of them.</li>
+    <li><strong>Kocijan et al. / resume-parsing literature:</strong> for the information-extraction side, see the SemEval shared tasks on CV parsing and Decorte et al., "Skill Detection in Job Profiles" (2021) <a href="https://arxiv.org/abs/2111.13319">arXiv:2111.13319</a> on extracting and normalizing skills from noisy professional text.</li>
+    <li><strong>Vaswani et al., "Attention Is All You Need" (2017)</strong> <a href="https://arxiv.org/abs/1706.03762">arXiv:1706.03762</a>. Included for completeness: the transformer backbone under every LLM stage of this pipeline.</li>
   </ul>
 
   <h2>Wrapping up</h2>
-  <p>None of the individual pieces here is exotic: regexes, weighted scoring, an LLM call behind a schema, a WhatsApp bot. The engineering value — and the forward-deployed mindset — lives in the seams: knowing which problems need a model and which need a regex, making automated judgments inspectable, keeping humans on the decisions that deserve them, and proving fairness claims with tests. That's the difference between an AI demo and an AI pipeline a real business runs on.</p>
+  <p>None of the individual pieces here is exotic: regexes, weighted scoring, an LLM call behind a schema, a WhatsApp bot. The engineering value and the forward-deployed mindset lives in the seams: knowing which problems need a model and which need a regex, making automated judgments inspectable, keeping humans on the decisions that deserve them, and proving fairness claims with tests. That's the difference between an AI demo and an AI pipeline a real business runs on.</p>
   <p style="margin-top:36px;"><a href="/">← Back to portfolio</a></p>
 </div>
 </body>

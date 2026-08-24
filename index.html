@@ -69,6 +69,7 @@
     transition: transform .15s, border-color .15s; display: flex; flex-direction: column; gap: 10px;
   }
   .card:hover { transform: translateY(-3px); border-color: rgba(79,140,255,.45); }
+  .card[data-href]:hover h3 { color: var(--accent); }
   .card h3 { font-size: 17px; letter-spacing: -.01em; }
   .card p { color: var(--muted); font-size: 14.5px; flex: 1; }
   .tagrow { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -112,7 +113,7 @@
   <div class="hero">
     <span class="badge">● Founder · Engineer · Jakarta → Busan → Uppsala</span>
     <h1>AI Forward Deployed Engineer<br>with a <em>business mindset</em>.</h1>
-    <p class="lede">I build end-to-end AI systems that run real businesses. My recruiting agency runs on a pipeline I built myself: resumes parsed and reformatted by LLMs, candidates scored for fit with explainable reasoning, and engagement automated over WhatsApp — from application to client submission, without recruiter busywork.</p>
+    <p class="lede">I build end-to-end AI systems that run real businesses. My recruiting agency runs on a pipeline I built myself: resumes parsed and reformatted by LLMs, candidates scored for fit with explainable reasoning, and engagement automated over WhatsApp from application to client submission, without recruiter busywork.</p>
     <div class="cta">
       <a class="btn primary" href="#ventures">What I'm building</a>
       <a class="btn ghost" href="#contact">Get in touch</a>
@@ -145,20 +146,19 @@
   <section id="ventures">
     <h2>Ventures &amp; projects</h2>
     <div class="cards">
-      <div class="card">
-        <h3><a href="https://satriocs.com/" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">Satrio Consulting ↗</a></h3>
-        <p>Contingency talent search that scaled from zero to seven figures in USD, winning clients across Japan, Korea, Singapore, Australia, Malaysia, and Indonesia.</p>
-        <div class="tagrow"><span class="tag">Recruitment</span><span class="tag">B2B sales</span><span class="tag">APAC</span></div>
+      <div class="card" data-href="https://satriocs.com/">
+        <h3>Satrio Consulting ↗</h3>
+        <p>Contingency talent search that scaled from zero to seven figures in USD, winning clients across Japan, Korea, Singapore, Australia, Malaysia, and Indonesia. Includes an employer-of-record service letting foreign companies hire Indonesian talent locally or remotely without setting up a legal entity.</p>
+        <div class="tagrow"><span class="tag">Recruitment</span><span class="tag">EoR</span><span class="tag">B2B sales</span><span class="tag">APAC</span></div>
       </div>
-      <div class="card">
-        <h3>Explainable Candidate Fit Scoring (in production)</h3>
+      <div class="card" data-href="/blog-ai-recruiting-pipeline.html">
+        <h3>Explainable Candidate Fit Scoring (in production) 📖</h3>
         <p>Scoring engine that weighs each candidate's resume against a job order across skills, language, seniority, tenure, and stability, then tells recruiters fit-or-not with the reasons behind every point. Built with fairness guardrails: age, name, gender, and nationality never touch the score.</p>
         <div class="tagrow"><span class="tag">Scoring engine</span><span class="tag">NLP</span><span class="tag">Responsible AI</span></div>
-        <p style="font-size:13px;margin-top:4px;">📖 <a href="/blog-ai-recruiting-pipeline.html" style="color:var(--accent);">How the full pipeline works — blog post</a></p>
       </div>
       <div class="card">
         <h3>AI Resume Intelligence (in production)</h3>
-        <p>LLM pipeline inside my agency's job board that reads any candidate CV, extracts structured data, and reformats it into each client's exact submission template for recruiter review — turning hours of per-placement document work into minutes.</p>
+        <p>LLM pipeline inside my agency's job board that reads any candidate CV, extracts structured data, and reformats it into each client's exact submission template for recruiter review turning hours of per-placement document work into minutes.</p>
         <div class="tagrow"><span class="tag">Claude</span><span class="tag">GPT-4o</span><span class="tag">Docx generation</span></div>
       </div>
       <div class="card">
@@ -166,18 +166,13 @@
         <p>Automated candidate engagement over WhatsApp: reaching out, qualifying, and scheduling inside the placement pipeline so recruiters spend time closing, not chasing.</p>
         <div class="tagrow"><span class="tag">WhatsApp API</span><span class="tag">Automation</span><span class="tag">LLM</span></div>
       </div>
-      <div class="card">
-        <h3><a href="https://www.globalcareerexpo.id/" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">Global Career Expo 2026 ↗</a></h3>
+      <div class="card" data-href="https://www.globalcareerexpo.id/">
+        <h3>Global Career Expo 2026 ↗</h3>
         <p>A job fair I built connecting foreign-owned companies in Jakarta with Indonesian talent, extending the community into real hiring.</p>
         <div class="tagrow"><span class="tag">Events</span><span class="tag">Recruitment</span><span class="tag">Community</span></div>
       </div>
-      <div class="card">
-        <h3>EoR / Outsourcing Solution</h3>
-        <p>Employer-of-record service letting foreign companies hire Indonesian talent locally or remotely without setting up a legal entity.</p>
-        <div class="tagrow"><span class="tag">HR ops</span><span class="tag">Compliance</span></div>
-      </div>
-      <div class="card">
-        <h3><a href="https://okoshiedu.com/" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;">Okoshi Japanese Education ↗</a></h3>
+      <div class="card" data-href="https://okoshiedu.com/">
+        <h3>Okoshi Japanese Education ↗</h3>
         <p>JLPT N3–N2 training program for fresh graduates and young professionals heading into the Japanese market.</p>
         <div class="tagrow"><span class="tag">Edtech</span><span class="tag">Japan corridor</span></div>
       </div>
@@ -237,5 +232,14 @@
   </footer>
 
 </main>
+<script>
+document.querySelectorAll('.card[data-href]').forEach(function(c){
+  c.style.cursor='pointer';
+  c.addEventListener('click', function(e){
+    if (e.target.closest('a')) return;
+    window.open(c.dataset.href, '_blank', 'noopener');
+  });
+});
+</script>
 </body>
 </html>
