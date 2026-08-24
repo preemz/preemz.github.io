@@ -145,23 +145,23 @@
     <div class="caption">Figure 2. Weighted components with dynamic re-normalization. Weights only count when the job order expresses that dimension.</div>
   </div>
 
-  <h3>Fairness guardrails are a feature, not a checkbox</h3>
+  <h3 data-i18n="b.s2.fair.h">Fairness guardrails are a feature, not a checkbox</h3>
   <p>We collect date of birth for client paperwork. The scoring module never reads it and there is a test asserting two identical candidates with different birth dates receive identical scores. Name, gender, nationality, photo, and university prestige are likewise excluded by construction, not by prompt politeness. If you're deploying models on people, this class of guarantee belongs in your test suite, next to your business logic.</p>
 
-  <h2>Stage 3: The human in the loop, on purpose</h2>
-  <p>The recruiter sees the score <em>with its reasons</em>. This matters because a naked number invites either blind trust or blind dismissal; reasons invite calibration. Over time recruiters learn where the model over-weights and where their own judgment should override, which is exactly the collaboration pattern you want between humans and automated screening.</p>
-  <p>Ownership stays manual by design: no application is ever auto-assigned or auto-rejected. Automation triages; humans decide. In recruiting, a false negative (rejecting someone who would have placed) costs more than a few minutes of recruiter time.</p>
+  <h2 data-i18n="b.h2d">Stage 3: The human in the loop, on purpose</h2>
+  <p data-i18n="b.s3.p1">The recruiter sees the score <em>with its reasons</em>. This matters because a naked number invites either blind trust or blind dismissal; reasons invite calibration. Over time recruiters learn where the model over-weights and where their own judgment should override, which is exactly the collaboration pattern you want between humans and automated screening.</p>
+  <p data-i18n="b.s3.p2">Ownership stays manual by design: no application is ever auto-assigned or auto-rejected. Automation triages; humans decide. In recruiting, a false negative (rejecting someone who would have placed) costs more than a few minutes of recruiter time.</p>
 
-  <h2>Stage 4: LLM-powered CV reformatting</h2>
-  <p>When a candidate advances, each client expects their own submission format: a specific DOCX template with particular sections and phrasing. Historically recruiters retyped resumes into these formats by hand, which is slow, repetitive work on every placement. Now:</p>
+  <h2 data-i18n="b.h2e">Stage 4: LLM-powered CV reformatting</h2>
+  <p data-i18n="b.s4.p1">When a candidate advances, each client expects their own submission format: a specific DOCX template with particular sections and phrasing. Historically recruiters retyped resumes into these formats by hand, which is slow, repetitive work on every placement. Now:</p>
   <ol>
-    <li>Each client format is declared as a <strong>schema</strong>: field keys, labels, groupings, hints, repeating blocks (employment history).</li>
-    <li>The schema generates three artifacts from one source of truth: the <strong>LLM prompt</strong>, the <strong>recruiter review form</strong>, and the <strong>template fill</strong>.</li>
-    <li>The LLM (OpenAI or Anthropic, provider-swappable via config) receives the raw CV text plus the target schema and returns structured JSON.</li>
-    <li>A tolerant JSON parser handles the reality of LLM output: markdown fences, trailing commas, chatty preambles.</li>
-    <li>The recruiter reviews extracted fields in the browser and corrects anything wrong; the corrected data fills the client's DOCX.</li>
+    <li data-i18n="b.s4.l1">Each client format is declared as a <strong>schema</strong>: field keys, labels, groupings, hints, repeating blocks (employment history).</li>
+    <li data-i18n="b.s4.l2">The schema generates three artifacts from one source of truth: the <strong>LLM prompt</strong>, the <strong>recruiter review form</strong>, and the <strong>template fill</strong>.</li>
+    <li data-i18n="b.s4.l3">The LLM (OpenAI or Anthropic, provider-swappable via config) receives the raw CV text plus the target schema and returns structured JSON.</li>
+    <li data-i18n="b.s4.l4">A tolerant JSON parser handles the reality of LLM output: markdown fences, trailing commas, chatty preambles.</li>
+    <li data-i18n="b.s4.l5">The recruiter reviews extracted fields in the browser and corrects anything wrong; the corrected data fills the client's DOCX.</li>
   </ol>
-  <p>The schema-driven approach is the key trick: adding a new client format means writing one declarative object, not new prompt engineering. The prompt can't drift out of sync with the form or the template, because they're all projections of the same definition.</p>
+  <p data-i18n="b.s4.p2">The schema-driven approach is the key trick: adding a new client format means writing one declarative object, not new prompt engineering. The prompt can't drift out of sync with the form or the template, because they're all projections of the same definition.</p>
 
   <div class="diagram">
     <svg viewBox="0 0 720 190" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,sans-serif">
@@ -181,20 +181,20 @@
       </g>
       <text x="360" y="175" text-anchor="middle" fill="#8b93a5" font-size="11">one source of truth, so the three artifacts can never disagree</text>
     </svg>
-    <div class="caption">Figure 3. Schema-as-single-source-of-truth for prompt, UI, and output generation.</div>
+    <div class="caption" data-i18n="b.fig3">Figure 3. Schema-as-single-source-of-truth for prompt, UI, and output generation.</div>
   </div>
 
-  <h2>What production taught me</h2>
+  <h2 data-i18n="b.h2f">What production taught me</h2>
   <ul>
-    <li><strong>Deterministic-first architecture pays twice.</strong> Rules handle the structured 80% of a resume cheaply and consistently; the LLM handles the messy 20%. Costs stay predictable and failures stay debuggable.</li>
-    <li><strong>Explainability is a product requirement, not an ethics poster.</strong> Recruiters adopted the scoring engine because they could interrogate it. A black-box score would have been ignored correctly.</li>
-    <li><strong>Provider abstraction is cheap insurance.</strong> Supporting OpenAI-compatible and Anthropic APIs behind one interface was a small one-time cost, and it means model swaps are now config changes rather than code changes. I have not needed to switch providers under pressure yet, so treat this as insurance I have bought but not cashed in.</li>
-    <li><strong>Human-in-the-loop is where trust compounds.</strong> Every recruiter correction is implicit labeled data. The pipeline gets better not by retraining, but because the design routes uncertainty to the person best placed to resolve it.</li>
-    <li><strong>Fairness constraints belong in tests.</strong> If a protected attribute must not influence a decision, prove it with an assertion, not a policy memo.</li>
+    <li data-i18n="b.l1"><strong>Deterministic-first architecture pays twice.</strong> Rules handle the structured 80% of a resume cheaply and consistently; the LLM handles the messy 20%. Costs stay predictable and failures stay debuggable.</li>
+    <li data-i18n="b.l2"><strong>Explainability is a product requirement, not an ethics poster.</strong> Recruiters adopted the scoring engine because they could interrogate it. A black-box score would have been ignored correctly.</li>
+    <li data-i18n="b.l3"><strong>Provider abstraction is cheap insurance.</strong> Supporting OpenAI-compatible and Anthropic APIs behind one interface was a small one-time cost, and it means model swaps are now config changes rather than code changes. I have not needed to switch providers under pressure yet, so treat this as insurance I have bought but not cashed in.</li>
+    <li data-i18n="b.l4"><strong>Human-in-the-loop is where trust compounds.</strong> Every recruiter correction is implicit labeled data. The pipeline gets better not by retraining, but because the design routes uncertainty to the person best placed to resolve it.</li>
+    <li data-i18n="b.l5"><strong>Fairness constraints belong in tests.</strong> If a protected attribute must not influence a decision, prove it with an assertion, not a policy memo.</li>
   </ul>
 
-  <h2>Papers worth reading alongside this</h2>
-  <p>If you want to go deeper on the research behind these design choices, start here:</p>
+  <h2 data-i18n="b.h2g">Papers worth reading alongside this</h2>
+  <p data-i18n="b.refs.intro">If you want to go deeper on the research behind these design choices, start here:</p>
   <ul class="refs">
     <li><strong>Ribeiro et al., ""Why Should I Trust You?": Explaining the Predictions of Any Classifier" (KDD 2016)</strong> <a href="https://arxiv.org/abs/1602.04938">arXiv:1602.04938</a>. The LIME paper; foundational for why local, reason-level explanations drive user trust. It is the same principle behind showing recruiters <em>why</em> a candidate scored as they did.</li>
     <li><strong>Lundberg &amp; Lee, "A Unified Approach to Interpreting Model Predictions" (NeurIPS 2017)</strong> <a href="https://arxiv.org/abs/1705.07874">arXiv:1705.07874</a>. SHAP: attribute decisions to input features fairly. Useful mental model even when your "model" is a weighted rule engine.</li>
@@ -204,8 +204,8 @@
     <li><strong>Decorte et al., "Skill Detection in Job Profiles" (2021)</strong> <a href="https://arxiv.org/abs/2111.13319">arXiv:2111.13319</a>. Extracting and normalizing skills from noisy professional text, the same problem as the skill-canonicalization layer described above.</li>
   </ul>
 
-  <h2>Wrapping up</h2>
-  <p>None of the individual pieces here is exotic: regexes, weighted scoring, an LLM call behind a schema, a WhatsApp bot. The engineering value and the forward-deployed mindset lives in the seams: knowing which problems need a model and which need a regex, making automated judgments inspectable, keeping humans on the decisions that deserve them, and proving fairness claims with tests. That's the difference between an AI demo and an AI pipeline a real business runs on.</p>
+  <h2 data-i18n="b.h2h">Wrapping up</h2>
+  <p data-i18n="b.outro">None of the individual pieces here is exotic: regexes, weighted scoring, an LLM call behind a schema, a WhatsApp bot. The engineering value and the forward-deployed mindset lives in the seams: knowing which problems need a model and which need a regex, making automated judgments inspectable, keeping humans on the decisions that deserve them, and proving fairness claims with tests. That's the difference between an AI demo and an AI pipeline a real business runs on.</p>
   <p style="margin-top:36px;"><a href="/">← Back to portfolio</a></p>
 </div>
 <script src="blog-i18n.js"></script>
