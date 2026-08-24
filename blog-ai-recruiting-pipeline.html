@@ -116,6 +116,7 @@
 
   <h2>Stage 2: Explainable fit scoring</h2>
   <p>Given a job order and a parsed resume, the scoring engine estimates how well this candidate fits. But the design constraint that shaped everything was <strong>explainability</strong>: every point in the score must come with a reason a recruiter can read, agree or disagree with, and act on.</p>
+  <p>The weighting scheme has a subtlety worth flagging. Each component only counts when the job order expresses that dimension, and its weight is removed from the denominator otherwise, so the remaining weights re-normalize automatically. That avoids punishing candidates for requirements nobody asked for, but it also means a sparse job order (one that mentions almost nothing) concentrates all the weight on whichever dimensions happen to be present, which can amplify weak signals into large score swings. In practice our job orders are written against a client intake template that always covers skills and experience, so the degenerate case is rare; if you borrow this idea, add a validation check for orders that specify too few dimensions rather than trusting re-normalization to sort it out.</p>
 
   <div class="diagram">
     <svg viewBox="0 0 720 210" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,sans-serif">
@@ -152,7 +153,7 @@
   <p>Ownership stays manual by design: no application is ever auto-assigned or auto-rejected. Automation triages; humans decide. In recruiting, a false negative (rejecting someone who would have placed) costs more than a few minutes of recruiter time.</p>
 
   <h2>Stage 4: LLM-powered CV reformatting</h2>
-  <p>When a candidate advances, each client expects their own submission format: a specific DOCX template with particular sections and phrasing. Historically recruiters retyped resumes into these formats by hand: hours per placement. Now:</p>
+  <p>When a candidate advances, each client expects their own submission format: a specific DOCX template with particular sections and phrasing. Historically recruiters retyped resumes into these formats by hand, which is slow, repetitive work on every placement. Now:</p>
   <ol>
     <li>Each client format is declared as a <strong>schema</strong>: field keys, labels, groupings, hints, repeating blocks (employment history).</li>
     <li>The schema generates three artifacts from one source of truth: the <strong>LLM prompt</strong>, the <strong>recruiter review form</strong>, and the <strong>template fill</strong>.</li>
@@ -187,7 +188,7 @@
   <ul>
     <li><strong>Deterministic-first architecture pays twice.</strong> Rules handle the structured 80% of a resume cheaply and consistently; the LLM handles the messy 20%. Costs stay predictable and failures stay debuggable.</li>
     <li><strong>Explainability is a product requirement, not an ethics poster.</strong> Recruiters adopted the scoring engine because they could interrogate it. A black-box score would have been ignored correctly.</li>
-    <li><strong>Provider abstraction is cheap insurance.</strong> Supporting OpenAI-compatible and Anthropic APIs behind one interface took an afternoon and means model swaps are config changes, not migrations.</li>
+    <li><strong>Provider abstraction is cheap insurance.</strong> Supporting OpenAI-compatible and Anthropic APIs behind one interface was a small one-time cost, and it means model swaps are now config changes rather than code changes. I have not needed to switch providers under pressure yet, so treat this as insurance I have bought but not cashed in.</li>
     <li><strong>Human-in-the-loop is where trust compounds.</strong> Every recruiter correction is implicit labeled data. The pipeline gets better not by retraining, but because the design routes uncertainty to the person best placed to resolve it.</li>
     <li><strong>Fairness constraints belong in tests.</strong> If a protected attribute must not influence a decision, prove it with an assertion, not a policy memo.</li>
   </ul>
@@ -195,13 +196,12 @@
   <h2>Papers worth reading alongside this</h2>
   <p>If you want to go deeper on the research behind these design choices, start here:</p>
   <ul class="refs">
-    <li><strong>Ribeiro et al., ""Why Should I Trust You?": Explaining the Predictions of Any Classifier" (KDD 2016)</strong> <a href="https://arxiv.org/abs/1602.04938">arXiv:1602.04938</a>. The LIME paper; foundational for why local, reason-level explanations drive user trust the same principle behind showing recruiters <em>why</em> a candidate scored as they did.</li>
+    <li><strong>Ribeiro et al., ""Why Should I Trust You?": Explaining the Predictions of Any Classifier" (KDD 2016)</strong> <a href="https://arxiv.org/abs/1602.04938">arXiv:1602.04938</a>. The LIME paper; foundational for why local, reason-level explanations drive user trust. It is the same principle behind showing recruiters <em>why</em> a candidate scored as they did.</li>
     <li><strong>Lundberg &amp; Lee, "A Unified Approach to Interpreting Model Predictions" (NeurIPS 2017)</strong> <a href="https://arxiv.org/abs/1705.07874">arXiv:1705.07874</a>. SHAP: attribute decisions to input features fairly. Useful mental model even when your "model" is a weighted rule engine.</li>
     <li><strong>Buolamwini &amp; Gebru, "Gender Shades" (FAT* 2018)</strong> <a href="http://proceedings.mlr.press/v81/buolamwini18a.html">PMLR v81</a>. The canonical demonstration that systems processing people carry bias unless audited. Motivates testing fairness properties explicitly.</li>
     <li><strong>Raji et al., "Closing the AI Accountability Gap: Defining an End-to-End Framework for Internal Algorithmic Auditing" (2020)</strong> <a href="https://arxiv.org/abs/2001.00973">arXiv:2001.00973</a>. How to build audit scaffolding (like our birth-date-blindness test) into the development lifecycle.</li>
-    <li><strong>Wang et al., "Human-AI Collaboration in Data Science" and related work on human-in-the-loop ML</strong> a good entry point is Amershi et al., "Guidelines for Human-AI Interaction" (CHI 2019) <a href="https://www.microsoft.com/en-us/research/publication/guidelines-for-human-ai-interaction/">Microsoft Research</a>. Eighteen concrete guidelines; our "show reasons, keep the decision human" pattern maps directly onto several of them.</li>
-    <li><strong>Kocijan et al. / resume-parsing literature:</strong> for the information-extraction side, see the SemEval shared tasks on CV parsing and Decorte et al., "Skill Detection in Job Profiles" (2021) <a href="https://arxiv.org/abs/2111.13319">arXiv:2111.13319</a> on extracting and normalizing skills from noisy professional text.</li>
-    <li><strong>Vaswani et al., "Attention Is All You Need" (2017)</strong> <a href="https://arxiv.org/abs/1706.03762">arXiv:1706.03762</a>. Included for completeness: the transformer backbone under every LLM stage of this pipeline.</li>
+    <li><strong>Amershi et al., "Guidelines for Human-AI Interaction" (CHI 2019)</strong> <a href="https://www.microsoft.com/en-us/research/publication/guidelines-for-human-ai-interaction/">Microsoft Research</a>. Eighteen concrete design guidelines for human-AI systems; our "show reasons, keep the decision human" pattern maps directly onto several of them.</li>
+    <li><strong>Decorte et al., "Skill Detection in Job Profiles" (2021)</strong> <a href="https://arxiv.org/abs/2111.13319">arXiv:2111.13319</a>. Extracting and normalizing skills from noisy professional text, the same problem as the skill-canonicalization layer described above.</li>
   </ul>
 
   <h2>Wrapping up</h2>
