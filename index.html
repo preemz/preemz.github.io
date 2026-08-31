@@ -154,7 +154,8 @@
       <ul>
         <li><a href="#about" data-i18n="nav.about">About</a></li>
         <li><a href="#ventures" data-i18n="nav.ventures">Ventures</a></li>
-        <li><a href="#experience" data-i18n="nav.experience">Experience &amp; Speaking</a></li>
+        <li><a href="#experience" data-i18n="nav.experience">Experience</a></li>
+        <li><a href="#blog" data-i18n="nav.blog">Writing</a></li>
         <li><a href="#contact" data-i18n="nav.contact">Contact</a></li>
         <li><button id="lang-toggle" aria-label="Switch language" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:3px 10px;font-size:13px;cursor:pointer;">SV</button></li>
       </ul>
@@ -191,7 +192,7 @@
       <aside class="facts">
         <div class="fact"><b data-i18n="fact1.b">Ex-unicorn PM</b><span data-i18n="fact1.s">Bukalapak, Indonesia's top e-commerce</span></div>
         <div class="fact"><b data-i18n="fact2.b">Telkom University</b><span data-i18n="fact2.s">Computer Science, AI thesis</span></div>
-        <div class="fact"><b data-i18n="fact3.b">Languages</b><span data-i18n="fact3.s">Indonesian · English · Japanese · Swedish</span></div>
+        <div class="fact"><b data-i18n="fact3.b">Languages</b><span data-i18n="fact3.s">Indonesian · English · Swedish</span></div>
         <div class="fact"><b data-i18n="fact4.b">Based in</b><span data-i18n="fact4.s">Uppsala, Sweden (remote worldwide)</span></div>
       </aside>
     </div>
@@ -208,8 +209,7 @@
       <div class="card" data-href="/blog-ai-recruiting-pipeline.html">
         <h3 data-i18n="card.fit.t">Explainable Candidate Fit Scoring (in production) 📖</h3>
         <p data-i18n="card.cv.p">Scoring engine that weighs each candidate's resume against a job order across skills, language, seniority, tenure, and stability, then tells recruiters fit-or-not with the reasons behind every point. Built with fairness guardrails: age, name, gender, and nationality never touch the score.</p>
-        <div class="tagrow"><span class="tag">Scoring engine</span><span class="tag">NLP</span><span class="tag">Responsible AI</span>
-        <p style="font-size:13px;margin-top:4px;"><a href="/blog-csv-candidate-import.html" style="color:var(--accent);">How we imported the candidate database → blog post</a></p></div>
+        <div class="tagrow"><span class="tag">Scoring engine</span><span class="tag">NLP</span><span class="tag">Responsible AI</span></div>
       </div>
       <div class="card">
         <h3 data-i18n="card.cv.t">AI Resume Intelligence (in production)</h3>
@@ -261,6 +261,22 @@
         <span class="when" data-i18n="exp5.w">2012 – 2015 · Jakarta–Bandung, Indonesia</span>
         <h3 data-i18n="exp5.t">Software Engineer &amp; Product Manager Various Startups</h3>
         <p data-i18n="exp5.p">Freelance and full-time roles at TMLEnergy, KMK Online, and Greeneration including founding my own startup.</p>
+      </div>
+    </div>
+  </section>
+
+    <section id="blog">
+    <h2 data-i18n="blog.h2">Writing</h2>
+    <div class="cards">
+      <div class="card" data-href="/blog-ai-recruiting-pipeline.html">
+        <h3>An End-to-End AI Recruiting Pipeline in Production</h3>
+        <p data-i18n="blog1.p">How my agency runs on AI I built myself: LLM resume parsing, explainable fit scoring with fairness guardrails, and the schema trick that keeps prompts and templates in sync. With diagrams and the research papers behind the design choices.</p>
+        <div class="tagrow"><span class="tag">LLM</span><span class="tag">Explainable AI</span><span class="tag">Responsible AI</span></div>
+      </div>
+      <div class="card" data-href="/blog-csv-candidate-import.html">
+        <h3>Importing thousands of candidates without breaking a single record</h3>
+        <p data-i18n="blog2.p">The CSV importer behind our candidate database migration: an RFC 4180 parser that survives real-world exports, bilingual column mapping, and a dry-run preview that classifies every row before anything is written.</p>
+        <div class="tagrow"><span class="tag">Data engineering</span><span class="tag">Dedup</span><span class="tag">Cloudflare Workers</span></div>
       </div>
     </div>
   </section>

@@ -6,7 +6,8 @@ const I18N = {
   // ---- NAV ----
   'nav.about': { en: 'About', sv: 'Om mig' },
   'nav.ventures': { en: 'Ventures', sv: 'Projekt' },
-  'nav.experience': { en: 'Experience & Speaking', sv: 'Erfarenhet & Föreläsningar' },
+  'nav.experience': { en: 'Experience', sv: 'Erfarenhet' },
+  'nav.blog': { en: 'Writing', sv: 'Skriver' },
   'nav.contact': { en: 'Contact', sv: 'Kontakt' },
 
   // ---- HERO ----
@@ -47,7 +48,7 @@ const I18N = {
   'fact2.b': { en: 'Telkom University', sv: 'Telkom University' },
   'fact2.s': { en: 'Computer Science, AI thesis', sv: 'Datavetenskap, examensarbete i AI' },
   'fact3.b': { en: 'Languages', sv: 'Språk' },
-  'fact3.s': { en: 'Indonesian · English · Japanese · Swedish', sv: 'Indonesiska · Engelska · Japanska · Svenska' },
+  'fact3.s': { en: 'Indonesian · English · Swedish', sv: 'Indonesiska · Engelska · Svenska' },
   'fact4.b': { en: 'Based in', sv: 'Baserad i' },
   'fact4.s': { en: 'Uppsala, Sweden (remote worldwide)', sv: 'Uppsala, Sverige (distans globalt)' },
 
@@ -115,6 +116,17 @@ const I18N = {
   'exp5.p': {
     en: "Freelance and full-time roles at TMLEnergy, KMK Online, and Greeneration including founding my own startup.",
     sv: "Frilans- och fast anställning på TMLEnergy, KMK Online och Greeneration, inklusive att grunda min egen startup."
+  },
+
+  // ---- BLOG ----
+  'blog.h2': { en: 'Writing', sv: 'Skriver' },
+  'blog1.p': {
+    en: "How my agency runs on AI I built myself: LLM resume parsing, explainable fit scoring with fairness guardrails, and the schema trick that keeps prompts and templates in sync. With diagrams and the research papers behind the design choices.",
+    sv: "Hur min byrå drivs på AI jag byggt själv: LLM-tolkning av CV:n, förklarbar matchningspoäng med rättvisespärrar och schema-tricket som håller prompts och mallar i synk. Med diagram och forskningsartiklarna bakom designvalen."
+  },
+  'blog2.p': {
+    en: "The CSV importer behind our candidate database migration: an RFC 4180 parser that survives real-world exports, bilingual column mapping, and a dry-run preview that classifies every row before anything is written.",
+    sv: "CSV-importören bakom vår kandidatdatabasmigrering: en RFC 4180-parser som överlever verkliga exporter, tvåspråkig kolumnmappning och en förhandsgranskning som klassar varje rad innan något skrivs."
   },
 
   // ---- SPEAKING ----
