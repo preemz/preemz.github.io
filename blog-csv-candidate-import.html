@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Importing 6,000 Candidates Without Breaking a Single Record — Primawan Satrio</title>
+<meta name="description" content="How we built a CSV candidate importer for our recruiting platform: RFC 4180 parsing, header alias matching for Indonesian exports, dry-run previews, and deduplication on email as the identity key.">
+<link rel="canonical" href="https://preemz.github.io/blog-csv-candidate-import.html">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://preemz.github.io/blog-csv-candidate-import.html">
+<meta property="og:title" content="Importing 6,000 Candidates Without Breaking a Single Record">
+<meta property="og:description" content="Building a forgiving CSV import pipeline for a recruiting platform: parsing, mapping, dedup, and the dry-run that made it safe.">
+<style>
+  :root {
+    --bg: #0b0e14; --surface: #12161f; --border: #232a38;
+    --text: #e6e9ef; --muted: #8b93a5; --accent: #4f8cff; --accent2: #7c5cff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+    line-height: 1.75; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 60px 24px 80px; }
+  .back { font-size: 14px; }
+  .back a { color: var(--accent); text-decoration: none; }
+  h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.2; letter-spacing: -.02em; margin: 18px 0 10px; }
+  .meta { color: var(--muted); font-size: 14px; margin-bottom: 40px; }
+  h2 { font-size: 22px; letter-spacing: -.01em; margin: 44px 0 14px; }
+  p { margin-bottom: 16px; color: #c4cad6; }
+  p strong, li strong { color: var(--text); }
+  a { color: var(--accent); }
+  ul, ol { margin: 0 0 16px 22px; color: #c4cad6; }
+  li { margin-bottom: 8px; }
+  code {
+    font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; font-size: .88em;
+    background: rgba(79,140,255,.09); color: #9cc0ff; border-radius: 5px; padding: 1.5px 6px;
+  }
+  blockquote {
+    border-left: 3px solid var(--accent); background: var(--surface);
+    padding: 12px 18px; border-radius: 0 10px 10px 0; margin: 18px 0; color: var(--muted); font-size: 15px;
+  }
+  table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14.5px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); }
+  th { color: var(--text); }
+  td { color: var(--muted); }
+  .diagram {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px 16px; margin: 22px 0; overflow-x: auto;
+  }
+  .diagram svg { display: block; min-width: 560px; width: 100%; height: auto; }
+  .caption { font-size: 13px; color: var(--muted); text-align: center; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="back"><a href="/">← primawan.github.io</a><button id="lang-toggle" aria-label="Switch language" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:3px 10px;font-size:13px;cursor:pointer;margin-left:12px;float:right;">SV</button></div>
+
+  <h1 data-i18n="t">Importing thousands of candidates without breaking a single record</h1>
+  <div class="meta" data-i18n="meta">Primawan Satrio · August 2026 · ~8 min read</div>
+
+  <p data-i18n="p1">When we moved our recruiting operation onto our own platform, the hardest part was not the job board or the application flow. It was the database: years of candidate records living in a Lark base, with column names in a mix of English and Bahasa Indonesia, phone numbers formatted six different ways, and the same people entered more than once by different recruiters. A naive import would have created phantom duplicates that our team would chase for months.</p>
+  <p data-i18n="p2">This post covers the CSV importer we built to solve that: a forgiving parser, smart column mapping, and a dry-run preview that shows exactly what will happen to every row before anything is written. The feature now lives at <code>/admin/import</code> and recruiters use it whenever a client or partner sends over a spreadsheet of candidates.</p>
+
+  <h2 data-i18n="h_parse">Parsing: assume the file is worse than it is</h2>
+  <p data-i18n="parse_p1">Spreadsheet exports are hostile. Real files we received contained a UTF-8 byte-order mark, CRLF line endings from Windows Excel, quoted fields with embedded commas and newlines, doubled quotes inside quoted fields, and trailing blank lines. Rather than pull in a dependency on a Workers-sized budget, we wrote a ~60-line RFC 4180 parser that handles all of it:</p>
+  <ul>
+    <li data-i18n="parse_l1"><strong>Byte-order mark stripping</strong> so the first header is not silently corrupted into <code>ï»¿email</code></li>
+    <li data-i18n="parse_l2"><strong>Proper quote state machine</strong> with escaped-quote handling (<code>""</code> inside a quoted field)</li>
+    <li data-i18n="parse_l3"><strong>Blank-row filtering</strong> and whitespace trimming on every cell</li>
+  </ul>
+  <blockquote data-i18n="parse_q"><strong>Design rule:</strong> every quirk in this parser exists because a real export contained it. When your parser meets a new quirk in production, fix the parser, not the file.</blockquote>
+
+  <h2 data-i18n="h_map">Column mapping: meet the spreadsheet where it is</h2>
+  <p data-i18n="map_p1">The next problem is that exports never use your field names. Our Lark base called the email column everything from <code>Email Address</code> to <code>e-mail</code> to <code>surel</code> (Indonesian for email). Instead of forcing a rigid template, the importer guesses the mapping using an alias table, with Indonesian aliases as first-class citizens:</p>
+  <div class="diagram">
+    <table style="margin:0;">
+      <tr><th>Our field</th><th>Headers we accept</th></tr>
+      <tr><td><code>email</code></td><td>email, emailaddress, mail, workemail, <strong>surel</strong></td></tr>
+      <tr><td><code>name</code></td><td>fullname, name, candidatename, <strong>namalengkap, nama</strong></td></tr>
+      <tr><td><code>phone</code></td><td>phone, mobile, whatsapp, wa, <strong>nohp, telepon</strong></td></tr>
+      <tr><td><code>dateOfBirth</code></td><td>dob, birthdate, birthday, <strong>tanggallahir, ttl</strong></td></tr>
+      <tr><td><code>location</code></td><td>city, domicile, address, <strong>domisili, kota</strong></td></tr>
+    </table>
+    <div class="caption" data-i18n="map_cap">Header matching is done on a normalized form: lowercased, everything but letters and digits stripped, so "E-Mail Address" matches "emailaddress".</div>
+  </div>
+  <p data-i18n="map_p2">The guesser has two rules that matter. First, it never maps the same column twice: once a header is claimed by a field, it is removed from the pool, so two similar columns cannot both feed one field. Second, every guess is shown to the admin on a review screen where any choice can be overridden before committing. The machine proposes; a human disposes.</p>
+
+  <h2 data-i18n="h_dry">The dry-run: no surprises allowed</h2>
+  <p data-i18n="dry_p1">The part I am most insistent on is that nothing is written to the database until the admin has seen, row by row, what will happen. Upload lands on a review page showing every row classified into one of five actions:</p>
+  <ul>
+    <li data-i18n="dry_l1"><strong>create</strong> — valid, unknown email, will be imported</li>
+    <li data-i18n="dry_l2"><strong>invalid</strong> — missing or malformed email, or missing name; excluded with the reason shown</li>
+    <li data-i18n="dry_l3"><strong>duplicateInFile</strong> — same email appeared on an earlier line of this same file</li>
+    <li data-i18n="dry_l4"><strong>alreadyRegistered</strong> — this person already has an account on the platform</li>
+    <li data-i18n="dry_l5"><strong>ownedByRecruiter</strong> — the person sits in a recruiter's talent pool with an active ownership window; the import names the recruiter and the expiry date</li>
+  </ul>
+  <p data-i18n="dry_p2">Email is the identity key for all of it. Everything deduplicates on the normalized (lowercased) email address, because in our business the email is the one field that reliably identifies a person across systems, while names collide and phone numbers change format.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 720 210" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,sans-serif">
+      <defs><marker id="arw3" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#4f8cff"/></marker></defs>
+      <g font-size="12.5" fill="#e6e9ef">
+        <rect x="8" y="75" width="130" height="60" rx="10" fill="#161b26" stroke="#232a38"/>
+        <text x="73" y="100" text-anchor="middle">CSV upload</text>
+        <text x="73" y="118" text-anchor="middle" fill="#8b93a5" font-size="11">stored with history</text>
+        <rect x="178" y="75" width="130" height="60" rx="10" fill="#161b26" stroke="#4f8cff"/>
+        <text x="243" y="100" text-anchor="middle" fill="#9cc0ff">Map columns</text>
+        <text x="243" y="118" text-anchor="middle" fill="#8b93a5" font-size="11">alias guess + override</text>
+        <rect x="348" y="75" width="150" height="60" rx="10" fill="#161b26" stroke="#4f8cff"/>
+        <text x="423" y="100" text-anchor="middle" fill="#9cc0ff">Dry-run preview</text>
+        <text x="423" y="118" text-anchor="middle" fill="#8b93a5" font-size="11">every row classified</text>
+        <rect x="538" y="75" width="174" height="60" rx="10" fill="#161b26" stroke="#232a38"/>
+        <text x="625" y="100" text-anchor="middle">Commit (or walk away)</text>
+        <text x="625" y="118" text-anchor="middle" fill="#8b93a5" font-size="11">nothing written before this</text>
+      </g>
+      <g stroke="#4f8cff" stroke-width="1.5" fill="none" marker-end="url(#arw3)">
+        <line x1="138" y1="105" x2="176" y2="105"/>
+        <line x1="308" y1="105" x2="346" y2="105"/>
+        <line x1="498" y1="105" x2="536" y2="105"/>
+      </g>
+      <path d="M 423 137 C 423 175, 243 175, 243 137" stroke="#7c5cff" stroke-width="1.2" fill="none" stroke-dasharray="4 4"/>
+      <text x="333" y="190" text-anchor="middle" fill="#7c5cff" font-size="10.5" data-i18n="dry_fig_note">admin edits mapping, preview recomputes</text>
+      <text x="423" y="30" text-anchor="middle" fill="#8b93a5" font-size="11.5" data-i18n="dry_fig_top">five outcomes per row: create · invalid · duplicateInFile · alreadyRegistered · ownedByRecruiter</text>
+    </svg>
+    <div class="caption" data-i18n="dry_fig_cap">Figure 1. The import flow. The commit step is unreachable until a human has reviewed the classified preview.</div>
+  </div>
+
+  <h2 data-i18n="h_perf">Performance: two passes, not one per row</h2>
+  <p data-i18n="perf_p1">The deduplication check needs to query the database per row, and on Cloudflare Workers a naive loop of one query per row is exactly the pattern that eats your subrequest budget. The preview instead runs in two passes:</p>
+  <ol>
+    <li data-i18n="perf_l1"><strong>Synchronous first pass</strong> over the file itself: validate emails, require names, detect in-file duplicates with a set. No database involved, and ordering stays strict so "same email appears earlier in this file" is always accurate.</li>
+    <li data-i18n="perf_l2"><strong>Parallel second pass</strong> over the surviving rows: batched lookups against registered users and active recruiter ownerships, run concurrently rather than sequentially.</li>
+  </ol>
+  <p data-i18n="perf_p2">Every import is also recorded with its filename, headers, mapping, and who uploaded it, so a bad import can be audited after the fact rather than wondered about.</p>
+
+  <h2 data-i18n="h_lessons">What this taught us</h2>
+  <ul>
+    <li data-i18n="les_l1"><strong>Dedupe on identity, not on rows.</strong> The unit of truth is the person (by email), not the spreadsheet line. Getting this wrong is how companies end up calling the same candidate twice from two "different" records.</li>
+    <li data-i18n="les_l2"><strong>Show the future before you create it.</strong> A dry-run preview that classifies every row converts an import from an act of faith into a reviewable decision. The admin who sees "owned by Mikke until 2026-11-30" trusts the system; the one who sees a spinner does not.</li>
+    <li data-i18n="les_l3"><strong>Bilingual data needs bilingual tooling.</strong> Half our header aliases are Indonesian because our data is Indonesian. Tooling that only understands English column names would have made every import a manual mapping exercise.</li>
+    <li data-i18n="les_l4"><strong>A ~60-line parser beats a dependency when you know exactly what you must survive.</strong> RFC 4180 is small, and owning the code means the next weird export is a one-line fix away.</li>
+  </ul>
+
+  <p data-i18n="outro" style="margin-top:28px;">The importer looks mundane next to LLM pipelines and scoring engines, but it is the feature that made the rest trustworthy: the match engine can only be as good as the candidate data underneath it, and this is how that data got in cleanly.</p>
+  <p style="margin-top:36px;"><a href="/">← Back to portfolio</a></p>
+</div>
+<script src="csv-import-i18n.js"></script>
+</body>
+</html>
