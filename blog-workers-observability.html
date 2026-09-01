@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Observability on a Workers Free Plan — Primawan Satrio</title>
+<meta name="description" content="How we built observability for a production Cloudflare Workers recruiting platform without paid tooling: tagged structured logs, a Discord Monitoring channel, funnel metrics with privacy sampling, and a cron smoke check.">
+<link rel="canonical" href="https://preemz.github.io/blog-workers-observability.html">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://preemz.github.io/blog-workers-observability.html">
+<meta property="og:title" content="Observability on a Workers Free Plan">
+<meta property="og:description" content="Structured logs, a Discord Monitoring channel, privacy-sampled funnel metrics, and a 15-minute smoke check: production observability for $0.">
+<style>
+  :root {
+    --bg: #0b0e14; --surface: #12161f; --border: #232a38;
+    --text: #e6e9ef; --muted: #8b93a5; --accent: #4f8cff; --accent2: #7c5cff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+    line-height: 1.75; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 60px 24px 80px; }
+  .back { font-size: 14px; }
+  .back a { color: var(--accent); text-decoration: none; }
+  h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.2; letter-spacing: -.02em; margin: 18px 0 10px; }
+  .meta { color: var(--muted); font-size: 14px; margin-bottom: 40px; }
+  h2 { font-size: 22px; letter-spacing: -.01em; margin: 44px 0 14px; }
+  p { margin-bottom: 16px; color: #c4cad6; }
+  p strong, li strong { color: var(--text); }
+  a { color: var(--accent); }
+  ul, ol { margin: 0 0 16px 22px; color: #c4cad6; }
+  li { margin-bottom: 8px; }
+  code {
+    font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; font-size: .88em;
+    background: rgba(79,140,255,.09); color: #9cc0ff; border-radius: 5px; padding: 1.5px 6px;
+  }
+  pre {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 18px; overflow-x: auto; margin: 18px 0; font-size: 13px; line-height: 1.6;
+  }
+  pre code { background: none; padding: 0; color: #c4cad6; }
+  blockquote {
+    border-left: 3px solid var(--accent); background: var(--surface);
+    padding: 12px 18px; border-radius: 0 10px 10px 0; margin: 18px 0; color: var(--muted); font-size: 15px;
+  }
+  .diagram {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px 16px; margin: 22px 0; overflow-x: auto;
+  }
+  .diagram svg { display: block; min-width: 560px; width: 100%; height: auto; }
+  .caption { font-size: 13px; color: var(--muted); text-align: center; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="back"><a href="/">← primawan.github.io</a><button id="lang-toggle" aria-label="Switch language" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:3px 10px;font-size:13px;cursor:pointer;margin-left:12px;float:right;">SV</button></div>
+
+  <h1 data-i18n="t">Observability on a Workers Free Plan</h1>
+  <div class="meta" data-i18n="meta">Primawan Satrio · August 2026 · ~8 min read</div>
+
+  <p data-i18n="p1">Our recruiting platform runs on Cloudflare Workers' free plan. That buys us zero infrastructure and zero dollars, and it also buys us roughly zero dashboards. No APM agent, no paid log retention worth the name, no tracing. When a candidate's application vanished into a 1102 error one evening, my entire debugging surface was a Cloudflare error page and my own memory of what the code was supposed to do.</p>
+  <p data-i18n="p2">This post is about the observability layer we built afterwards. It costs nothing, it lives in about forty lines of code, and it has since caught every production failure within minutes instead of when a recruiter phones me to ask if the site is down. The stack: tagged structured logs, a Discord Monitoring channel, privacy-sampled funnel metrics, and a cron smoke check that fetches our own pages every fifteen minutes.</p>
+
+  <h2 data-i18n="h_why">The constraint that shaped everything</h2>
+  <p data-i18n="why_p1">On the free plan, <code>console.log</code> output is retained for a short window and there is no queryable long-term store you can grep from a dashboard. So the design question was never "which observability vendor" but "where does signal go when logs evaporate?"</p>
+  <p data-i18n="why_p2">Our answer: logs stay for debugging what just happened, and anything that must be <em>noticed</em> gets pushed to a place the team already looks several times a day. For us that place is Discord. We already used a webhook for job announcements; we added a second channel, <strong>#monitoring</strong>, with its own webhook, and made it the single destination for every failure signal.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 720 240" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,sans-serif">
+      <defs><marker id="arw4" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#4f8cff"/></marker></defs>
+      <g font-size="12.5" fill="#e6e9ef">
+        <rect x="30" y="90" width="150" height="64" rx="10" fill="#161b26" stroke="#4f8cff"/>
+        <text x="105" y="116" text-anchor="middle" fill="#9cc0ff">metric()</text>
+        <text x="105" y="134" text-anchor="middle" fill="#8b93a5" font-size="11">one function, every event</text>
+        <rect x="240" y="30" width="190" height="56" rx="10" fill="#161b26" stroke="#232a38"/>
+        <text x="335" y="53" text-anchor="middle">console.log [metric]</text>
+        <text x="335" y="71" text-anchor="middle" fill="#8b93a5" font-size="11">Workers Logs (short window)</text>
+        <rect x="240" y="150" width="190" height="56" rx="10" fill="#161b26" stroke="#7c5cff"/>
+        <text x="335" y="173" text-anchor="middle" fill="#c3b0ff">Discord #monitoring</text>
+        <text x="335" y="191" text-anchor="middle" fill="#8b93a5" font-size="11">webhook, real-time</text>
+        <rect x="500" y="90" width="185" height="64" rx="10" fill="#161b26" stroke="#232a38"/>
+        <text x="592" y="116" text-anchor="middle">Team phones</text>
+        <text x="592" y="134" text-anchor="middle" fill="#8b93a5" font-size="11">failures surface in minutes</text>
+      </g>
+      <g stroke="#4f8cff" stroke-width="1.5" fill="none" marker-end="url(#arw4)">
+        <line x1="180" y1="112" x2="238" y2="62"/>
+        <line x1="180" y1="122" x2="238" y2="172"/>
+        <line x1="430" y1="178" x2="498" y2="140"/>
+        <line x1="430" y1="55" x2="498" y2="105" stroke-dasharray="4 4" opacity=".5"/>
+      </g>
+      <text x="335" y="14" text-anchor="middle" fill="#8b93a5" font-size="11.5" data-i18n="why_fig_top">every event → both destinations; only failures page anyone</text>
+    </svg>
+    <div class="caption" data-i18n="why_fig_cap">Figure 1. One metric() call fans out to ephemeral logs and the persistent Discord channel. Dashboards are for browsing; Discord is for noticing.</div>
+  </div>
+
+  <h2 data-i18n="h_metric">One function to rule the telemetry</h2>
+  <p data-i18n="metric_p1">The core is a single exported <code>metric(ctx, event, fields)</code>. It formats an event with key=value pairs, writes one tagged line to logs, and fires the Discord webhook. Every observable event in the codebase goes through it:</p>
+  <pre><code>metric(ctx, 'cv_extract', { ext, ms, bytes, chars, ok: 1 });
+metric(ctx, 'application_submit', { jobId, extras, portfolio, recruiter: 1 });
+metric(ctx, 'worker_error', { path, method, err });</code></pre>
+  <p data-i18n="metric_p2">Three design rules keep it useful. <strong>Tag everything:</strong> every line starts with <code>[metric]</code> so a log dump can be filtered mechanically. <strong>Bound the fields:</strong> values are truncated to 60 characters so a stack trace fragment cannot flood a Discord message. <strong>Never log people:</strong> candidate emails, file contents, and names are excluded by rule; only technical dimensions (sizes, durations, counts, booleans, job IDs) pass through.</p>
+  <blockquote data-i18n="metric_q"><strong>The privacy rule is enforced at the choke point.</strong> Because every event flows through one function, "what must never be logged" is checked in exactly one place, not sprinkled across the codebase as good intentions.</blockquote>
+
+  <h2 data-i18n="h_funnel">Funnel metrics: the business, measured</h2>
+  <p data-i18n="funnel_p1">Error-only monitoring tells you the site is broken. It does not tell you the funnel is quietly leaking. We instrument the candidate journey as a sequence of metric events: CV extraction (with extraction success as an explicit boolean), application submission (with attachment counts), recommendation generation (with its own error event when the matcher fails). Reading a day of <code>[metric]</code> lines answers the questions that actually matter to a recruiting business:</p>
+  <ul>
+    <li data-i18n="funnel_l1">Are CVs extracting cleanly, or is a document format silently producing garbage?</li>
+    <li data-i18n="funnel_l2">Do applications carry the extras (portfolio, additional files) we want?</li>
+    <li data-i18n="funnel_l3">Is the matching engine erroring on particular job orders?</li>
+  </ul>
+  <p data-i18n="funnel_p2">The <code>cv_extract</code> event earns special mention because it is the direct descendant of the Error 1102 incident. After bounding PDF stream processing, we added <code>ok</code> (did extraction yield real text?) and timing to every extraction. When a pathological document appears now, the metric line shows it immediately: high <code>ms</code>, low <code>chars</code>, <code>ok=0</code>.</p>
+
+  <h2 data-i18n="h_smoke">The smoke check: a cron that fetches our own site</h2>
+  <p data-i18n="smoke_p1">The piece that turned monitoring from reactive to proactive is a scheduled handler on a 15-minute cron. It fetches a handful of our own pages (the shell, login, privacy, and the newest live job pages) and checks for 5xx responses. Failures land in the Monitoring channel with a red embed; successes write one quiet log line and notify nobody.</p>
+  <blockquote data-i18n="smoke_q"><strong>The quiet-success rule matters as much as the alerting.</strong> A monitoring channel that pings on every success gets muted within a week. Ours only speaks when something fails, so when it speaks, everyone reads.</blockquote>
+  <p data-i18n="smoke_p2">Why fetch pages over HTTP instead of calling internal functions? Because the whole point is to test what a candidate actually experiences: DNS, the edge, routing, the D1 queries behind a live job page. It even caught a real regression once, a broken SQL path on job pages that would otherwise have sat undetected until an applicant hit it. Internal smoke coverage of live job pages came directly from that incident.</p>
+
+  <h2 data-i18n="h_lessons">What we would tell ourselves earlier</h2>
+  <ul>
+    <li data-i18n="les_l1"><strong>Observability is a routing problem, not a tooling problem.</strong> We did not need a vendor; we needed failure signals to arrive where the team already looks. Discord won because attention was already there.</li>
+    <li data-i18n="les_l2"><strong>One choke point beats scattered diligence.</strong> A single metric() function with a privacy rule and field bounding gives guarantees that twenty well-meaning console.log sites never will.</li>
+    <li data-i18n="les_l3"><strong>Instrument the funnel, not just the failures.</strong> A silent extraction degradation costs candidates quietly. Business metrics caught it; error logs never would have.</li>
+    <li data-i18n="les_l4"><strong>Free-tier limits force honesty.</strong> Short log retention pushed push-based alerting from nice-to-have to mandatory. The constraint made the system simpler than a paid setup would have been.</li>
+    <li data-i18n="les_l5"><strong>Alert only on failure, and only on what needs action.</strong> Every notification should be one a human must read. Everything else is a log line.</li>
+  </ul>
+
+  <p data-i18n="outro" style="margin-top:28px;">None of this is clever. A tagged logger, a webhook, a cron that self-pings. But the test of observability is not sophistication, it is whether the right person learns about a failure before a customer tells them. On that test this setup outperforms plenty of dashboards I have been bought and never opened.</p>
+  <p style="margin-top:36px;"><a href="/">← Back to portfolio</a></p>
+</div>
+<script src="obs-i18n.js"></script>
+</body>
+</html>

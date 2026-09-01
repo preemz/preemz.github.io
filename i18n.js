@@ -129,6 +129,11 @@ const I18N = {
     sv: "CSV-importören bakom vår kandidatdatabasmigrering: en RFC 4180-parser som överlever verkliga exporter, tvåspråkig kolumnmappning och en förhandsgranskning som klassar varje rad innan något skrivs."
   },
 
+  'blog3.p': {
+    en: "Production monitoring for zero dollars: tagged structured logs, a Discord Monitoring channel, privacy-sampled funnel metrics, and a 15-minute cron smoke check that catches failures before candidates do.",
+    sv: "Produktionsövervakning för noll kronor: taggade strukturerade loggar, en Discord Monitoring-kanal, integritetsbevakade trattmätvärden och ett röktest på cron var femtonde minut som fångar fel innan kandidaterna gör det."
+  },
+
   // ---- SPEAKING ----
   'spk.h2': { en: 'Speaking & mentoring', sv: 'Föreläsningar & mentorskap' },
   'spk1': { en: '"Indonesia\'s Global Talent: Why Diaspora Matters" (2025)', sv: '"Indonesiens globala talang: Varför diaspora spelar roll" (2025)' },
