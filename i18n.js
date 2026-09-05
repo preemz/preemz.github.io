@@ -56,8 +56,8 @@ const I18N = {
   'ventures.h2': { en: 'Ventures & projects', sv: 'Bolag & projekt' },
   'card.sc.t': { en: 'Satrio Consulting ↗', sv: 'Satrio Consulting ↗' },
   'card.sc.p': {
-    en: "Contingency talent search that scaled from zero to seven figures in USD, winning clients across Japan, Korea, Singapore, Australia, Malaysia, and Indonesia. Includes an employer-of-record service letting foreign companies hire Indonesian talent locally or remotely without setting up a legal entity.",
-    sv: "Rekrytering på provision som skalats från noll till sju-siffrig omsättning i USD, med kunder i Japan, Korea, Singapore, Australien, Malaysia och Indonesien. Inkluderar employer-of-record-tjänst som låter utländska företag anställa indonesisk talang lokalt eller på distans utan eget bolag."
+    en: "A headhunting and recruitment firm for professionals moving across borders: contingency executive search, international placement, and an employer-of-record service letting foreign companies hire Indonesian talent locally or remotely without setting up a legal entity. Scaled from zero to seven figures in USD, with clients across Japan, Korea, Singapore, Australia, Malaysia, and Indonesia.",
+    sv: "En headhunting- och rekryteringsfirma för yrkesverksamma som rör sig över landsgränser: provisionbaserad executive search, internationell placering och en employer-of-record-tjänst som låter utländska företag anställa indonesisk talang lokalt eller på distans utan eget bolag. Skalat från noll till sju-siffrig omsättning i USD, med kunder i Japan, Korea, Singapore, Australien, Malaysia och Indonesien."
   },
   'card.fit.t': { en: 'Explainable Candidate Fit Scoring (in production) 📖', sv: 'Förklarbar kandidatmatchning (i produktion) 📖' },
   'card.fit.p': {
@@ -74,10 +74,10 @@ const I18N = {
     en: "Automated candidate engagement over WhatsApp: reaching out, qualifying, and scheduling inside the placement pipeline so recruiters spend time closing, not chasing.",
     sv: "Automatiserad kandidatuppföljning via WhatsApp: ta kontakt, kvalificera och boka tid inne i placeringsflödet så rekrytären lägger tiden på att avsluta, inte leta."
   },
-  'card.gce.t': { en: 'Global Career Expo 2026 ↗', sv: 'Global Career Expo 2026 ↗' },
-  'card.gce.p': {
-    en: "A job fair I built connecting foreign-owned companies in Jakarta with Indonesian talent, extending the community into real hiring.",
-    sv: "En jobbmässa jag byggde som knyter samman utländska företag i Jakarta med indonesisk talang och gör gemenskapen till verklig anställning."
+  'card.kb.t': { en: 'KerjaBoard ↗', sv: 'KerjaBoard ↗' },
+  'card.kb.p': {
+    en: "The production job board powering my agency: GDPR-ready for EU postings, an LLM pipeline that reformats candidate CVs into client templates, explainable fit scoring, and a recruiter console for the full placement workflow.",
+    sv: "Produktionsjobbbrädet som driver min byrå: GDPR-klart för EU-annonser, en LLM-pipeline som formaterar om kandidat-CV:n till klientmallar, förklarbar matchningspoäng och en rekrytärkonsol för hela placeringsflödet."
   },
   'card.ok.t': { en: 'Okoshi Japanese Education ↗', sv: 'Okoshi japanskundervisning ↗' },
   'card.ok.p': {
