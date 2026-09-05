@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KerjaBoard Is Now GDPR-Ready — Primawan Satrio</title>
+<meta name="description" content="How we made a 6,449-candidate recruiting platform GDPR-compliant without a second deployment: region-aware privacy notices, opt-in consent, Article 21 objections, EU pay transparency, and a retention sweep behind a flag.">
+<link rel="canonical" href="https://preemz.github.io/blog-kerjaboard-gdpr.html">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://preemz.github.io/blog-kerjaboard-gdpr.html">
+<meta property="og:title" content="KerjaBoard Is Now GDPR-Ready">
+<meta property="og:description" content="Region-aware compliance for a 6,449-candidate platform: one Worker, one database, zero npm dependencies.">
+<style>
+  :root {
+    --bg: #0b0e14; --surface: #12161f; --border: #232a38;
+    --text: #e6e9ef; --muted: #8b93a5; --accent: #4f8cff; --accent2: #7c5cff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+    line-height: 1.75; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 60px 24px 80px; }
+  .back { font-size: 14px; }
+  .back a { color: var(--accent); text-decoration: none; }
+  h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.2; letter-spacing: -.02em; margin: 18px 0 10px; }
+  .meta { color: var(--muted); font-size: 14px; margin-bottom: 40px; }
+  h2 { font-size: 22px; letter-spacing: -.01em; margin: 44px 0 14px; }
+  p { margin-bottom: 16px; color: #c4cad6; }
+  p strong, li strong { color: var(--text); }
+  a { color: var(--accent); }
+  ul, ol { margin: 0 0 16px 22px; color: #c4cad6; }
+  li { margin-bottom: 8px; }
+  code {
+    font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; font-size: .88em;
+    background: rgba(79,140,255,.09); color: #9cc0ff; border-radius: 5px; padding: 1.5px 6px;
+  }
+  blockquote {
+    border-left: 3px solid var(--accent); background: var(--surface);
+    padding: 12px 18px; border-radius: 0 10px 10px 0; margin: 18px 0; color: var(--muted); font-size: 15px;
+  }
+  table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); }
+  th { color: var(--text); }
+  td { color: var(--muted); }
+  .diagram {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px 16px; margin: 22px 0; overflow-x: auto;
+  }
+  .diagram svg { display: block; min-width: 560px; width: 100%; height: auto; }
+  .caption { font-size: 13px; color: var(--muted); text-align: center; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="back"><a href="/">← primawan.github.io</a><button id="lang-toggle" aria-label="Switch language" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:3px 10px;font-size:13px;cursor:pointer;margin-left:12px;float:right;">SV</button></div>
+
+  <h1 data-i18n="t">KerjaBoard Is Now GDPR-Ready: Region-Aware Compliance on One Worker</h1>
+  <div class="meta" data-i18n="meta">Primawan Satrio · September 2026 · ~9 min read</div>
+
+  <p data-i18n="p1">When we decided to post EU jobs on KerjaBoard, our recruiting platform, the standard advice is to spin up a separate EU deployment: separate database, separate region, separate everything. We did not do that. We shipped full GDPR compliance for EU data subjects on the <strong>same Worker, the same database, and the same codebase</strong> that serves 6,449 Indonesian candidates — and without changing a single thing about their experience.</p>
+  <p data-i18n="p2">This post explains the architecture, what changed per region, what deliberately did not change, and the few places where GDPR forced us to build features that turned out to be good for everyone.</p>
+
+  <h2 data-i18n="h_start">What we started with was better than we thought</h2>
+  <p data-i18n="start_p1">The first useful discovery came from checking facts instead of assuming. Our D1 database lives in Cloudflare's Eastern Europe region (Stockholm) and so does our R2 bucket holding candidate CVs. In other words, <strong>the data was already stored in the EU</strong>. There was never an EU-to-Indonesia transfer at the storage layer to fix.</p>
+  <p data-i18n="start_p2">We also found that the three most-invoked data-subject rights already existed as self-service features: candidates could download their data as JSON, correct their profile, and delete their account outright. The largest misconception about GDPR compliance is that it is primarily about data location and database isolation. It is not. It is about <strong>lawful basis, transparency, consent mechanics, retention, and demonstrable records</strong> for the people whose data you hold. That is where the real work was.</p>
+
+  <h2 data-i18n="h_axes">Two independent axes, one system</h2>
+  <p data-i18n="axes_p1">The design's core decision: a job's regulatory region and a candidate's data-subject region are <strong>different things</strong> and had to be modelled separately. Jobs gained a <code>regulatoryRegion</code> (Indonesia by default, or EU). Candidates gained a <code>dataSubjectRegion</code> they declare themselves, plus a <code>signupCountry</code> recorded from request geo as evidence only. An Indonesian engineer applying to an EU remote role, and a German candidate applying to a Jakarta role, are both normal cases — neither axis may be derived from the other.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,sans-serif">
+      <rect x="40" y="30" width="280" height="70" rx="10" fill="#161b26" stroke="#4f8cff"/>
+      <text x="180" y="58" text-anchor="middle" fill="#9cc0ff" font-size="13">jobs.regulatoryRegion</text>
+      <text x="180" y="78" text-anchor="middle" fill="#8b93a5" font-size="11">'ID' (default) × 'EU'</text>
+      <text x="180" y="93" text-anchor="middle" fill="#8b93a5" font-size="10.5">drives pay-transparency &amp; posting rules</text>
+      <rect x="400" y="30" width="280" height="70" rx="10" fill="#161b26" stroke="#7c5cff"/>
+      <text x="540" y="58" text-anchor="middle" fill="#c3b0ff" font-size="13">users.dataSubjectRegion</text>
+      <text x="540" y="78" text-anchor="middle" fill="#8b93a5" font-size="11">'ID' | 'EU' | 'OTHER' | null</text>
+      <text x="540" y="93" text-anchor="middle" fill="#8b93a5" font-size="10.5">drives notice, consent, retention, rights</text>
+      <g stroke="#4f8cff" stroke-width="1.3" fill="none">
+        <line x1="180" y1="100" x2="180" y2="150"/>
+        <line x1="540" y1="100" x2="540" y2="150"/>
+      </g>
+      <text x="180" y="168" text-anchor="middle" fill="#8b93a5" font-size="11.5" data-i18n="axes_fig_job">posting layer</text>
+      <text x="540" y="168" text-anchor="middle" fill="#8b93a5" font-size="11.5" data-i18n="axes_fig_cand">data layer</text>
+      <rect x="140" y="185" width="440" height="44" rx="10" fill="#12161f" stroke="#232a38"/>
+      <text x="360" y="204" text-anchor="middle" fill="#e6e9ef" font-size="12" data-i18n="axes_fig_join">evaluated independently at every intersection — never derived from each other</text>
+      <text x="360" y="221" text-anchor="middle" fill="#8b93a5" font-size="10.5" data-i18n="axes_fig_join2">ID candidate → EU remote role: legal. EU candidate → Jakarta role: legal.</text>
+    </svg>
+    <div class="caption" data-i18n="axes_fig_cap">Figure 1. The two-axis model. One Worker, one database, every combination valid.</div>
+  </div>
+
+  <h2 data-i18n="h_diff">What changed for EU candidates</h2>
+  <table>
+    <tr><th data-i18n="th_concern">Concern</th><th data-i18n="th_id">Indonesia (unchanged)</th><th data-i18n="th_eu">EU (new)</th></tr>
+    <tr><td data-i18n="td_notice">Privacy notice</td><td data-i18n="td_notice_id">UU PDP wording, as before</td><td data-i18n="td_notice_eu">GDPR edition: lawful bases with Article references, full rights, EU storage location</td></tr>
+    <tr><td data-i18n="td_recs">Recommendation emails</td><td data-i18n="td_recs_id">Opt-out (existing)</td><td data-i18n="td_recs_eu">Opt-in — no email without a ticked box</td></tr>
+    <tr><td data-i18n="td_retention">Retention</td><td data-i18n="td_retention_id">24 months</td><td data-i18n="td_retention_eu">12 months from last activity</td></tr>
+    <tr><td data-i18n="td_salary">Salary on posting</td><td data-i18n="td_salary_id">Optional</td><td data-i18n="td_salary_eu">Mandatory with real figures (EU Pay Transparency Directive)</td></tr>
+    <tr><td data-i18n="td_obj">Object to sourcing</td><td data-i18n="td_obj_id">—</td><td data-i18n="td_obj_eu">Self-service button, immediate effect</td></tr>
+  </table>
+  <p data-i18n="diff_p1">Every region-specific rule lives in one module, <code>src/region.js</code>, with per-region profiles containing the retention months, consent model, and salary requirement. No rule is duplicated in the privacy page, the forms, and the email engine — they all read the same profile, so the notice can never promise something the code does not do.</p>
+
+  <h2 data-i18n="h_consent">The consent asymmetry we had to get exactly right</h2>
+  <p data-i18n="consent_p1">The subtlest requirement was consent conversion. Indonesian candidates have always been <em>opt-out</em> for recommendation emails: we may email unless they say stop. GDPR does not accept that default for EU candidates — proactive emails need prior opt-in.</p>
+  <p data-i18n="consent_p2">The trap: our database holds thousands of legacy candidates with no declared region. The safe rule we shipped: <strong>legacy records default to the Indonesian profile</strong> (that is their factual provenance), any legacy candidate who later declares EU gets <em>zero</em> opt-in credit, and the opt-in flag is never backfilled for anyone. A candidate who never ticked the box does not receive proactive emails — the engine checks the region profile at send time, not a stored assumption. The recommendation engine now asks one function, <code>mayEmailRecommendations(candidate)</code>, which resolves region, consent model, and objections in a single call.</p>
+  <blockquote data-i18n="consent_q"><strong>Article 21 as a button, not an email address.</strong> The right to object to processing is real only if exercising it is easy. EU candidates get a self-service "Stop using my data to source me" button on their profile. It takes effect immediately: the person is excluded from proactive matching from that moment, while their live applications continue, because pulling someone out of an interview process they chose to enter would harm them more than the processing does.</blockquote>
+
+  <h2 data-i18n="h_conf">Client confidentiality and GDPR, resolved</h2>
+  <p data-i18n="conf_p1">One requirement looked contradictory at first. As a headhunting firm, our client names are confidential — candidates learn which client they are being put forward to, at the moment we put them forward, and never before. GDPR Article 13 asks for transparency about recipients. The resolution is written into the regulation itself: Article 13(1)(e) permits disclosing <strong>categories of recipients</strong>. Our EU notice names the categories ("client companies in the banking, financial services, IT, manufacturing and professional services sectors") and explains that the specific client is revealed before any application is forwarded. Confidentiality preserved, transparency satisfied, no legal entity names anywhere public.</p>
+
+  <h2 data-i18n="h_pay">Pay transparency as a feature</h2>
+  <p data-i18n="pay_p1">The EU Pay Transparency Directive requires applicants to see pay information before the interview stage. We turned that into a hard validation: an EU posting cannot go live unless the salary field parses to real figures. "Competitive" is rejected with an explanation of why. The region selector sits on the posting form for staff, and EU jobs carry a visible badge on the public page so applicants know which regime applies before they apply.</p>
+
+  <h2 data-i18n="h_retention">The retention sweep we built but did not switch on</h2>
+  <p data-i18n="ret_p1">A retention promise that nothing enforces is a paragraph, not a policy. We built a scheduled sweep that anonymises or deletes candidate records once they pass their region's retention window (12 months EU, 24 Indonesia), cleans up the corresponding CV files in object storage, and skips anyone with a live application in an interview stage.</p>
+  <p data-i18n="ret_p2">It shipped <strong>disabled</strong>. A settings flag gates it, and it logs what it <em>would</em> delete for a review period before it deletes anything. A background job whose failure mode is destroying real candidate data does not get to be clever on its first day. The one task where a wrong implementation destroys data is the one task that ships behind a flag.</p>
+
+  <h2 data-i18n="h_honest">What we deliberately did not do</h2>
+  <ul>
+    <li data-i18n="honest_l1"><strong>No cookie banner.</strong> The app sets exactly two cookies: a session cookie and a 24-hour staging cookie for documents attached before registration. Both are strictly necessary; there are no analytics or tracking scripts. The privacy notice documents them in plain language. A banner over two necessary cookies would be compliance theatre.</li>
+    <li data-i18n="honest_l2"><strong>No second deployment.</strong> One Worker, one database, region-aware logic. A second system would double the audit surface for a benefit (data location) we already had, and split-region matching — Indonesian engineers to EU remote roles — is the business goal, not a problem.</li>
+    <li data-i18n="honest_l3"><strong>No auto-deletion of the legacy population.</strong> 6,449 imported records with unknown region are treated as Indonesian-market data, prompted to self-declare at next login, never guessed at.</li>
+    <li data-i18n="honest_l4"><strong>No legal claim of being "fully certified".</strong> A DPIA for automated fit-scoring is flagged for legal review, an Article 27 EU representative still needs appointing, and the GDPR notice text deserves review by EU-qualified counsel before EU candidates rely on it. The engineering is done; the paperwork has owners.</li>
+  </ul>
+
+  <h2 data-i18n="h_lessons">What this taught us</h2>
+  <ul>
+    <li data-i18n="les_l1"><strong>Check the facts before building for the worst assumption.</strong> Verifying that storage was already EU-resident saved us from an entire pointless migration project.</li>
+    <li data-i18n="les_l2"><strong>A compliance rules module beats compliance logic scattered in code.</strong> When the retention months, consent model, and salary rule live in one profile object, the privacy notice and the code cannot disagree about what the rules are.</li>
+    <li data-i18n="les_l3"><strong>Consent conversion has a direction, and it is not backwards.</strong> Opt-out populations do not carry consent into an opt-in regime. Never backfill.</li>
+    <li data-i18n="les_l4"><strong>Some GDPR requirements improve the product.</strong> Mandatory pay ranges, a self-service objection button, and documented cookies are things candidates in every region benefit from. Compliance work done honestly is user-experience work.</li>
+    <li data-i18n="les_l5"><strong>Ship the destructive job behind a flag.</strong> Retention sweeps delete people. Dry-run first, always.</li>
+  </ul>
+
+  <p data-i18n="outro" style="margin-top:28px;">The result: one platform, two regimes, zero changes for the 6,449 candidates who never asked for any of this — and a company that can post in the EU market the moment a client asks. The full implementation was sixteen tasks over five days on a zero-dependency Cloudflare Workers stack; the region rules fit in one small module. Compliance is not a rebuild of the system. Done right, it is a layer.</p>
+  <p style="margin-top:36px;"><a href="/">← Back to portfolio</a></p>
+</div>
+<script src="gdpr-i18n.js"></script>
+</body>
+</html>

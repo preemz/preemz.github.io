@@ -134,6 +134,11 @@ const I18N = {
     sv: "Produktionsövervakning för noll kronor: taggade strukturerade loggar, en Discord Monitoring-kanal, integritetsbevakade trattmätvärden och ett röktest på cron var femtonde minut som fångar fel innan kandidaterna gör det."
   },
 
+  'blog4.p': {
+    en: "Region-aware compliance for 6,449 candidates on one Worker: EU and Indonesian privacy regimes side by side, opt-in consent for EU match emails, Article 21 objection as a button, and EU pay-transparency validation on job postings.",
+    sv: "Regionmedveten efterlevnad för 6 449 kandidater på en Worker: EU:s och Indonesiens integritetsregimer sida vid sida, opt-in-samtycke för EU-matchmejl, artikel 21-invändning som knapp och EU-löntransparensvalidering på jobbannonser."
+  },
+
   // ---- SPEAKING ----
   'spk.h2': { en: 'Speaking & mentoring', sv: 'Föreläsningar & mentorskap' },
   'spk1': { en: '"Indonesia\'s Global Talent: Why Diaspora Matters" (2025)', sv: '"Indonesiens globala talang: Varför diaspora spelar roll" (2025)' },
