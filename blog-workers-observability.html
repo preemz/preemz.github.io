@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Observability on a Workers Free Plan — Primawan Satrio</title>
-<meta name="description" content="How we built observability for a production Cloudflare Workers recruiting platform without paid tooling: tagged structured logs, a Discord Monitoring channel, funnel metrics with privacy sampling, and a cron smoke check.">
+<title>Observability on a Workers Free Plan (and What Paid Unlocked) — Primawan Satrio</title>
+<meta name="description" content="How we built observability for a production Cloudflare Workers recruiting platform under free-plan constraints — and what moving to a paid plan actually unlocked. Tagged logs, Discord Monitoring, funnel metrics, cron smoke check.">
 <link rel="canonical" href="https://preemz.github.io/blog-workers-observability.html">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://preemz.github.io/blog-workers-observability.html">
-<meta property="og:title" content="Observability on a Workers Free Plan">
+<meta property="og:title" content="Observability on a Workers Free Plan (and What Paid Unlocked)">
 <meta property="og:description" content="Structured logs, a Discord Monitoring channel, privacy-sampled funnel metrics, and a 15-minute smoke check: production observability for $0.">
 <style>
   :root {
@@ -57,14 +57,14 @@
 <div class="wrap">
   <div class="back"><a href="/">← primawan.github.io</a><button id="lang-toggle" aria-label="Switch language" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:3px 10px;font-size:13px;cursor:pointer;margin-left:12px;float:right;">SV</button></div>
 
-  <h1 data-i18n="t">Observability on a Workers Free Plan</h1>
+  <h1 data-i18n="t">Observability on a Workers Free Plan (and What Paid Unlocked)</h1>
   <div class="meta" data-i18n="meta">Primawan Satrio · August 2026 · ~8 min read</div>
 
-  <p data-i18n="p1">Our recruiting platform runs on Cloudflare Workers' free plan. That buys us zero infrastructure and zero dollars, and it also buys us roughly zero dashboards. No APM agent, no paid log retention worth the name, no tracing. When a candidate's application vanished into a 1102 error one evening, my entire debugging surface was a Cloudflare error page and my own memory of what the code was supposed to do.</p>
+  <p data-i18n="p1">Our recruiting platform started on Cloudflare Workers' free plan. That bought us zero infrastructure and zero dollars, and it also bought us roughly zero dashboards: no APM agent, no log retention worth the name, no tracing. When a candidate's application vanished into a 1102 error one evening, my entire debugging surface was a Cloudflare error page and my own memory of what the code was supposed to do. The observability layer in this post was built under those constraints — and it is still running today, now on a paid plan.</p>
   <p data-i18n="p2">This post is about the observability layer we built afterwards. It costs nothing, it lives in about forty lines of code, and it has since caught every production failure within minutes instead of when a recruiter phones me to ask if the site is down. The stack: tagged structured logs, a Discord Monitoring channel, privacy-sampled funnel metrics, and a cron smoke check that fetches our own pages every fifteen minutes.</p>
 
   <h2 data-i18n="h_why">The constraint that shaped everything</h2>
-  <p data-i18n="why_p1">On the free plan, <code>console.log</code> output is retained for a short window and there is no queryable long-term store you can grep from a dashboard. So the design question was never "which observability vendor" but "where does signal go when logs evaporate?"</p>
+  <p data-i18n="why_p1">On the free plan, <code>console.log</code> output was retained for a short window and there was no queryable long-term store to grep from a dashboard. So the design question was never "which observability vendor" but "where does signal go when logs evaporate?"</p>
   <p data-i18n="why_p2">Our answer: logs stay for debugging what just happened, and anything that must be <em>noticed</em> gets pushed to a place the team already looks several times a day. For us that place is Discord. We already used a webhook for job announcements; we added a second channel, <strong>#monitoring</strong>, with its own webhook, and made it the single destination for every failure signal.</p>
 
   <div class="diagram">
@@ -117,12 +117,17 @@ metric(ctx, 'worker_error', { path, method, err });</code></pre>
   <blockquote data-i18n="smoke_q"><strong>The quiet-success rule matters as much as the alerting.</strong> A monitoring channel that pings on every success gets muted within a week. Ours only speaks when something fails, so when it speaks, everyone reads.</blockquote>
   <p data-i18n="smoke_p2">Why fetch pages over HTTP instead of calling internal functions? Because the whole point is to test what a candidate actually experiences: DNS, the edge, routing, the D1 queries behind a live job page. It even caught a real regression once, a broken SQL path on job pages that would otherwise have sat undetected until an applicant hit it. Internal smoke coverage of live job pages came directly from that incident.</p>
 
+  <h2 data-i18n="h_paid">What moving to a paid plan actually unlocked</h2>
+  <p data-i18n="paid_p1">The platform has since moved to a paid Workers plan. Here is the honest accounting of what changed and what did not, because upgrade posts usually oversell.</p>
+  <p data-i18n="paid_p2"><strong>What genuinely improved:</strong> Workers Logs retention went from days to weeks, queryable in the dashboard, which makes the weekly dry-run review of our GDPR retention sweep practical — I can now read a week of <code>retention_sweep dry_run=1</code> lines in one query instead of tailing at cron ticks. Long-delay debugging (what happened at 3am three days ago?) went from impossible to a search box.</p>
+  <p data-i18n="paid_p3"><strong>What did not change:</strong> everything in this post. The Discord Monitoring channel is still the thing that actually wakes me up; the tagged <code>[metric]</code> lines are still the format every event speaks; the smoke check still probes our own pages on the same cron; the privacy rule that candidate emails never enter logs still holds at the same choke point. Paid tooling added memory to a system that already had reflexes. Build the reflexes first — they survive every plan tier.</p>
+
   <h2 data-i18n="h_lessons">What we would tell ourselves earlier</h2>
   <ul>
     <li data-i18n="les_l1"><strong>Observability is a routing problem, not a tooling problem.</strong> We did not need a vendor; we needed failure signals to arrive where the team already looks. Discord won because attention was already there.</li>
     <li data-i18n="les_l2"><strong>One choke point beats scattered diligence.</strong> A single metric() function with a privacy rule and field bounding gives guarantees that twenty well-meaning console.log sites never will.</li>
     <li data-i18n="les_l3"><strong>Instrument the funnel, not just the failures.</strong> A silent extraction degradation costs candidates quietly. Business metrics caught it; error logs never would have.</li>
-    <li data-i18n="les_l4"><strong>Free-tier limits force honesty.</strong> Short log retention pushed push-based alerting from nice-to-have to mandatory. The constraint made the system simpler than a paid setup would have been.</li>
+    <li data-i18n="les_l4"><strong>Free-tier limits forced honesty.</strong> Short log retention pushed push-based alerting from nice-to-have to mandatory. The constraint made the system simpler than a paid setup would have been — and when we later upgraded, the paid features became additions to a working system rather than a replacement for one (see the section below).</li>
     <li data-i18n="les_l5"><strong>Alert only on failure, and only on what needs action.</strong> Every notification should be one a human must read. Everything else is a log line.</li>
   </ul>
 

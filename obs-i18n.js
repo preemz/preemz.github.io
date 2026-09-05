@@ -1,6 +1,6 @@
 // Observability post bilingual switcher (EN/SV).
 const I18N_OBS = {
-  't': { en: 'Observability on a Workers Free Plan', sv: 'Observabilitet på en Workers Free Plan' },
+  't': { en: 'Observability on a Workers Free Plan (and What Paid Unlocked)', sv: 'Observabilitet på en Workers Free Plan (och vad betald plan öppnade)' },
   'meta': { en: 'Primawan Satrio · August 2026 · ~8 min read', sv: 'Primawan Satrio · augusti 2026 · ca 8 min läsning' },
   'p1': {
     en: "Our recruiting platform runs on Cloudflare Workers' free plan. That buys us zero infrastructure and zero dollars, and it also buys us roughly zero dashboards. No APM agent, no paid log retention worth the name, no tracing. When a candidate's application vanished into a 1102 error one evening, my entire debugging surface was a Cloudflare error page and my own memory of what the code was supposed to do.",
@@ -9,6 +9,19 @@ const I18N_OBS = {
   'p2': {
     en: "This post is about the observability layer we built afterwards. It costs nothing, it lives in about forty lines of code, and it has since caught every production failure within minutes instead of when a recruiter phones me to ask if the site is down. The stack: tagged structured logs, a Discord Monitoring channel, privacy-sampled funnel metrics, and a cron smoke check that fetches our own pages every fifteen minutes.",
     sv: "Detta inlägg handlar om observabilitetsskiktet vi byggde efteråt. Det kostar ingenting, bor i ungefär fyrtio rader kod, och har sedan dess fångat varje produktionsfel inom minuter istället för när en rekrytör ringer mig och frågar om sidan är nere. Stacken: taggade strukturerade loggar, en Discord Monitoring-kanal, integritetsbevakade trattmätvärden och en cron-röktest som hämtar våra egna sidor var femtonde minut."
+  },
+  'h_paid': { en: 'What moving to a paid plan actually unlocked', sv: 'Vad övergången till betald plan faktiskt öppnade' },
+  'paid_p1': {
+    en: "The platform has since moved to a paid Workers plan. Here is the honest accounting of what changed and what did not, because upgrade posts usually oversell.",
+    sv: "Plattformen har sedan dess gått över till en betald Workers-plan. Här är den ärliga redovisningen av vad som ändrades och vad som inte gjorde det, för uppgraderingsinlägg brukar översälja."
+  },
+  'paid_p2': {
+    en: "<strong>What genuinely improved:</strong> Workers Logs retention went from days to weeks, queryable in the dashboard, which makes the weekly dry-run review of our GDPR retention sweep practical — I can now read a week of <code>retention_sweep dry_run=1</code> lines in one query instead of tailing at cron ticks. Long-delay debugging (what happened at 3am three days ago?) went from impossible to a search box.",
+    sv: "<strong>Vad genuint förbättrades:</strong> Workers Logs lagringstid gick från dagar till veckor, sökbart i dashboarden, vilket gör den veckovisa torrkörningsgranskningen av vår GDPR-retentionssopning praktisk — jag kan nu läsa en vecka av <code>retention_sweep dry_run=1</code>-rader i en fråga istället för att taila vid cron-tickar. Felsökning med lång fördröjning (vad hände klockan 3 för tre dagar sedan?) gick från omöjligt till en sökruta."
+  },
+  'paid_p3': {
+    en: "<strong>What did not change:</strong> everything in this post. The Discord Monitoring channel is still the thing that actually wakes me up; the tagged <code>[metric]</code> lines are still the format every event speaks; the smoke check still probes our own pages on the same cron; the privacy rule that candidate emails never enter logs still holds at the same choke point. Paid tooling added memory to a system that already had reflexes. Build the reflexes first — they survive every plan tier.",
+    sv: "<strong>Vad inte ändrades:</strong> allt i detta inlägg. Discord Monitoring-kanalen är fortfarande det som faktiskt väcker mig; de taggade <code>[metric]</code>-raderna är fortfarande formatet varje händelse talar; röktestet sonderar fortfarande våra egna sidor på samma cron; integritetsregeln att kandidatmejl aldrig hamnar i loggar gäller fortfarande på samma flaskhals. Betald verktygslag lade till minne till ett system som redan hade reflexer. Bygg reflexerna först — de överlever varje plannivå."
   },
   'h_why': { en: 'The constraint that shaped everything', sv: 'Begränsningen som formade allt' },
   'why_p1': {
@@ -76,8 +89,8 @@ const I18N_OBS = {
     sv: "<strong>Instrumentera tratten, inte bara felen.</strong> En tyst extraktionsförsämring kostar kandidater i det tysta. Affärsmetriken fångade den; felloggar hade aldrig gjort det."
   },
   'les_l4': {
-    en: "<strong>Free-tier limits force honesty.</strong> Short log retention pushed push-based alerting from nice-to-have to mandatory. The constraint made the system simpler than a paid setup would have been.",
-    sv: "<strong>Gratisplansgränser tvingar fram ärlighet.</strong> Kort loggretention drev push-baserad larmning från trevlig-att-ha till obligatorisk. Begränsningen gjorde systemet enklare än en betald installation skulle ha varit."
+    en: "<strong>Free-tier limits forced honesty.</strong> Short log retention pushed push-based alerting from nice-to-have to mandatory. The constraint made the system simpler than a paid setup would have been — and when we later upgraded, the paid features became additions to a working system rather than a replacement for one (see the section below).",
+    sv: "<strong>Gratisplansgränser tvingar fram ärlighet.</strong> Kort loggretention drev push-baserad larmning från trevlig-att-ha till obligatorisk. Begränsningen gjorde systemet enklare än en betald installation skulle ha varit — och när vi senare uppgraderade blev de betalda funktionerna tillägg till ett fungerande system snarare än en ersättning (se avsnittet nedan)."
   },
   'les_l5': {
     en: "<strong>Alert only on failure, and only on what needs action.</strong> Every notification should be one a human must read. Everything else is a log line.",
