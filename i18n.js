@@ -56,8 +56,8 @@ const I18N = {
   'ventures.h2': { en: 'Ventures & projects', sv: 'Bolag & projekt' },
   'card.sc.t': { en: 'Satrio Consulting ↗', sv: 'Satrio Consulting ↗' },
   'card.sc.p': {
-    en: "A headhunting and recruitment firm for professionals moving across borders: contingency executive search, international placement, and an employer-of-record service letting foreign companies hire Indonesian talent locally or remotely without setting up a legal entity. Scaled from zero to seven figures in USD, with clients across Japan, Korea, Singapore, Australia, Malaysia, and Indonesia.",
-    sv: "En headhunting- och rekryteringsfirma för yrkesverksamma som rör sig över landsgränser: provisionbaserad executive search, internationell placering och en employer-of-record-tjänst som låter utländska företag anställa indonesisk talang lokalt eller på distans utan eget bolag. Skalat från noll till sju-siffrig omsättning i USD, med kunder i Japan, Korea, Singapore, Australien, Malaysia och Indonesien."
+    en: "A headhunting and recruitment firm for professionals moving across borders: contingency executive search, international placement, and an employer-of-record service letting foreign companies hire Indonesian talent locally or remotely without setting up a legal entity. Clients across Japan, Korea, Singapore, Australia, Malaysia, and Indonesia.",
+    sv: "En headhunting- och rekryteringsfirma för yrkesverksamma som rör sig över landsgränser: provisionbaserad executive search, internationell placering och en employer-of-record-tjänst som låter utländska företag anställa indonesisk talang lokalt eller på distans utan eget bolag. Kunder i Japan, Korea, Singapore, Australien, Malaysia och Indonesien."
   },
   'card.fit.t': { en: 'Explainable Candidate Fit Scoring (in production) 📖', sv: 'Förklarbar kandidatmatchning (i produktion) 📖' },
   'card.fit.p': {
