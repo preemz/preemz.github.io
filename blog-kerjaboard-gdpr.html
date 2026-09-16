@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KerjaBoard Is Now GDPR-Ready — Primawan Satrio</title>
-<meta name="description" content="How we made a 6,449-candidate recruiting platform GDPR-compliant without a second deployment: region-aware privacy notices, opt-in consent, Article 21 objections, EU pay transparency, and a retention sweep behind a flag.">
+<meta name="description" content="How we made a recruiting platform holding thousands of candidates GDPR-compliant without a second deployment: region-aware privacy notices, opt-in consent, Article 21 objections, EU pay transparency, and a retention sweep behind a flag.">
 <link rel="canonical" href="https://preemz.github.io/blog-kerjaboard-gdpr.html">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://preemz.github.io/blog-kerjaboard-gdpr.html">
 <meta property="og:title" content="KerjaBoard Is Now GDPR-Ready">
-<meta property="og:description" content="Region-aware compliance for a 6,449-candidate platform: one Worker, one database, zero npm dependencies.">
+<meta property="og:description" content="Region-aware compliance for a platform holding thousands of candidates: one Worker, one database, zero npm dependencies.">
 <style>
   :root {
     --bg: #0b0e14; --surface: #12161f; --border: #232a38;
@@ -59,7 +59,7 @@
   <h1 data-i18n="t">KerjaBoard Is Now GDPR-Ready: Region-Aware Compliance on One Worker</h1>
   <div class="meta" data-i18n="meta">Primawan Satrio · September 2026 · ~9 min read</div>
 
-  <p data-i18n="p1">When we decided to post EU jobs on KerjaBoard, our recruiting platform, the standard advice is to spin up a separate EU deployment: separate database, separate region, separate everything. We did not do that. We shipped full GDPR compliance for EU data subjects on the <strong>same Worker, the same database, and the same codebase</strong> that serves 6,449 Indonesian candidates — and without changing a single thing about their experience.</p>
+  <p data-i18n="p1">When we decided to post EU jobs on KerjaBoard, our recruiting platform, the standard advice is to spin up a separate EU deployment: separate database, separate region, separate everything. We did not do that. We shipped full GDPR compliance for EU data subjects on the <strong>same Worker, the same database, and the same codebase</strong> that serves thousands of Indonesian candidates — and without changing a single thing about their experience.</p>
   <p data-i18n="p2">This post explains the architecture, what changed per region, what deliberately did not change, and the few places where GDPR forced us to build features that turned out to be good for everyone.</p>
 
   <h2 data-i18n="h_start">What we started with was better than we thought</h2>
@@ -124,7 +124,7 @@
   <ul>
     <li data-i18n="honest_l1"><strong>No cookie banner.</strong> The app sets exactly two cookies: a session cookie and a 24-hour staging cookie for documents attached before registration. Both are strictly necessary; there are no analytics or tracking scripts. The privacy notice documents them in plain language. A banner over two necessary cookies would be compliance theatre.</li>
     <li data-i18n="honest_l2"><strong>No second deployment.</strong> One Worker, one database, region-aware logic. A second system would double the audit surface for a benefit (data location) we already had, and split-region matching — Indonesian engineers to EU remote roles — is the business goal, not a problem.</li>
-    <li data-i18n="honest_l3"><strong>No auto-deletion of the legacy population.</strong> 6,449 imported records with unknown region are treated as Indonesian-market data, prompted to self-declare at next login, never guessed at.</li>
+    <li data-i18n="honest_l3"><strong>No auto-deletion of the legacy population.</strong> Thousands of imported records with unknown region are treated as Indonesian-market data, prompted to self-declare at next login, never guessed at.</li>
     <li data-i18n="honest_l4"><strong>No legal claim of being "fully certified".</strong> A DPIA for automated fit-scoring is flagged for legal review, an Article 27 EU representative still needs appointing, and the GDPR notice text deserves review by EU-qualified counsel before EU candidates rely on it. The engineering is done; the paperwork has owners.</li>
   </ul>
 
@@ -137,7 +137,7 @@
     <li data-i18n="les_l5"><strong>Ship the destructive job behind a flag.</strong> Retention sweeps delete people. Dry-run first, always.</li>
   </ul>
 
-  <p data-i18n="outro" style="margin-top:28px;">The result: one platform, two regimes, zero changes for the 6,449 candidates who never asked for any of this — and a company that can post in the EU market the moment a client asks. The full implementation was sixteen tasks over five days on a zero-dependency Cloudflare Workers stack; the region rules fit in one small module. Compliance is not a rebuild of the system. Done right, it is a layer.</p>
+  <p data-i18n="outro" style="margin-top:28px;">The result: one platform, two regimes, zero changes for the thousands of candidates who never asked for any of this — and a company that can post in the EU market the moment a client asks. The full implementation was sixteen tasks over five days on a zero-dependency Cloudflare Workers stack; the region rules fit in one small module. Compliance is not a rebuild of the system. Done right, it is a layer.</p>
   <p style="margin-top:36px;"><a href="/">← Back to portfolio</a></p>
 </div>
 <script src="gdpr-i18n.js"></script>
