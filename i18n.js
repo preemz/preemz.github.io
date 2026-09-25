@@ -61,8 +61,8 @@ const I18N = {
   },
   'card.fit.t': { en: 'Explainable Candidate Fit Scoring (in production) 📖', sv: 'Förklarbar kandidatmatchning (i produktion) 📖' },
   'card.fit.p': {
-    en: "Scoring engine that weighs each candidate's resume against a job order across skills, language, seniority, tenure, and stability, then tells recruiters fit-or-not with the reasons behind every point. Built with fairness guardrails: age, name, gender, and nationality never touch the score, and a test enforces it before every deploy.",
-    sv: "Poängmotor som väger varje kandidats CV mot ett joborder utifrån kompetens, språk, senioritet, anställningstid och stabilitet, och ger rekrytören svar om matchning med motiven bakom varje poäng. Byggd med rättvise-spärrar: ålder, namn, kön och nationalitet påverkar aldrig poängen, och ett test kontrollerar det före varje driftsättning."
+    en: "Scoring engine that weighs each candidate's resume against a job order across must-have skills, language, years of experience, tenure, seniority, and commercial fit, then ranks candidates with the reasons behind every point. Built with fairness guardrails: age, name, gender, and nationality never touch the score, and a test enforces it before every CI deploy.",
+    sv: "Poängmotor som väger varje kandidats CV mot en jobborder utifrån obligatoriska färdigheter, språk, års erfarenhet, anställningstid, senioritet och kommersiell matchning, och rangordnar kandidaterna med skälen bakom varje poäng. Byggd med rättvisespärrar: ålder, namn, kön och nationalitet påverkar aldrig poängen, och ett test kontrollerar det före varje driftsättning i CI."
   },
   'card.cv.t': { en: 'AI Resume Intelligence (in production)', sv: 'AI CV-analys (i produktion)' },
   'card.cv.p': {
@@ -140,8 +140,8 @@ const I18N = {
   },
 
   'blog5.p': {
-    en: "Nearly half of stored candidate matches read exactly 100%. How we moved from pass/fail bars to a graded rubric, capped scores that experience alone could not justify, re-scored stale rows, and turned the fairness guardrail into a test that gates every deploy.",
-    sv: "Nästan hälften av de sparade kandidatmatchningarna visade exakt 100 %. Så gick vi från godkänd/underkänd-ribbor till en graderad rubrik, satte tak för poäng som erfarenhet ensam inte kunde motivera, räknade om inaktuella rader och gjorde rättviseskyddet till ett test som styr varje driftsättning."
+    en: "Nearly half of stored candidate matches read exactly 100%. How we moved from pass/fail bars to a graded rubric, capped scores that experience alone could not justify, re-scored stale rows, and turned the fairness guardrail into a test that gates every CI deploy.",
+    sv: "Nästan hälften av de sparade kandidatmatchningarna visade exakt 100 %. Så gick vi från godkänd/underkänd-ribbor till en graderad poängmodell, satte tak för poäng som erfarenhet ensam inte kunde motivera, räknade om inaktuella rader och gjorde rättvisespärren till ett test som körs före varje driftsättning i CI."
   },
 
   // ---- SPEAKING ----
