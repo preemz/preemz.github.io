@@ -61,8 +61,8 @@ const I18N = {
   },
   'card.fit.t': { en: 'Explainable Candidate Fit Scoring (in production) 📖', sv: 'Förklarbar kandidatmatchning (i produktion) 📖' },
   'card.fit.p': {
-    en: "Scoring engine that weighs each candidate's resume against a job order across skills, language, seniority, tenure, and stability, then tells recruiters fit-or-not with the reasons behind every point. Built with fairness guardrails: age, name, gender, and nationality never touch the score.",
-    sv: "Poängmotor som väger varje kandidats CV mot ett joborder utifrån kompetens, språk, senioritet, anställningstid och stabilitet, och ger rekrytören svar om matchning med motiven bakom varje poäng. Byggd med rättvise-spärrar: ålder, namn, kön och nationalitet påverkar aldrig poängen."
+    en: "Scoring engine that weighs each candidate's resume against a job order across skills, language, seniority, tenure, and stability, then tells recruiters fit-or-not with the reasons behind every point. Built with fairness guardrails: age, name, gender, and nationality never touch the score, and a test enforces it before every deploy.",
+    sv: "Poängmotor som väger varje kandidats CV mot ett joborder utifrån kompetens, språk, senioritet, anställningstid och stabilitet, och ger rekrytören svar om matchning med motiven bakom varje poäng. Byggd med rättvise-spärrar: ålder, namn, kön och nationalitet påverkar aldrig poängen, och ett test kontrollerar det före varje driftsättning."
   },
   'card.cv.t': { en: 'AI Resume Intelligence (in production)', sv: 'AI CV-analys (i produktion)' },
   'card.cv.p': {
@@ -137,6 +137,11 @@ const I18N = {
   'blog4.p': {
     en: "Region-aware compliance for thousands of candidates on one Worker: EU and Indonesian privacy regimes side by side, opt-in consent for EU match emails, Article 21 objection as a button, and EU pay-transparency validation on job postings.",
     sv: "Regionmedveten efterlevnad för tusentals kandidater på en Worker: EU:s och Indonesiens integritetsregimer sida vid sida, opt-in-samtycke för EU-matchmejl, artikel 21-invändning som knapp och EU-löntransparensvalidering på jobbannonser."
+  },
+
+  'blog5.p': {
+    en: "Nearly half of stored candidate matches read exactly 100%. How we moved from pass/fail bars to a graded rubric, capped scores that experience alone could not justify, re-scored stale rows, and turned the fairness guardrail into a test that gates every deploy.",
+    sv: "Nästan hälften av de sparade kandidatmatchningarna visade exakt 100 %. Så gick vi från godkänd/underkänd-ribbor till en graderad rubrik, satte tak för poäng som erfarenhet ensam inte kunde motivera, räknade om inaktuella rader och gjorde rättviseskyddet till ett test som styr varje driftsättning."
   },
 
   // ---- SPEAKING ----
