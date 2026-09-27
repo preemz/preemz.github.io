@@ -6,7 +6,7 @@ const I18N_BK = {
  },
  "meta": {
   "en": "Primawan Satrio · September 2026 · ~9 min read",
-  "sv": "Primawan Satrio · september 2026 · ~9 min läsning"
+  "sv": "Primawan Satrio · september 2026 · ~9 min lästid"
  },
  "p1": {
   "en": "<a href=\"https://bayarkerja.com\" target=\"_blank\" rel=\"noopener\">BayarKerja</a> is the payroll product I am building inside Satrio Consulting: Indonesian payroll with PPh 21 under the TER scheme and BPJS contributions, plus an Employer of Record site for overseas companies hiring in Indonesia. The first working version, from an empty repository to a deployed app with sign-in, a demo company, and a payroll run you can click through, came together over one weekend in 38 commits.",
@@ -14,11 +14,11 @@ const I18N_BK = {
  },
  "p2": {
   "en": "<strong>Where it stands, plainly:</strong> BayarKerja is pre-launch. The free PPh 21 calculator and the demo workspace are live. The first client payroll runs only after a tax consultant signs off the rule set. Nobody is being paid through it yet, and this post does not pretend otherwise.",
-  "sv": "<strong>Läget, rakt ut:</strong> BayarKerja är inte lanserat. Den kostnadsfria PPh 21-kalkylatorn och demomiljön är live. Den första lönekörningen för en kund görs först när en skattekonsult har godkänt regeluppsättningen. Ingen får lön genom systemet ännu, och det här inlägget låtsas inget annat."
+  "sv": "<strong>Läget, rent ut sagt:</strong> BayarKerja är inte lanserat. Den kostnadsfria PPh 21-kalkylatorn och demomiljön är live. Den första lönekörningen för en kund görs först när en skattekonsult har godkänt regeluppsättningen. Ingen får lön genom systemet ännu, och det här inlägget låtsas inget annat."
  },
  "p3": {
   "en": "This post is about the stack. The tax engine is its own story. The part worth writing down is what happened when a Next.js app with a real Postgres database met the Cloudflare Workers runtime, because the runtime has opinions and it enforces them.",
-  "sv": "Det här inlägget handlar om stacken. Skattemotorn är en egen historia. Det som är värt att skriva ner är vad som hände när en Next.js-app med en riktig Postgres-databas mötte Cloudflare Workers-miljön, för den miljön har åsikter och upprätthåller dem."
+  "sv": "Det här inlägget handlar om stacken. Skattemotorn är en egen historia. Det som är värt att skriva ner är vad som hände när en Next.js-app med en riktig Postgres-databas mötte Cloudflare Workers-miljön, för den miljön har bestämda åsikter och ser till att de följs."
  },
  "h_why": {
   "en": "Why this stack",
@@ -50,19 +50,19 @@ const I18N_BK = {
  },
  "nl_p1": {
   "en": "The first deploy with the database wired in could not reach it. The connection string was correct in GitHub's secret store and correct on my machine. The CI step that copied it into the Worker was <code>echo \"$DATABASE_URL\" | wrangler secret put DATABASE_URL</code>, and <code>echo</code> appends a newline. The Worker's secret ended in <code>\\n</code>, which is enough to break a Postgres URL.",
-  "sv": "Den första driftsättningen med databasen inkopplad nådde den inte. Anslutningssträngen var korrekt i GitHubs hemlighetslager och korrekt på min dator. CI-steget som kopierade den till Workern var <code>echo ”$DATABASE_URL” | wrangler secret put DATABASE_URL</code>, och <code>echo</code> lägger till en radbrytning. Workerns hemlighet slutade med <code>\\n</code>, vilket räcker för att förstöra en Postgres-URL."
+  "sv": "Den första driftsättningen med databasen inkopplad nådde den inte. Anslutningssträngen var korrekt i GitHubs hemlighetslager och korrekt på min dator. CI-steget som kopierade den till Workern var <code>echo \"$DATABASE_URL\" | wrangler secret put DATABASE_URL</code>, och <code>echo</code> lägger till en radbrytning. Workerns hemlighet slutade med <code>\\n</code>, vilket räcker för att förstöra en Postgres-URL."
  },
  "nl_p2": {
   "en": "Every secret now goes through <code>printf '%s'</code>, and the deploy step refuses to ship a Worker without an auth signing key rather than deploying one that cannot sign sessions. Half an hour of debugging for one character.",
-  "sv": "Varje hemlighet går nu genom <code>printf '%s'</code>, och driftsättningssteget vägrar skicka ut en Worker utan signeringsnyckel hellre än att driftsätta en som inte kan signera sessioner. En halvtimmes felsökning för ett tecken."
+  "sv": "Varje hemlighet går nu genom <code>printf '%s'</code>, och driftsättningssteget driftsättningen stoppas om signeringsnyckeln saknas, i stället för att skicka ut en Worker som inte kan signera sessioner. En halvtimmes felsökning för ett tecken."
  },
  "h_saga": {
   "en": "Lesson 3: the runtime decides your database driver",
   "sv": "Lärdom 3: miljön bestämmer din databasdrivrutin"
  },
  "saga_p1": {
-  "en": "In the hour between 16:00 and 17:00 on that Saturday, the database layer changed five times:",
-  "sv": "Under timmen mellan 16.00 och 17.00 den lördagen ändrades databaslagret fem gånger:"
+  "en": "In the hour between 16:00 and 17:00 on that Saturday, the database setup changed five times:",
+  "sv": "Under timmen mellan 16.00 och 17.00 den lördagen ändrades databasuppsättningen fem gånger:"
  },
  "fig1": {
   "en": "Figure 1. One hour of the database layer, from the git log. It ended where it started, on the HTTP driver, but for a different reason.",
@@ -78,7 +78,7 @@ const I18N_BK = {
  },
  "saga_p4": {
   "en": "The HTTP driver sidesteps the problem because there is nothing to share: one query, one <code>fetch</code>, done. So BayarKerja runs on it, and lives without transactions for now. The durable version of the fix is Cloudflare Hyperdrive with the standard <code>pg</code> driver, which pools connections outside the Worker and gives real transactions back. That move is planned before billing or the payroll ledger depends on atomic writes.",
-  "sv": "HTTP-drivrutinen undviker problemet eftersom det inte finns något att dela: en fråga, en <code>fetch</code>, klart. Så BayarKerja körs på den och klarar sig utan transaktioner tills vidare. Den hållbara lösningen är Cloudflare Hyperdrive med standarddrivrutinen <code>pg</code>, som poolar anslutningar utanför Workern och ger tillbaka riktiga transaktioner. Den flytten är planerad innan fakturering eller lönereskontran blir beroende av atomära skrivningar."
+  "sv": "HTTP-drivrutinen undviker problemet eftersom det inte finns något att dela: en fråga, en <code>fetch</code>, klart. Så BayarKerja körs på den och klarar sig utan transaktioner tills vidare. Den hållbara lösningen är Cloudflare Hyperdrive med standarddrivrutinen <code>pg</code>, som poolar anslutningar utanför Workern och ger tillbaka riktiga transaktioner. Den flytten är planerad innan fakturering eller lönebokföringen blir beroende av atomära skrivningar."
  },
  "h_notx": {
   "en": "Lesson 4: living without transactions, honestly",
@@ -86,11 +86,11 @@ const I18N_BK = {
  },
  "notx_p1": {
   "en": "Without <code>BEGIN</code>/<code>COMMIT</code>, \"all or nothing\" has to be built by hand, and the honest thing is to say how far that goes. Four measures carry it:",
-  "sv": "Utan <code>BEGIN</code>/<code>COMMIT</code> måste ”allt eller inget” byggas för hand, och det ärliga är att säga hur långt det räcker. Fyra åtgärder bär det:"
+  "sv": "Utan <code>BEGIN</code>/<code>COMMIT</code> måste ”allt eller inget” byggas för hand, och det ärliga är att säga hur långt det räcker. Det vilar på fyra åtgärder:"
  },
  "notx_l1": {
-  "en": "<strong>Compute first, write second.</strong> The payroll engine is pure: no I/O, no clock, integer rupiah. Every payslip is calculated in memory before the first row is written, so a calculation error never leaves anything behind.",
-  "sv": "<strong>Räkna först, skriv sedan.</strong> Lönemotorn är ren: ingen I/O, ingen klocka, heltal i rupiah. Varje lönebesked räknas ut i minnet innan första raden skrivs, så ett beräkningsfel lämnar aldrig något efter sig."
+  "en": "<strong>Compute before writing payslips.</strong> The payroll engine is pure: no I/O, no clock, integer rupiah. The run row goes in first because the payslips need its id; then every payslip is calculated in memory before any payslip is written, and a calculation error takes the same cleanup path as a failed write.",
+  "sv": "<strong>Räkna innan lönebeskeden skrivs.</strong> Lönemotorn är ren: ingen I/O, ingen klocka, heltal i rupiah. Körningsraden skrivs först eftersom lönebeskeden behöver dess id; sedan räknas varje lönebesked ut i minnet innan något lönebesked skrivs, och ett beräkningsfel går samma städväg som en misslyckad skrivning."
  },
  "notx_l2": {
   "en": "<strong>Compensate on failure.</strong> If any write fails, the run's payslips and then the run shell are deleted before the error surfaces.",
@@ -102,7 +102,7 @@ const I18N_BK = {
  },
  "notx_l4": {
   "en": "<strong>Guard state changes on the state you read.</strong> Approving a run updates it only <code>WHERE status</code> still equals what was read a moment ago. If another request got there first, zero rows change and the action fails loudly instead of skipping a step in the approval chain.",
-  "sv": "<strong>Villkora tillståndsbyten på det lästa tillståndet.</strong> Att godkänna en körning uppdaterar den bara <code>WHERE status</code> fortfarande är det som lästes nyss. Om en annan förfrågan hann före ändras noll rader och åtgärden misslyckas tydligt i stället för att hoppa över ett steg i godkännandekedjan."
+  "sv": "<strong>Villkora statusbyten på den status du läste.</strong> Att godkänna en körning uppdaterar den bara <code>WHERE status</code> fortfarande är det som lästes nyss. Om en annan förfrågan hann före ändras noll rader och åtgärden misslyckas tydligt i stället för att hoppa över ett steg i godkännandekedjan."
  },
  "fig2": {
   "en": "Figure 2. How a payroll run is written on a driver without transactions.",
@@ -113,28 +113,28 @@ const I18N_BK = {
   "sv": "Det här är kompensation, inte atomicitet. En krasch mellan sista lönebeskedet och skrivningen av totalerna skulle synas, och koden säger det i en kommentar bredvid skrivningarna. Ett tag sa kommentaren motsatsen: den beskrev skrivningarna som en enda batchad transaktion, och koden batchade aldrig något. En granskning fångade det och kommentaren skrevs om så att den stämmer med koden. Om man bara läste kommentarerna var systemet transaktionellt större delen av ett dygn."
  },
  "notx_p3": {
-  "en": "Sign-up has the same gap. Better Auth writes the user, the account, and the session as three statements, so the adapter runs with transactions switched off, and a failed sign-up cleans up after itself so the email address stays free.",
-  "sv": "Registreringen har samma lucka. Better Auth skriver användaren, kontot och sessionen som tre satser, så adaptern körs med transaktioner avstängda, och en misslyckad registrering städar efter sig så att e-postadressen förblir ledig."
+  "en": "Sign-up has the same gap. The HTTP driver has no transactions, so Better Auth's adapter runs with them switched off and writes the user, the account, and the session as three separate statements. A sign-up that fails in the middle can leave a user without an account, which is one more reason the move to real transactions is first on the list below.",
+  "sv": "Registreringen har samma lucka. HTTP-drivrutinen har inga transaktioner, så Better Auths adapter körs med dem avstängda och skriver användaren, kontot och sessionen som tre separata satser. En registrering som avbryts halvvägs kan lämna en användare utan konto, vilket är ytterligare ett skäl till att flytten till riktiga transaktioner står först på listan nedan."
  },
  "h_half": {
   "en": "Lesson 5: partial states are real states",
   "sv": "Lärdom 5: halvfärdiga tillstånd är riktiga tillstånd"
  },
  "half_p1": {
-  "en": "Every new account gets its own demo company with twelve fictional employees and two calculated runs, so a visitor can try a full payroll cycle without entering anyone's real salary. Signing up against the live site found the bug that no test had: when building that demo company failed halfway, the visitor was signed in but belonged to no company. The app treated \"no company\" the same as \"not signed in\" and sent them to the sign-in page, where signing in led straight back to the sign-in page. Forever.",
-  "sv": "Varje nytt konto får ett eget demoföretag med tolv fiktiva anställda och två beräknade körningar, så att en besökare kan prova en hel lönecykel utan att mata in någons riktiga lön. En registrering mot den skarpa sajten hittade felet som inget test hade hittat: när bygget av demoföretaget misslyckades halvvägs var besökaren inloggad men tillhörde inget företag. Appen behandlade ”inget företag” som ”inte inloggad” och skickade dem till inloggningssidan, där inloggning ledde direkt tillbaka till inloggningssidan. För alltid."
+  "en": "Every new account gets its own demo company with twelve fictional employees and two calculated runs, so a visitor can try a full payroll cycle without entering anyone's real salary. Signing up against the live site found the bug that no test had: when building that demo company failed halfway, the visitor was signed in but belonged to no company. The app treated \"no company\" the same as \"not signed in\" and sent them to the sign-in page, where signing in led straight back to the sign-in page whenever the rebuild failed again.",
+  "sv": "Varje nytt konto får ett eget demoföretag med tolv fiktiva anställda och två beräknade körningar, så att en besökare kan prova en hel lönecykel utan att mata in någons riktiga lön. En registrering mot den skarpa sajten hittade felet som inget test hade hittat: när bygget av demoföretaget misslyckades halvvägs var besökaren inloggad men tillhörde inget företag. Appen behandlade ”inget företag” som ”inte inloggad” och skickade dem till inloggningssidan, där inloggning ledde direkt tillbaka till inloggningssidan så länge återuppbyggnaden fortsatte att misslyckas."
  },
  "half_p2": {
   "en": "Without transactions, \"halfway\" is not an edge case, it is a state the system can be in. The fix was a repair path: when a session exists but no membership does, the app builds or reuses the demo company and carries on. If the repair itself fails, the visitor gets a page that explains what happened and offers a retry, instead of a sign-in form for someone who is already signed in.",
-  "sv": "Utan transaktioner är ”halvvägs” inget specialfall, det är ett tillstånd systemet kan befinna sig i. Lösningen blev en reparationsväg: när en session finns men inget medlemskap gör appen i ordning eller återanvänder demoföretaget och fortsätter. Om själva reparationen misslyckas får besökaren en sida som förklarar vad som hände och erbjuder ett nytt försök, i stället för ett inloggningsformulär till någon som redan är inloggad."
+  "sv": "Utan transaktioner är ”halvvägs” inget specialfall, det är ett tillstånd systemet kan befinna sig i. Lösningen blev en reparationsväg: när en session finns men inget medlemskap skapar appen demoföretaget eller återanvänder det och fortsätter. Om själva reparationen misslyckas får besökaren en sida som förklarar vad som hände och erbjuder ett nytt försök, i stället för ett inloggningsformulär till någon som redan är inloggad."
  },
  "h_tenant": {
   "en": "Lesson 6: the tenant belongs in the WHERE clause",
-  "sv": "Lärdom 6: kunden hör hemma i WHERE-satsen"
+  "sv": "Lärdom 6: tenanten hör hemma i WHERE-satsen"
  },
  "tenant_p1": {
   "en": "Several companies share one database, so the most important rule in the codebase is that one company can never see another's payroll. Today that is enforced in the application, not by Postgres row-level security, and it rests on a few rules:",
-  "sv": "Flera företag delar en databas, så den viktigaste regeln i kodbasen är att ett företag aldrig kan se ett annats löner. I dag upprätthålls det i applikationen, inte av Postgres row-level security, och det vilar på några regler:"
+  "sv": "Flera företag delar en databas, så den viktigaste regeln i kodbasen är att ett företag aldrig kan se ett annat företags löner. I dag upprätthålls det i applikationen, inte av Postgres row-level security, och det vilar på några regler:"
  },
  "tenant_l1": {
   "en": "<strong>The company is part of the lookup, not a check afterwards.</strong> A query asks for \"run 42 belonging to this company\". A run id from another company is indistinguishable from one that does not exist.",
@@ -154,15 +154,15 @@ const I18N_BK = {
  },
  "tenant_p2": {
   "en": "Application-level scoping is one mistake away from a leak, which is why I want row-level security in Postgres underneath it as a second line of defence before real payroll data goes in.",
-  "sv": "Avgränsning på applikationsnivå är ett misstag från en läcka, och därför vill jag ha row-level security i Postgres under den som en andra försvarslinje innan riktig lönedata läggs in."
+  "sv": "Med avgränsning enbart på applikationsnivå räcker det med ett misstag för att data ska läcka, och därför vill jag ha row-level security i Postgres under den som en andra försvarslinje innan riktig lönedata läggs in."
  },
  "h_engine": {
   "en": "The engine stays on the server",
   "sv": "Motorn stannar på servern"
  },
  "engine_p1": {
-  "en": "The public PPh 21 calculator could have run in the browser. It does not: the page posts to an API route and the same engine that calculates payroll answers it, so there is exactly one implementation of the tax rules and the calculator cannot drift from the payslips. The project has 116 tests, including golden tests pinned to the worked examples in the Indonesian tax office's own PPh 21 guide, and CI runs them before every build. A mismatch there is treated as a regulatory defect, not a stale expectation.",
-  "sv": "Den publika PPh 21-kalkylatorn hade kunnat köras i webbläsaren. Det gör den inte: sidan skickar till en API-route och samma motor som räknar lönerna svarar, så det finns exakt en implementation av skattereglerna och kalkylatorn kan inte glida isär från lönebeskeden. Projektet har 116 tester, bland dem golden tests låsta till räkneexemplen i den indonesiska skattemyndighetens (DJP) egen PPh 21-guide, och CI kör dem före varje bygge. En avvikelse där behandlas som ett regelfel, inte som en inaktuell förväntan."
+  "en": "The public PPh 21 calculator could have run in the browser. It does not: the page posts to an API route that uses the same TER, gross-up, and BPJS functions as the payroll engine, and tests check that it builds the tax base the same way the payslips do, so the two cannot quietly drift apart. The project has 116 tests, including golden tests pinned to the worked examples in the Indonesian tax office's own PPh 21 guide, and CI runs them before every build. A mismatch there is treated as a regulatory defect, not a stale expectation.",
+  "sv": "Den publika PPh 21-kalkylatorn hade kunnat köras i webbläsaren. Det gör den inte: sidan skickar till en API-route som använder samma TER-, gross-up- och BPJS-funktioner som lönemotorn, och tester kontrollerar att den bygger skatteunderlaget på samma sätt som lönebeskeden, så att de två inte i tysthet börjar avvika från varandra. Projektet har 116 tester, bland dem golden tests låsta till räkneexemplen i den indonesiska skattemyndighetens (DJP) egen PPh 21-guide, och CI kör dem före varje bygge. En avvikelse där behandlas som ett regelfel, inte som en inaktuell förväntan."
  },
  "h_next": {
   "en": "What is next",
@@ -190,7 +190,7 @@ const I18N_BK = {
  },
  "les_l2": {
   "en": "<strong>Treat module scope as hostile.</strong> No environment, no shared sockets. Build lazily, per request.",
-  "sv": "<strong>Behandla modulnivån som fientlig.</strong> Ingen miljö, inga delade sockets. Bygg lat, per förfrågan."
+  "sv": "<strong>Behandla modulnivån som fientlig.</strong> Ingen miljö, inga delade sockets. Skapa klienten först när den behövs, per förfrågan."
  },
  "les_l3": {
   "en": "<strong>Partial states are states.</strong> If writes can stop halfway, design the page a user sees when they do.",
@@ -198,7 +198,7 @@ const I18N_BK = {
  },
  "les_l4": {
   "en": "<strong>The tenant goes in the WHERE clause,</strong> every time, and a foreign id should look exactly like a missing one.",
-  "sv": "<strong>Kunden hör hemma i WHERE-satsen,</strong> varje gång, och ett främmande id ska se ut precis som ett som saknas."
+  "sv": "<strong>Tenanten hör hemma i WHERE-satsen,</strong> varje gång, och ett främmande id ska se ut precis som ett som saknas."
  },
  "les_l5": {
   "en": "<strong>Test against the live site.</strong> The worst bug of the weekend was found by signing up, not by the test suite.",
@@ -206,7 +206,7 @@ const I18N_BK = {
  },
  "outro": {
   "en": "A weekend is enough to get a Next.js and Postgres app running on the edge. It is not enough to make it trustworthy with other people's salaries, and the gap between those two is the list above. BayarKerja stays pre-launch until that list is done.",
-  "sv": "En helg räcker för att få en Next.js- och Postgres-app att köra i edge-miljön. Den räcker inte för att göra den pålitlig med andras löner, och skillnaden mellan de två är listan ovan. BayarKerja förblir olanserat tills den listan är klar."
+  "sv": "En helg räcker för att få en Next.js- och Postgres-app att köra i edge-miljön. Den räcker inte för att göra den pålitlig med andras löner, och skillnaden mellan de två är listan ovan. BayarKerja lanseras inte förrän den listan är klar."
  },
  "back": {
   "en": "← Back to portfolio",
