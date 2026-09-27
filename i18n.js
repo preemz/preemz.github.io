@@ -79,6 +79,11 @@ const I18N = {
     en: "The production job board powering my agency: GDPR-ready for EU postings, an LLM pipeline that reformats candidate CVs into client templates, explainable fit scoring, and a recruiter console for the full placement workflow.",
     sv: "Produktionsjobbbrädet som driver min byrå: GDPR-klart för EU-annonser, en LLM-pipeline som formaterar om kandidat-CV:n till klientmallar, förklarbar matchningspoäng och en rekrytärkonsol för hela placeringsflödet."
   },
+  'card.bk.t': { en: 'BayarKerja ↗', sv: 'BayarKerja ↗' },
+  'card.bk.p': {
+    en: "Indonesian payroll and Employer of Record platform: a PPh 21 TER and BPJS engine tested against the tax office's worked examples, a free public tax calculator, and a multi-tenant payroll app on Next.js and Postgres. Pre-launch: the first client payroll runs after tax-consultant sign-off.",
+    sv: "Plattform för indonesisk lönehantering och Employer of Record: en PPh 21 TER- och BPJS-motor testad mot skattemyndighetens räkneexempel, en kostnadsfri publik skattekalkylator och en lönehanteringsapp för flera företag på Next.js och Postgres. Inte lanserad: första lönekörningen för en kund görs efter en skattekonsults godkännande."
+  },
   'card.ok.t': { en: 'Okoshi Japanese Education ↗', sv: 'Okoshi japanskundervisning ↗' },
   'card.ok.p': {
     en: "JLPT N3–N2 training program for fresh graduates and young professionals heading into the Japanese market.",
@@ -137,6 +142,11 @@ const I18N = {
   'blog4.p': {
     en: "Region-aware compliance for thousands of candidates on one Worker: EU and Indonesian privacy regimes side by side, opt-in consent for EU match emails, Article 21 objection as a button, and EU pay-transparency validation on job postings.",
     sv: "Regionmedveten efterlevnad för tusentals kandidater på en Worker: EU:s och Indonesiens integritetsregimer sida vid sida, opt-in-samtycke för EU-matchmejl, artikel 21-invändning som knapp och EU-löntransparensvalidering på jobbannonser."
+  },
+
+  'blog6.p': {
+    en: "The first working version of a payroll product in one weekend, and what the Workers runtime taught me: why it picked the database driver, payroll runs without transactions, repairing half-finished sign-ups, and keeping companies' data apart.",
+    sv: "Den första fungerande versionen av en lönetjänst på en helg, och vad Workers-miljön lärde mig: varför den valde databasdrivrutinen, lönekörningar utan transaktioner, att reparera halvfärdiga registreringar och att hålla företagens data åtskilda."
   },
 
   'blog5.p': {
