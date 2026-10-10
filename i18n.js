@@ -79,6 +79,11 @@ const I18N = {
     en: "The production job board powering my agency: GDPR-ready for EU postings, an LLM pipeline that reformats candidate CVs into client templates, explainable fit scoring, and a recruiter console for the full placement workflow.",
     sv: "Produktionsjobbbrädet som driver min byrå: GDPR-klart för EU-annonser, en LLM-pipeline som formaterar om kandidat-CV:n till klientmallar, förklarbar matchningspoäng och en rekrytärkonsol för hela placeringsflödet."
   },
+  'card.crm.t': { en: 'Satrio CRM ↗', sv: 'Satrio CRM ↗' },
+  'card.crm.p': {
+    en: "Internal client CRM for my agency's business development team, replacing two years of Google Sheets: companies, contacts, outreach, and an outbound engine that reads replies, honours opt-outs, and warms a mailbox before it sends. One Cloudflare Worker, one D1 database, no framework.",
+    sv: "Internt kund-CRM för min byrås affärsutvecklingsteam, som ersätter två år med Google Sheets: företag, kontakter, utmailningar och en utgående motor som läser svar, respekterar avregistreringar och värmer en brevlåda innan den skickar. En Cloudflare Worker, en D1-databas, inget ramverk."
+  },
   'card.bk.t': { en: 'BayarKerja ↗', sv: 'BayarKerja ↗' },
   'card.bk.p': {
     en: "Indonesian payroll and Employer of Record platform: a PPh 21 TER and BPJS engine tested against the tax office's worked examples, a free public tax calculator, and a multi-tenant payroll app on Next.js and Postgres. Pre-launch: the first client payroll runs after tax-consultant sign-off.",
@@ -142,6 +147,11 @@ const I18N = {
   'blog4.p': {
     en: "Region-aware compliance for thousands of candidates on one Worker: EU and Indonesian privacy regimes side by side, opt-in consent for EU match emails, Article 21 objection as a button, and EU pay-transparency validation on job postings.",
     sv: "Regionmedveten efterlevnad för tusentals kandidater på en Worker: EU:s och Indonesiens integritetsregimer sida vid sida, opt-in-samtycke för EU-matchmejl, artikel 21-invändning som knapp och EU-löntransparensvalidering på jobbannonser."
+  },
+
+  'blog7.p': {
+    en: "A two-year Google Sheet became a client CRM on one Worker, then grew an outbound engine. The part worth reading: a reply classifier with nine passing tests that was wrong on three real sentences, and a kill switch any signed-in user could arm.",
+    sv: "Ett tvåårigt Google Sheet blev ett kund-CRM på en Worker, och fick sedan en utgående motor. Det som är värt att läsa: en svarsklassificerare med nio godkända tester som hade fel på tre riktiga meningar, och ett huvudströmbrytare vem som helst som var inloggad kunde lägga om."
   },
 
   'blog6.p': {
