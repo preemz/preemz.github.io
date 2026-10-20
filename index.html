@@ -211,10 +211,10 @@
         <p data-i18n="card.fit.p">Scoring engine that weighs each candidate's resume against a job order across must-have skills, language, years of experience, tenure, seniority, and commercial fit, then ranks candidates with the reasons behind every point. Built with fairness guardrails: age, name, gender, and nationality never touch the score, and a test enforces it before every CI deploy.</p>
         <div class="tagrow"><span class="tag">Scoring engine</span><span class="tag">NLP</span><span class="tag">Responsible AI</span></div>
       </div>
-      <div class="card">
-        <h3 data-i18n="card.cv.t">AI Resume Intelligence (in production)</h3>
-        <p data-i18n="card.cv.p">LLM pipeline inside my agency's job board that reads any candidate CV, extracts structured data, and reformats it into each client's exact submission template for recruiter review, cutting most of that manual document work down to a quick review.</p>
-        <div class="tagrow"><span class="tag">Claude</span><span class="tag">GPT-4o</span><span class="tag">Docx generation</span></div>
+      <div class="card" data-href="/blog-cv-reformatter.html">
+        <h3 data-i18n="card.cv.t">AI Resume Intelligence (in production) 📖</h3>
+        <p data-i18n="card.cv.p">LLM pipeline inside my agency's job board that reads a candidate's CV (PDF, DOCX or text), extracts structured data and fills each client's exact submission template, so most of the manual document work shrinks to a quick recruiter review.</p>
+        <div class="tagrow"><span class="tag">Claude</span><span class="tag">PDF parsing</span><span class="tag">Docx generation</span></div>
       </div>
       <div class="card" data-href="https://apply.satriocs.com">
         <h3 data-i18n="card.kb.t">KerjaBoard ↗</h3>
@@ -273,6 +273,11 @@
     <section id="blog">
     <h2 data-i18n="blog.h2">Writing</h2>
     <div class="cards">
+      <div class="card" data-href="/blog-cv-reformatter.html">
+        <h3>Designing a CV Reformatter: Any Resume In, the Client's Exact Template Out</h3>
+        <p data-i18n="blog8.p">How KerjaBoard turns a candidate's CV into a client's exact Word template: five ways PDFs hide their text, one definition behind the prompt, form and template, a review screen that shows gaps instead of guesses, and an anonymous CV scrubbed three times.</p>
+        <div class="tagrow"><span class="tag">LLM</span><span class="tag">System design</span><span class="tag">Docx generation</span></div>
+      </div>
       <div class="card" data-href="/blog-crm-outbound.html">
         <h3>Building a Client CRM on Cloudflare Workers, One Weekend</h3>
         <p data-i18n="blog7.p">A two-year Google Sheet became a client CRM on one Worker, then grew an outbound engine. The part worth reading: a reply classifier with nine passing tests that was wrong on three real sentences, and a kill switch any signed-in user could arm.</p>

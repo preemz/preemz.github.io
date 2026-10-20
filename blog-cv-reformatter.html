@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Designing a CV Reformatter: Any Resume In, the Client's Exact Template Out · Primawan Satrio</title>
+<meta name="description" content="The system design behind the CV reformatter in KerjaBoard: five ways PDFs hide their text, one format definition behind the prompt, review form and Word template, a review screen that shows gaps instead of guesses, and an anonymous CV scrubbed three times.">
+<link rel="canonical" href="https://preemz.github.io/blog-cv-reformatter.html">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://preemz.github.io/blog-cv-reformatter.html">
+<meta property="og:title" content="Designing a CV Reformatter for a Recruiting Agency">
+<meta property="og:description" content="The system design behind the CV reformatter in KerjaBoard: five ways PDFs hide their text, one format definition behind the prompt, review form and Word template, a review screen that shows gaps instead of guesses, and an anonymous CV scrubbed three times.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Designing a CV Reformatter for a Recruiting Agency">
+<meta name="twitter:description" content="The system design behind the CV reformatter in KerjaBoard: five ways PDFs hide their text, one format definition behind the prompt, review form and Word template, a review screen that shows gaps instead of guesses, and an anonymous CV scrubbed three times.">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BlogPosting",
+ "headline": "Designing a CV Reformatter: Any Resume In, the Client's Exact Template Out",
+ "description": "The system design behind the CV reformatter in KerjaBoard: five ways PDFs hide their text, one format definition behind the prompt, review form and Word template, a review screen that shows gaps instead of guesses, and an anonymous CV scrubbed three times.",
+ "datePublished": "2026-10-20",
+ "inLanguage": "en",
+ "url": "https://preemz.github.io/blog-cv-reformatter.html",
+ "mainEntityOfPage": "https://preemz.github.io/blog-cv-reformatter.html",
+ "author": {
+  "@type": "Person",
+  "name": "Primawan Satrio",
+  "url": "https://preemz.github.io/"
+ },
+ "keywords": "CV reformatter, LLM extraction, PDF text extraction, docx templating, Cloudflare Workers, recruiting"
+}
+</script>
+<style>
+  :root {
+    --bg: #0b0e14; --surface: #12161f; --border: #232a38;
+    --text: #e6e9ef; --muted: #8b93a5; --accent: #4f8cff; --accent2: #7c5cff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+    line-height: 1.75; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 60px 24px 80px; }
+  .back { font-size: 14px; }
+  .back a { color: var(--accent); text-decoration: none; }
+  h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.2; letter-spacing: -.02em; margin: 18px 0 10px; }
+  .meta { color: var(--muted); font-size: 14px; margin-bottom: 40px; }
+  h2 { font-size: 22px; letter-spacing: -.01em; margin: 44px 0 14px; }
+  p { margin-bottom: 16px; color: #c4cad6; }
+  p strong, li strong { color: var(--text); }
+  a { color: var(--accent); }
+  ul, ol { margin: 0 0 16px 22px; color: #c4cad6; }
+  li { margin-bottom: 8px; }
+  code {
+    font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; font-size: .88em;
+    background: rgba(79,140,255,.09); color: #9cc0ff; border-radius: 5px; padding: 1.5px 6px;
+  }
+  blockquote {
+    border-left: 3px solid var(--accent); background: var(--surface);
+    padding: 12px 18px; border-radius: 0 10px 10px 0; margin: 18px 0; color: var(--muted); font-size: 15px;
+  }
+  table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); }
+  th { color: var(--text); }
+  td { color: var(--muted); }
+  .diagram {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px 16px; margin: 22px 0; overflow-x: auto;
+  }
+  .diagram svg { display: block; min-width: 560px; width: 100%; height: auto; }
+  .caption { font-size: 13px; color: var(--muted); text-align: center; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="back"><a href="/">← preemz.github.io</a><button id="lang-toggle" aria-label="Switch language" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:3px 10px;font-size:13px;cursor:pointer;margin-left:12px;float:right;">SV</button></div>
+
+  <h1 data-i18n="t">Designing a CV Reformatter: Any Resume In, the Client’s Exact Template Out</h1>
+  <div class="meta" data-i18n="meta">Primawan Satrio · October 2026 · ~12 min read</div>
+  <p data-i18n="p1">Every client of my recruiting agency wants candidate CVs in its own Word template. One wants a blind CV with the candidate's name in the header and the client's own contact block in place of the candidate's. Another wants the full profile, with a line for how long the candidate has worked in Singapore. When a client has no template, we send our own anonymous Satrio Consulting CV, so the client hires through us rather than around us. Before this tool, a recruiter retyped each CV into the right template by hand, for every candidate and every client.</p>
+  <p data-i18n="p2">The CV reformatter inside KerjaBoard, our job board, does that work now. A recruiter picks a candidate from the database or uploads a file, picks the client format, checks the draft on a review screen, and downloads a finished <code>.docx</code> in the client's template. It went live in August 2026, the internal recruiting team uses it on real client submissions, and their verdict so far is that it works. This post is the system design: the stages, the decision behind each one, and the bugs that shaped them.</p>
+  <h2 data-i18n="h_shape">The shape of the pipeline</h2>
+  <p data-i18n="shape1">Eight stages across two requests. Everything runs on the same Cloudflare Worker as the rest of KerjaBoard, and the document path (PDF parsing, the model call, the Word renderer) uses no npm packages.</p>
+  <div class="diagram"><svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,sans-serif"><text x="4" y="18" fill="#8b93a5" font-size="11">request 1: build a draft</text><rect x="4" y="30" width="160" height="58" rx="10" fill="#161b26" stroke="#232a38"/><text x="84.0" y="55.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">CV source</text><text x="84.0" y="72.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">upload or database pick</text><path d="M166 59.0 L186 59.0 m-6 -5 l6 5 l-6 5" stroke="#8b93a5" fill="none"/><rect x="188" y="30" width="160" height="58" rx="10" fill="#161b26" stroke="#4f8cff"/><text x="268.0" y="55.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">Text extraction</text><text x="268.0" y="72.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">PDF, DOCX, TXT</text><path d="M350 59.0 L370 59.0 m-6 -5 l6 5 l-6 5" stroke="#8b93a5" fill="none"/><rect x="372" y="30" width="160" height="58" rx="10" fill="#161b26" stroke="#4f8cff"/><text x="452.0" y="55.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">Readability gate</text><text x="452.0" y="72.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">refuse mojibake</text><path d="M534 59.0 L554 59.0 m-6 -5 l6 5 l-6 5" stroke="#8b93a5" fill="none"/><rect x="556" y="30" width="160" height="58" rx="10" fill="#161b26" stroke="#7c5cff"/><text x="636.0" y="55.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">Claude extraction</text><text x="636.0" y="72.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">fixed-region relay</text><path d="M636.0 90 L636.0 134 m-5 -6 l5 6 l5 -6" stroke="#8b93a5" fill="none"/><rect x="556" y="136" width="160" height="58" rx="10" fill="#161b26" stroke="#7c5cff"/><text x="636.0" y="161.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">Lenient parse</text><text x="636.0" y="178.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">salvage JSON, xxxx for gaps</text><rect x="372" y="136" width="160" height="58" rx="10" fill="#161b26" stroke="#ff6b6b"/><text x="452.0" y="161.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">Identity scrub</text><text x="452.0" y="178.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">anonymous format only</text><rect x="188" y="136" width="160" height="58" rx="10" fill="#161b26" stroke="#4f8cff"/><text x="268.0" y="161.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">Recruiter review</text><text x="268.0" y="178.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">every field editable</text><rect x="4" y="136" width="160" height="58" rx="10" fill="#161b26" stroke="#4f8cff"/><text x="84.0" y="161.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">Template fill</text><text x="84.0" y="178.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">.docx in client template</text><path d="M554 165.0 L534 165.0 m6 -5 l-6 5 l6 5" stroke="#8b93a5" fill="none"/><path d="M370 165.0 L350 165.0 m6 -5 l-6 5 l6 5" stroke="#8b93a5" fill="none"/><line x1="176.0" y1="122" x2="176.0" y2="202" stroke="#ff6b6b" stroke-width="2" stroke-dasharray="5 4"/><path d="M186 165.0 L166 165.0 m6 -5 l-6 5 l6 5" stroke="#ff9b9b" stroke-dasharray="4 3" fill="none"/><text x="176.0" y="216" text-anchor="middle" fill="#ff9b9b" font-size="11">request 2: approved fields only</text><text x="360" y="240" text-anchor="middle" fill="#8b93a5" font-size="11">nothing reaches a client until a recruiter has read every field</text></svg></div>
+  <div class="caption" data-i18n="fig1">Figure 1. The reformatter pipeline. The first request ends at the review screen; the download is a second request, built only from what the recruiter approved.</div>
+  <p data-i18n="shape2">The split into two requests is the most important decision in the design. The model's output is a draft, never a document. Nothing reaches a client until a recruiter has read every field, and the download is rebuilt from the fields the recruiter submitted, so a correction made on the review screen is the version that ships.</p>
+  <h2 data-i18n="h_schema">One definition, three consumers</h2>
+  <p data-i18n="schema1">Each format is one object in <code>CLIENT_FORMATS</code>: groups of fields, a repeating block for work history, and flags such as <code>blind</code>, <code>anonymous</code> and <code>english</code>. That one object generates the JSON schema in the prompt, the inputs on the review screen, and fixes the key names the template's tokens must use.</p>
+  <div class="diagram"><svg viewBox="0 0 720 240" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,sans-serif"><rect x="8" y="78" width="236" height="76" rx="10" fill="#161b26" stroke="#7c5cff"/><text x="126.0" y="112.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">CLIENT_FORMATS.&lt;id&gt;</text><text x="126.0" y="129.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">field groups, repeater, flags</text><rect x="470" y="10" width="242" height="58" rx="10" fill="#161b26" stroke="#4f8cff"/><text x="591.0" y="35.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">Prompt schema</text><text x="591.0" y="52.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">the keys the model must return</text><path d="M246 116 C 350 116, 360 39, 466 39" stroke="#8b93a5" fill="none"/><path d="M460 34 l6 5 l-6 5" stroke="#8b93a5" fill="none"/><rect x="470" y="86" width="242" height="58" rx="10" fill="#161b26" stroke="#4f8cff"/><text x="591.0" y="111.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">Review form</text><text x="591.0" y="128.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">one input per field, gaps flagged</text><path d="M246 116 C 350 116, 360 115, 466 115" stroke="#8b93a5" fill="none"/><path d="M460 110 l6 5 l-6 5" stroke="#8b93a5" fill="none"/><rect x="470" y="162" width="242" height="58" rx="10" fill="#161b26" stroke="#4f8cff"/><text x="591.0" y="187.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">Word template</text><text x="591.0" y="204.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">{{key}} tokens and loops</text><path d="M246 116 C 350 116, 360 191, 466 191" stroke="#8b93a5" fill="none"/><path d="M460 186 l6 5 l-6 5" stroke="#8b93a5" fill="none"/><text x="126" y="176" text-anchor="middle" fill="#8b93a5" font-size="11">one object per format</text></svg></div>
+  <div class="caption" data-i18n="fig2">Figure 2. A format definition drives the prompt, the review form and the template. A field added to the definition reaches the prompt and the review form automatically; the template only has to use the same key.</div>
+  <p data-i18n="schema2">The alternative, a prompt, a form and a template each written by hand, drifts the first time someone renames a field: the model fills a key the template never reads, and the client gets a blank section. With one definition, a new format is a short list: the object, the template file, one entry in a lookup table, and a line in the in-app guide. Prompt rules check the flags rather than the format's name where they can, so the newest format reused a translation rule an earlier format needed.</p>
+  <h2 data-i18n="h_extract">Extraction is the hard part</h2>
+  <p data-i18n="ex1">The first serious bug report said the reformatter was "not accurate". Every field on the review screen read <code>xxxx</code>. That is not an accuracy problem; it is zero input. The PDF parser had returned an empty string, the model had been asked to read nothing, and it had correctly answered that nothing was there. Tuning the prompt would have changed nothing.</p>
+  <p data-i18n="ex2">PDF is not a text format. It is a set of drawing instructions, and the tools people use to make CVs store the letters in at least five different ways. The parser in <code>src/cv.js</code> learned each one from a real CV that came back empty or garbled:</p>
+  <table>
+    <tr><th data-i18n="tbl.h0">How the text is stored</th><th data-i18n="tbl.h1">What we saw</th><th data-i18n="tbl.h2">The fix</th></tr>
+    <tr><td data-i18n="tbl.r0c0">Compressed streams with stray bytes before <code>endstream</code></td><td data-i18n="tbl.r0c1">Every field empty</td><td data-i18n="tbl.r0c2">Inflate exactly the stream's declared <code>/Length</code>, not up to the end marker</td></tr>
+    <tr><td data-i18n="tbl.r1c0">Glyph IDs in hex, a constant offset from Unicode (common in DOCX-to-PDF converters)</td><td data-i18n="tbl.r1c1">No text at all</td><td data-i18n="tbl.r1c2">Read the offset from the file's own ToUnicode maps and take the most common one</td></tr>
+    <tr><td data-i18n="tbl.r2c0">One ToUnicode map per font subset, the same code meaning different letters</td><td data-i18n="tbl.r2c1">Real words mixed with wrong characters</td><td data-i18n="tbl.r2c2">Decode each string through the map of the font in use at that point</td></tr>
+    <tr><td data-i18n="tbl.r3c0">Glyph indices with no ToUnicode map at all</td><td data-i18n="tbl.r3c1">Text shifted into nonsense</td><td data-i18n="tbl.r3c2">Search offsets per font; score each on letters, vowel ratio and common letter pairs</td></tr>
+    <tr><td data-i18n="tbl.r4c0">Uncompressed or ASCII85-wrapped streams</td><td data-i18n="tbl.r4c1">An empty string from a plain English CV</td><td data-i18n="tbl.r4c2">Read raw streams as they are; decode ASCII85 before inflating</td></tr>
+  </table>
+  <p data-i18n="ex3">Row four was the subtle one. Scoring candidate offsets by letter count alone picks a neighbour three or four places away, which turns a heading into readable-looking nonsense. Adding vowel ratio and a small set of common English and Indonesian letter pairs is what broke those ties. That change was run against a corpus of about three thousand real CV files, old parser against new: it improved 265 and made none worse. Later extractor changes were checked the same way on smaller sets, and the newest class has its own test in CI.</p>
+  <p data-i18n="ex4">Two guards sit around the extractor. A <code>looksReadable</code> check refuses mojibake before the model call, with a message asking the recruiter to re-save the file as DOCX, because sending garbage to a model three times with retries just produces three empty answers. And each text operator is found with a linear scan before any pattern matching runs: one image-heavy Japanese CV form made the old regular expression quadratic, and the Worker ran out of CPU time.</p>
+  <h2 data-i18n="h_model">The model call</h2>
+  <p data-i18n="m1">The prompt is mostly rules about facts. Copy every degree, GPA, certificate, employer and date exactly as written. Include every employer. Never guess: an unknown field is the literal string <code>xxxx</code> and an unknown list is empty. For clients who want English, translate the prose but keep proper nouns as written, so a product or system name is not turned into something the client cannot search for.</p>
+  <p data-i18n="m2">The call goes to Claude Sonnet with low thinking effort, because thinking spends the same output budget the JSON needs. The answer is parsed leniently: markdown fences are stripped, and JSON cut off mid-object is closed at the last complete element, so a long CV still reaches review with most of its data instead of failing on "Unexpected end of JSON input". A truncated answer is reported as running out of output space and is not retried, because a retry would stop in the same place. Empty answers and server errors get up to three attempts, with a longer wait before each retry.</p>
+  <p data-i18n="m3">Why not a free model? I measured it in August 2026 with the production prompt. On a clean CV, Claude and two free Workers AI models scored the same. On the same CV with its line breaks stripped and a section cut out, both free models returned nothing usable, while Claude still extracted five of six jobs and the correct GPA. A later re-run on newer cheap models did much better, so that verdict belongs to that generation of models, not to free models in general. The code now has a triage step that can send clean CVs to a cheaper model; it is built and switched off until an A/B run says it is safe.</p>
+  <h2 data-i18n="h_err">Four errors, four causes</h2>
+  <p data-i18n="e1">Over two months the provider call failed in four different ways, and each one looked like a broken formatter to the recruiter who hit it:</p>
+  <ul>
+    <li data-i18n="e_l1"><strong>401:</strong> billing on the API account, not the key itself. A new key fixed it without a deploy.</li>
+    <li data-i18n="e_l2"><strong>404 naming the model:</strong> the model ID had been retired. It lived in two places, the config and a fallback in the code, and both had to change.</li>
+    <li data-i18n="e_l3"><strong>400 asking for a workspace header:</strong> the provider tightened authentication for service-account keys. The key was fine; the request needed one more header.</li>
+    <li data-i18n="e_l4"><strong>403 "Request not allowed":</strong> a Worker's outbound call leaves from the data center nearest the visitor, and the provider refuses some regions. The fix is a Durable Object created once with a Western Europe location hint. Durable Objects stay where they were first created, so every model call now leaves from the same region, whoever clicks the button.</li>
+  </ul>
+  <p data-i18n="e2">The lesson: read the status code and the body before touching anything. I also added an admin-only page that makes a real call with the configured model. Its first version left out the workspace header and reported a working key as broken. A health check has to send exactly what production sends, or it is worse than no check.</p>
+  <h2 data-i18n="h_review">A review screen that shows the gaps</h2>
+  <p data-i18n="r1">Every field on the review screen is editable, every field the model could not fill is highlighted in yellow, an empty single-value field reads <code>xxxx</code>, and a list of the gaps sits at the top of the page. I chose visible gaps over a cleaner-looking draft on purpose. A draft that has to look complete invites a guessed notice period; a draft that shows <code>xxxx</code> asks a person to find out. The <code>xxxx</code> marker also survives into the Word file if nobody fixes it, so a missing value cannot pass for an answer. Empty lists are the exception: their section is dropped from the document, so the yellow highlight is what catches those.</p>
+  <h2 data-i18n="h_docx">Filling Word templates with no dependencies</h2>
+  <p data-i18n="d1">A <code>.docx</code> file is a ZIP archive of XML. The renderer in <code>src/docx.js</code> reads the client's template, rewrites only <code>word/document.xml</code>, and copies every other part byte for byte, so the client's logo, fonts, styles, headers and numbering stay exactly as they made them. The ZIP reader and writer, the CRC32 and the token engine are about four hundred lines of plain JavaScript inside the Worker.</p>
+  <p data-i18n="d2">The template grammar is small: <code>{{name}}</code> for a value, a paragraph that repeats once per list item, and a block loop for work history. The traps were all in Word's file format:</p>
+  <ul>
+    <li data-i18n="d_l1"><strong>Word splits text across runs.</strong> A token typed in one go can be stored as three fragments with different formatting. Loop markers and old text in a template are matched on the paragraph's combined text; simple <code>{{tokens}}</code> are still matched one run at a time, which is why every template is written with each token in a single run.</li>
+    <li data-i18n="d_l2"><strong>ZIP sizes can live only at the end.</strong> Many Word files write zero sizes in the local headers and the real ones in the central directory. Reading local headers returned zero characters; the reader now starts from the central directory.</li>
+    <li data-i18n="d_l3"><strong>Templates carry old data.</strong> One client template had a previous candidate's name drawn into the banner at the top of its first page. The renderer replaces that text across runs with the current candidate's name, and the template's placeholder portrait is swapped for the uploaded photo in the same frame.</li>
+    <li data-i18n="d_l4"><strong>Empty sections should disappear.</strong> A heading with nothing under it is dropped, so a candidate with no trainings does not get an empty Trainings section.</li>
+  </ul>
+  <h2 data-i18n="h_anon">Anonymous CVs: three layers, because one is not enough</h2>
+  <p data-i18n="a1">Our own anonymous CV carries no name, email, phone, address or link, because the client should contact us, not the candidate. A prompt rule saying so is not enough: models copy sentences verbatim, and "contact me at" comes along with them. So identity is removed three times:</p>
+  <ul>
+    <li data-i18n="a_l1"><strong>The prompt</strong> forbids the name and every contact detail, and asks for "the candidate" instead.</li>
+    <li data-i18n="a_l2"><strong>A scrub on the draft</strong> removes emails, links, social handles, phone numbers and the candidate's name, using the database name when the candidate was picked, or a checked guess from the CV's header on an upload. A sentence that existed only to give a contact detail is dropped whole.</li>
+    <li data-i18n="a_l3"><strong>A second scrub on download</strong>, by pattern only, because the review screen is editable and a recruiter can paste a phone number back in.</li>
+  </ul>
+  <p data-i18n="a2">The scrub had its own false positives to get right. A rupiah figure such as 3.000.000.000 looks like a phone number until you require a phone prefix and reject thousands groupings. A name can also be part of a company name: Jaya is both a given name and a common word in Indonesian company names, so a name part that appears in an employer or school line is kept. And JavaScript's <code>\b</code> fails on names with accents or Chinese and Japanese characters, so word boundaries use Unicode letter classes. Twelve cases like these, plus a rendered document checked for leftover identity details, run as a test in CI before every deploy.</p>
+  <p data-i18n="a3">One gap I know about: the download request does not know the candidate's name, so the second scrub catches contact patterns but not a name the recruiter types back in on the review screen. The review page says how many details were removed, and the recruiter is the last check. Closing it properly means carrying the identity through the form, which I have not built yet.</p>
+  <h2 data-i18n="h_roles">The bug at the last click</h2>
+  <p data-i18n="ro1">The reformatter started as admin-only. When the internal team needed it, the obvious move was to reuse the admin routes, but the <code>/admin</code> paths sit behind an extra login at the edge that only admin passes, so staff were blocked before the app's own permission check ever ran. The team got parallel <code>/internal</code> routes. Two bugs followed. The first attempt renamed the admin upload route instead of adding a new one, which broke it for admin. Later, the review form posted to an <code>/internal</code> download route that did not exist, so the team could upload and review a CV and then hit "Page not found" on the final click.</p>
+  <p data-i18n="ro2">After any route change I now send a request to every route in both namespaces and expect a login redirect, never a 404. The automated smoke test after each deploy covers only the admin page so far. The rule I took from it: when a second role needs a feature, add routes, never rename the existing ones.</p>
+  <h2 data-i18n="h_next">What is not solved</h2>
+  <ul>
+    <li data-i18n="n_l1"><strong>Scanned CVs.</strong> An image-only PDF has no text layer, and there is no OCR path yet. The recruiter is asked for a text-based file.</li>
+    <li data-i18n="n_l2"><strong>Cost routing.</strong> The triage step that would send clean CVs to a cheaper model stays off until an A/B run on real CVs shows that the cheap path does not miss or invent fields.</li>
+    <li data-i18n="n_l3"><strong>The name on the download request</strong>, as described above.</li>
+  </ul>
+  <p data-i18n="outro" style="margin-top:28px;">None of the parts is exotic: a PDF parser, one LLM call behind a schema, a review form and a ZIP writer. The design work was in the seams: one definition behind the prompt, the form and the template; the model's output treated as a draft that a person approves; and every gap made visible instead of plausible.</p>
+  <p style="margin-top:36px;"><a href="/" data-i18n="back">← Back to portfolio</a></p>
+</div>
+<script src="cvf-i18n.js"></script>
+</body>
+</html>

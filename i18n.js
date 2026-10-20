@@ -64,10 +64,10 @@ const I18N = {
     en: "Scoring engine that weighs each candidate's resume against a job order across must-have skills, language, years of experience, tenure, seniority, and commercial fit, then ranks candidates with the reasons behind every point. Built with fairness guardrails: age, name, gender, and nationality never touch the score, and a test enforces it before every CI deploy.",
     sv: "Poängmotor som väger varje kandidats CV mot en jobborder utifrån obligatoriska färdigheter, språk, års erfarenhet, anställningstid, senioritet och kommersiell matchning, och rangordnar kandidaterna med skälen bakom varje poäng. Byggd med rättvisespärrar: ålder, namn, kön och nationalitet påverkar aldrig poängen, och ett test kontrollerar det före varje driftsättning i CI."
   },
-  'card.cv.t': { en: 'AI Resume Intelligence (in production)', sv: 'AI CV-analys (i produktion)' },
+  'card.cv.t': { en: 'AI Resume Intelligence (in production) 📖', sv: 'AI CV-analys (i produktion) 📖' },
   'card.cv.p': {
-    en: "LLM pipeline inside my agency's job board that reads any candidate CV, extracts structured data, and reformats it into each client's exact submission template for recruiter review turning hours of per-placement document work into minutes.",
-    sv: "LLM-pipeline i min byrås jobbplattform som läser valfri kandidat-CV, extraherar strukturerad data och formaterar om den till varje kunds exakta leveransmall för rekrytörens granskning, vilket gör timmar av dokumentarbete per placering till minuter."
+    en: "LLM pipeline inside my agency's job board that reads a candidate's CV (PDF, DOCX or text), extracts structured data and fills each client's exact submission template, so most of the manual document work shrinks to a quick recruiter review.",
+    sv: "LLM-pipeline i min byrås jobbplattform som läser en kandidats CV (PDF, DOCX eller text), extraherar strukturerad data och fyller i varje kunds exakta mall, så att det mesta av det manuella dokumentarbetet krymper till en snabb granskning av rekryteraren."
   },
   'card.kb.t': { en: 'KerjaBoard ↗', sv: 'KerjaBoard ↗' },
   'card.kb.p': {
@@ -144,9 +144,13 @@ const I18N = {
     sv: "Regionmedveten efterlevnad för tusentals kandidater på en Worker: EU:s och Indonesiens integritetsregimer sida vid sida, opt-in-samtycke för EU-matchmejl, artikel 21-invändning som knapp och EU-löntransparensvalidering på jobbannonser."
   },
 
+  'blog8.p': {
+    en: "How KerjaBoard turns a candidate's CV into a client's exact Word template: five ways PDFs hide their text, one definition behind the prompt, form and template, a review screen that shows gaps instead of guesses, and an anonymous CV scrubbed three times.",
+    sv: "Hur KerjaBoard gör om ett CV till kundens exakta Word-mall: fem sätt som PDF-filer gömmer sin text på, en definition bakom prompt, formulär och mall, en granskningssida som visar luckor i stället för gissningar, och ett anonymt CV som rensas tre gånger."
+  },
   'blog7.p': {
     en: "A two-year Google Sheet became a client CRM on one Worker, then grew an outbound engine. The part worth reading: a reply classifier with nine passing tests that was wrong on three real sentences, and a kill switch any signed-in user could arm.",
-    sv: "Ett tvåårigt Google Sheet blev ett kund-CRM på en Worker, och fick sedan en utgående motor. Det som är värt att läsa: en svarsklassificerare med nio godkända tester som hade fel på tre riktiga meningar, och ett huvudströmbrytare vem som helst som var inloggad kunde lägga om."
+    sv: "Ett tvåårigt Google Sheet blev ett kund-CRM på en Worker, och fick sedan en utgående motor. Det som är värt att läsa: en svarsklassificerare med nio godkända tester som hade fel på tre riktiga meningar, och en huvudströmbrytare vem som helst som var inloggad kunde lägga om."
   },
 
   'blog6.p': {
