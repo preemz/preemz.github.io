@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="How I built an end-to-end AI recruiting pipeline in production: LLM resume parsing, explainable candidate fit scoring with fairness guardrails, and automated engagement. With architecture diagrams and research references.">
+<meta name="description" content="How I built an end-to-end AI recruiting pipeline in production: LLM resume parsing, explainable candidate fit scoring with fairness guardrails, and CV reformatting into client templates. With architecture diagrams and research references.">
 <link rel="canonical" href="https://preemz.github.io/blog-ai-recruiting-pipeline.html">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://preemz.github.io/blog-ai-recruiting-pipeline.html">
 <meta property="og:title" content="An End-to-End AI Recruiting Pipeline in Production">
-<meta property="og:description" content="LLM resume parsing, explainable fit scoring, and WhatsApp automation running a real recruiting agency on Cloudflare Workers.">
+<meta property="og:description" content="LLM resume parsing, explainable fit scoring, and CV reformatting running a real recruiting agency on Cloudflare Workers.">
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">
 {
@@ -73,7 +73,7 @@
   <h1 data-i18n="b.title">An End-to-End AI Recruiting Pipeline in Production</h1>
   <div class="meta" data-i18n="b.meta">Primawan Satrio · August 2026 · ~10 min read</div>
 
-  <p data-i18n="b.p1">Most AI demos die in the demo. The interesting question is not <em>can a model do this once</em>, but <em>can it run inside a live business every day, without a human babysitting every step</em>. I run a headhunting agency across the Indonesia–Japan corridor, and instead of bolting AI onto the side, I rebuilt our recruiting pipeline around it: parsing resumes, scoring candidate fit, reformatting CVs into client templates, and engaging candidates automatically.</p>
+  <p data-i18n="b.p1">Most AI demos die in the demo. The interesting question is not <em>can a model do this once</em>, but <em>can it run inside a live business every day, without a human babysitting every step</em>. I run a headhunting agency across the Indonesia–Japan corridor, and instead of bolting AI onto the side, I rebuilt our recruiting pipeline around it: parsing resumes, scoring candidate fit, and reformatting CVs into client templates.</p>
   <p data-i18n="b.p2">This post explains how the pipeline works, why each stage is designed the way it is, and what I learned deploying LLMs where mistakes cost real placements. It runs on Cloudflare Workers with D1 for data and R2 for document storage, with no origin server anywhere.</p>
 
   <h2 data-i18n="b.h2a">The pipeline at a glance</h2>
@@ -90,7 +90,7 @@
         <rect x="158" y="45" width="130" height="60" rx="10" fill="#161b26" stroke="#4f8cff"/><text x="223" y="70" text-anchor="middle" fill="#9cc0ff">Parse &amp; score</text><text x="223" y="88" text-anchor="middle" fill="#8b93a5" font-size="11">NLP extraction · fit engine</text>
         <rect x="308" y="45" width="130" height="60" rx="10" fill="#161b26" stroke="#4f8cff"/><text x="373" y="70" text-anchor="middle" fill="#9cc0ff">Recruiter review</text><text x="373" y="88" text-anchor="middle" fill="#8b93a5" font-size="11">explainable reasons shown</text>
         <rect x="458" y="45" width="120" height="60" rx="10" fill="#161b26" stroke="#7c5cff"/><text x="518" y="70" text-anchor="middle" fill="#c3b0ff">LLM reformat</text><text x="518" y="88" text-anchor="middle" fill="#8b93a5" font-size="11">client template .docx</text>
-        <rect x="598" y="45" width="114" height="60" rx="10" fill="#161b26" stroke="#232a38"/><text x="655" y="70" text-anchor="middle">Submit &amp; engage</text><text x="655" y="88" text-anchor="middle" fill="#8b93a5" font-size="11">WhatsApp follow-up</text>
+        <rect x="598" y="45" width="114" height="60" rx="10" fill="#161b26" stroke="#232a38"/><text x="655" y="70" text-anchor="middle">Submit to client</text><text x="655" y="88" text-anchor="middle" fill="#8b93a5" font-size="11">recruiter sends CV</text>
       </g>
       <g stroke="#4f8cff" stroke-width="1.5" fill="none" marker-end="url(#arw)">
         <line x1="138" y1="75" x2="156" y2="75"/>
@@ -205,7 +205,7 @@
   </ul>
 
   <h2 data-i18n="b.h2h">Wrapping up</h2>
-  <p data-i18n="b.outro">None of the individual pieces here is exotic: regexes, weighted scoring, an LLM call behind a schema, a WhatsApp bot. The engineering value and the forward-deployed mindset lives in the seams: knowing which problems need a model and which need a regex, making automated judgments inspectable, keeping humans on the decisions that deserve them, and proving fairness claims with tests. That's the difference between an AI demo and an AI pipeline a real business runs on.</p>
+  <p data-i18n="b.outro">None of the individual pieces here is exotic: regexes, weighted scoring, an LLM call behind a schema. The engineering value and the forward-deployed mindset lives in the seams: knowing which problems need a model and which need a regex, making automated judgments inspectable, keeping humans on the decisions that deserve them, and proving fairness claims with tests. That's the difference between an AI demo and an AI pipeline a real business runs on.</p>
   <p style="margin-top:36px;"><a href="/">← Back to portfolio</a></p>
 </div>
 <script src="blog-i18n.js"></script>

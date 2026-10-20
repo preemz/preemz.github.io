@@ -14,8 +14,8 @@ const I18N = {
   'hero.badge': { en: '● Founder · Engineer · Jakarta → Busan → Uppsala', sv: '● Grundare · Ingenjör · Jakarta → Busan → Uppsala' },
   'hero.title': { en: 'AI Forward Deployed Engineer|with a |business mindset|. ', sv: 'Forward Deployed Engineer inom AI|med ett |affärsfokus|. ' },
   'hero.lede': {
-    en: "I build end-to-end AI systems that run real businesses. My recruiting agency runs on a pipeline I built myself: resumes parsed and reformatted by LLMs, candidates scored for fit with explainable reasoning, and engagement automated over WhatsApp from application to client submission, without recruiter busywork.",
-    sv: "Jag bygger AI-system från start till mål som driver riktiga företag. Min rekryteringsbyrå drivs på en pipeline jag byggt själv: CV:n tolkas och formateras om av LLM:ar, kandidater poängsätts med förklarbar matchningslogik, och uppföljning sker automatiskt via WhatsApp, från ansökan till klientleverans, utan onödigt rekrytargnäll."
+    en: "I build end-to-end AI systems that run real businesses. My recruiting agency runs on a pipeline I built myself: resumes parsed and reformatted by LLMs and candidates scored for fit with explainable reasoning, so recruiters spend their time on candidates and clients instead of paperwork.",
+    sv: "Jag bygger AI-system från start till mål som driver riktiga företag. Min rekryteringsbyrå drivs på en pipeline jag byggt själv: CV:n tolkas och formateras om av LLM:ar och kandidater poängsätts med förklarbar matchningslogik, så att rekryterarna lägger tiden på kandidater och kunder i stället för pappersarbete."
   },
   'hero.cta1': { en: "What I'm building", sv: 'Vad jag bygger' },
   'hero.cta2': { en: 'Get in touch', sv: 'Ta kontakt' },
@@ -24,11 +24,11 @@ const I18N = {
   'about.h2': { en: 'Track record', sv: 'Meriter' },
   'stat1.label': { en: '10+ yrs', sv: '10+ år' },
   'stat1.sub': { en: 'across engineering, product & recruitment', sv: 'inom utveckling, produkt & rekrytering' },
-  'stat2.label': { en: '$0 → 7 figs', sv: '$0 → 7 siffror' },
-  'stat2.sub': { en: 'revenue scaled as founder', sv: 'omsättning skalad som grundare' },
+  'stat2.label': { en: '60+', sv: '60+' },
+  'stat2.sub': { en: 'clients served across APAC, Europe, and the US', sv: 'kunder i APAC, Europa och USA' },
   'stat3.label': { en: '10+', sv: '10+' },
   'stat3.sub': { en: 'core team members built & led', sv: 'kärngruppsmedlemmar byggda & ledda' },
-  'stat4.label': { en: '27k+', sv: '27k+' },
+  'stat4.label': { en: '28k+', sv: '28k+' },
   'stat4.sub': { en: 'followers across LinkedIn & WhatsApp channel', sv: 'följare på LinkedIn & WhatsApp-kanal' },
 
   'about.p1': {
@@ -40,8 +40,8 @@ const I18N = {
     sv: "Idag driver jag fem bolag som spänner över rekrytering på provision, employer-of-record-tjänster, japanskutbildning och AI-produkter. Den röda tråden: jag går dit där tekniken möter kunden, levererar snabbt och mäter allt i intäkt. Så arbetar jag som forward deployed engineer: modellen är bara hälften av jobbet; införande, ekonomi och förtroende är den andra halvan."
   },
   'about.p3': {
-    en: "What I do is what Forward Deployed Engineering means at places like Palantir and OpenAI: sit with the customer, ship with the engineers, close with the sale. The AI stack I built runs my own recruiting teams today: parsing CVs, formatting client submissions, and engaging candidates automatically.",
-    sv: "Det jag gör är vad Forward Deployed Engineering betyder hos bolag som Palantir och OpenAI: sitt med kunden, koda med ingenjörerna, avsluta med försäljningen. AI-stacken jag byggt driver idag mina egna rekryteringsteam: tolkar CV:n, formaterar kundleveranser och följer upp kandidater automatiskt."
+    en: "What I do is what Forward Deployed Engineering means at places like Palantir and OpenAI: sit with the customer, ship with the engineers, close with the sale. The AI stack I built runs my own recruiting teams today: parsing CVs, scoring fit, and formatting client submissions.",
+    sv: "Det jag gör är vad Forward Deployed Engineering betyder hos bolag som Palantir och OpenAI: sitt med kunden, koda med ingenjörerna, avsluta med försäljningen. AI-stacken jag byggt driver idag mina egna rekryteringsteam: tolkar CV:n, poängsätter matchning och formaterar kundleveranser."
   },
   'fact1.b': { en: 'Ex-unicorn PM', sv: 'Ex-PM på enhörning' },
   'fact1.s': { en: "Bukalapak, Indonesia's top e-commerce", sv: "Bukalapak, Indonesiens största e-handel" },
@@ -56,8 +56,8 @@ const I18N = {
   'ventures.h2': { en: 'Ventures & projects', sv: 'Bolag & projekt' },
   'card.sc.t': { en: 'Satrio Consulting ↗', sv: 'Satrio Consulting ↗' },
   'card.sc.p': {
-    en: "A headhunting and recruitment firm for professionals moving across borders: contingency executive search, international placement, and an employer-of-record service letting foreign companies hire Indonesian talent locally or remotely without setting up a legal entity. Clients across Japan, Korea, Singapore, Australia, Malaysia, and Indonesia.",
-    sv: "En headhunting- och rekryteringsfirma för yrkesverksamma som rör sig över landsgränser: provisionbaserad executive search, internationell placering och en employer-of-record-tjänst som låter utländska företag anställa indonesisk talang lokalt eller på distans utan eget bolag. Kunder i Japan, Korea, Singapore, Australien, Malaysia och Indonesien."
+    en: "A headhunting and recruitment firm for professionals moving across borders: contingency executive search, international placement, and an employer-of-record service letting foreign companies hire Indonesian talent locally or remotely without setting up a legal entity. Clients across APAC (Indonesia, Japan, Singapore), Europe (Poland, the UK, Germany, the Netherlands), and the US.",
+    sv: "En headhunting- och rekryteringsfirma för yrkesverksamma som rör sig över landsgränser: provisionbaserad executive search, internationell placering och en employer-of-record-tjänst som låter utländska företag anställa indonesisk talang lokalt eller på distans utan eget bolag. Kunder i APAC (Indonesien, Japan, Singapore), Europa (Polen, Storbritannien, Tyskland, Nederländerna) och USA."
   },
   'card.fit.t': { en: 'Explainable Candidate Fit Scoring (in production) 📖', sv: 'Förklarbar kandidatmatchning (i produktion) 📖' },
   'card.fit.p': {
@@ -68,11 +68,6 @@ const I18N = {
   'card.cv.p': {
     en: "LLM pipeline inside my agency's job board that reads any candidate CV, extracts structured data, and reformats it into each client's exact submission template for recruiter review turning hours of per-placement document work into minutes.",
     sv: "LLM-pipeline i min byrås jobbplattform som läser valfri kandidat-CV, extraherar strukturerad data och formaterar om den till varje kunds exakta leveransmall för rekrytörens granskning, vilket gör timmar av dokumentarbete per placering till minuter."
-  },
-  'card.wa.t': { en: 'LLM Candidate Engagement (in production)', sv: 'LLM-kandidatuppföljning (i produktion)' },
-  'card.wa.p': {
-    en: "Automated candidate engagement over WhatsApp: reaching out, qualifying, and scheduling inside the placement pipeline so recruiters spend time closing, not chasing.",
-    sv: "Automatiserad kandidatuppföljning via WhatsApp: ta kontakt, kvalificera och boka tid inne i placeringsflödet så rekrytären lägger tiden på att avsluta, inte leta."
   },
   'card.kb.t': { en: 'KerjaBoard ↗', sv: 'KerjaBoard ↗' },
   'card.kb.p': {
@@ -100,8 +95,8 @@ const I18N = {
   'exp1.w': { en: '2023 – Present · Uppsala, Sweden (remote)', sv: '2023 – nu · Uppsala, Sverige (distans)' },
   'exp1.t': { en: 'Founder & Executive Director Satrio Consulting (5 ventures)', sv: 'Grundare & VD Satrio Consulting (5 bolag)' },
   'exp1.p': {
-    en: "Set strategy across five ventures and ran day-to-day operations. Scaled revenue from zero to seven figures USD, grew a core team of 10+, built an 11k+ follower WhatsApp jobs channel and a 16k+ LinkedIn following, and closed clients in six countries.",
-    sv: "Satte strategi för fem bolag och ledde den dagliga driften. Skalade omsättningen från noll till sju siffror i USD, byggde upp en kärngrupp på 10+, startade en WhatsApp-kanal med 11k+ följare och 16k+ följare på LinkedIn, samt vann kunder i sex länder."
+    en: "Set strategy across five ventures and ran day-to-day operations. Served 60+ clients across APAC, Europe, and the US, grew a core team of 10+, and built a 12k+ follower WhatsApp jobs channel and a 16k+ LinkedIn following.",
+    sv: "Satte strategi för fem bolag och ledde den dagliga driften. Betjänade 60+ kunder i APAC, Europa och USA, byggde upp en kärngrupp på 10+ och startade en WhatsApp-kanal för jobb med 12k+ följare samt nådde 16k+ följare på LinkedIn."
   },
   'exp2.w': { en: '2019 – 2022 · Tokyo, Japan (remote)', sv: '2019 – 2022 · Tokyo, Japan (distans)' },
   'exp2.t': { en: 'Lead Career Advisor INBOUND TECHNOLOGY, Inc.', sv: 'Lead Career Advisor INBOUND TECHNOLOGY, Inc.' },
