@@ -74,6 +74,7 @@ const I18N = {
     en: "The production job board powering my agency: GDPR-ready for EU postings, an LLM pipeline that reformats candidate CVs into client templates, explainable fit scoring, and a recruiter console for the full placement workflow.",
     sv: "Produktionsjobbbrädet som driver min byrå: GDPR-klart för EU-annonser, en LLM-pipeline som formaterar om kandidat-CV:n till klientmallar, förklarbar matchningspoäng och en rekrytärkonsol för hela placeringsflödet."
   },
+  'card.kb.deck': { en: 'See the AI features deck ↗', sv: 'Se presentationen om AI-funktionerna ↗' },
   'card.crm.t': { en: 'Satrio CRM ↗', sv: 'Satrio CRM ↗' },
   'card.crm.p': {
     en: "Internal client CRM for my agency's business development team, replacing two years of Google Sheets: companies, contacts, outreach, and an outbound engine that reads replies, honours opt-outs, and warms a mailbox before it sends. One Cloudflare Worker, one D1 database, no framework.",

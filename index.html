@@ -126,6 +126,8 @@
   .card h3 { font-size: 17px; letter-spacing: -.01em; }
   .card p { color: var(--muted); font-size: 14.5px; flex: 1; }
   .tagrow { display: flex; flex-wrap: wrap; gap: 6px; }
+  .cardlink { align-self: flex-start; font-size: 14px; font-weight: 600; color: var(--accent); text-decoration: none; }
+  .cardlink:hover { text-decoration: underline; }
   .tag { font-size: 11.5px; color: var(--accent); background: rgba(79,140,255,.09); border-radius: 6px; padding: 2px 8px; }
 
   .timeline { border-left: 2px solid var(--border); margin-left: 6px; }
@@ -220,6 +222,7 @@
         <h3 data-i18n="card.kb.t">KerjaBoard ↗</h3>
         <p data-i18n="card.kb.p">The production job board powering my agency: GDPR-ready for EU postings, an LLM pipeline that reformats candidate CVs into client templates, explainable fit scoring, and a recruiter console for the full placement workflow.</p>
         <div class="tagrow"><span class="tag">Cloudflare Workers</span><span class="tag">GDPR</span><span class="tag">In production</span></div>
+        <a class="cardlink" href="https://satriocs.com/kerjaboard-ai/" target="_blank" rel="noopener" data-i18n="card.kb.deck">See the AI features deck ↗</a>
       </div>
       <div class="card" data-href="https://crm.satriocs.com">
         <h3 data-i18n="card.crm.t">Satrio CRM ↗</h3>
