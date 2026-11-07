@@ -13,8 +13,8 @@ const I18N_CRM = {
   "sv": "I två år höll min byrå sin kundpipeline i ett Google Sheet. Företag i en flik, eventkontakter i en annan, utmailningar och svar som skrevs för hand i celler som aldrig stämde. Kalkylbladet var systemet för varje affärsutvecklingssamtal vi hade. <a href=\"https://crm.satriocs.com\" target=\"_blank\" rel=\"noopener\">Satrio CRM</a> är det som ersatte det, och det här inlägget handlar om hur det byggdes."
  },
  "p2": {
-  "en": "<strong>What it is, plainly:</strong> an internal tool for the business development team. It is not a SaaS product, there is no marketing site, and nothing here is for sale. More than 500 companies and contacts came out of those sheets and into a real database, on one Cloudflare Worker with one D1 database, server-rendered HTML and zero runtime dependencies.",
-  "sv": "<strong>Vad det är, rent ut sagt:</strong> ett internt verktyg för affärsutvecklingsteamet. Det är ingen SaaS-produkt, det finns ingen marknadsföringssajt, och ingenting här är till salu. Över 500 företag och kontakter kom ut ur kalkylbladet och in i en riktig databas, på en enda Cloudflare Worker med en enda D1-databas, serverrenderad HTML och noll runtime-beroenden."
+  "en": "<strong>What it is, plainly:</strong> an internal tool for the business development team. The production CRM is not a SaaS product, there is no marketing site, and it is not for sale. More than 500 companies and contacts came out of those sheets and into a real database, on one Cloudflare Worker with one D1 database, server-rendered HTML and zero runtime dependencies.",
+  "sv": "<strong>Vad det är, rent ut sagt:</strong> ett internt verktyg för affärsutvecklingsteamet. Produktions-CRM:et är ingen SaaS-produkt, det finns ingen marknadsföringssajt och det är inte till salu. Över 500 företag och kontakter kom ut ur kalkylbladet och in i en riktig databas, på en enda Cloudflare Worker med en enda D1-databas, serverrenderad HTML och noll runtime-beroenden."
  },
  "h_why": {
   "en": "Why a CRM, and why build it",
@@ -77,12 +77,12 @@ const I18N_CRM = {
   "sv": "Den del som faktiskt var intressant: utgående trafik"
  },
  "outbound_p1": {
-  "en": "A CRM that only stores what you typed in is a database with extra steps. The reason this one is worth writing about is that it also runs outbound: segments the companies, tracks outreach, reads the replies that come back, and sequences follow-ups.",
-  "sv": "Ett CRM som bara sparar vad man skrev in är en databas med extra steg. Anledningen till att det här är värt att skriva om är att det också kör utgående trafik: segmenterar företagen, spårar utmailningar, läser svaren som kommer tillbaka och sekvenserar uppföljningar."
+  "en": "A CRM that only stores what you typed in is a database with extra steps. The reason this one is worth writing about is that it also runs outbound: segments the companies, tracks outreach, is built to read the replies that come back, and sequences follow-ups.",
+  "sv": "Ett CRM som bara sparar vad man skrev in är en databas med extra steg. Anledningen till att det här är värt att skriva om är att det också kör utgående trafik: segmenterar företagen, spårar utmailningar, är byggt för att läsa svaren som kommer tillbaka och sekvenserar uppföljningar."
  },
  "outbound_p2": {
-  "en": "Replies are read by a second Worker that shares the first Worker's database. It is deployed, and Cloudflare Email Routing still has to be pointed at it. When a reply arrives it does four things, in this order:",
-  "sv": "Svar läses av en andra Worker som delar den första Workerns databas. Den är drifsatt, men Cloudflare Email Routing måste ännu pekas mot den. När ett svar kommer gör den fyra saker, i den här ordningen:"
+  "en": "Replies are read by a second Worker that shares the first Worker's database. It is deployed, but inbound routing is not set up: replies are addressed to a Workspace mailbox, and nothing delivers mail to the Worker yet. Cloudflare Email Routing still has to be pointed at it. When a reply arrives it will do four things, in this order:",
+  "sv": "Svar läses av en andra Worker som delar den första Workerns databas. Den är driftsatt, men inkommande routing är inte uppsatt: svar adresseras till en brevlåda i Workspace, och ingenting levererar post till Workern ännu. Cloudflare Email Routing måste fortfarande pekas mot den. När ett svar kommer ska den göra fyra saker, i den här ordningen:"
  },
  "out_l1": {
   "en": "<strong>Classify the reply.</strong> A pure function takes the subject and body and returns one of interested, question, out of office, unsubscribe, or bounce.",
@@ -97,16 +97,16 @@ const I18N_CRM = {
   "sv": "<strong>Respektera en avregistrering direkt.</strong> En avregistrering eller en bounce lägger adressen på spärrlistan, och sekvensmotorn tar bort den spärrade kontakten ur alla sekvenser vid nästa körning."
  },
  "out_l4": {
-  "en": "<strong>Alert the team.</strong> A Discord message for every reply, so an interested prospect does not sit unread. Alerting is best effort and never allowed to break the processing.",
-  "sv": "<strong>Varna teamet.</strong> Ett Discord-meddelande för varje svar, så att ett intresserat prospekt inte ligger oläst. Varningen görs efter bästa förmåga och får aldrig få bearbetningen att krascha."
+  "en": "<strong>Alert the team.</strong> The code posts a Discord message for every reply, so an interested prospect does not sit unread, and it is tested. It is not wired to a secret in production: the Worker reads a different secret name than the one deployed, so the alert returns early. No reply has been logged so far, so it has never fired. Alerting is best effort and never allowed to break the processing.",
+  "sv": "<strong>Varna teamet.</strong> Koden postar ett Discord-meddelande för varje svar, så att ett intresserat prospekt inte ligger oläst, och den är testad. Den är inte kopplad till en secret i produktion: Workern läser ett annat secret-namn än det som är driftsatt, så varningen avbryts tidigt. Inget svar har loggats hittills, så den har aldrig utlösts. Varningen görs efter bästa förmåga och får aldrig få bearbetningen att krascha."
  },
  "fig1": {
-  "en": "Figure 1. What happens when a reply arrives. The suppression list is checked before any send, not only here.",
-  "sv": "Figur 1. Vad som händer när ett svar kommer. Spärrlistan kontrolleras före varje sändning, inte bara här."
+  "en": "Figure 1. What happens when a reply arrives, once inbound routing is set up. The suppression list is checked before any campaign send, not only here.",
+  "sv": "Figur 1. Vad som händer när ett svar kommer, när inkommande routing väl är uppsatt. Spärrlistan kontrolleras före varje kampanjsändning, inte bara här."
  },
  "outbound_p3": {
-  "en": "Suppression is the one rule with no exceptions in the codebase. It exists because of Indonesian law (UU 27/2022) and, for European contacts, GDPR, and there are no exceptions on any send path. A single hot lead is never worth mailing someone who asked you to stop.",
-  "sv": "Spärrlistan är den enda regeln utan undantag i kodbasen. Den finns på grund av indonesisk lag (UU 27/2022) och, för europeiska kontakter, GDPR. En enda het kund är aldrig värd att mejla någon som bett dig att sluta."
+  "en": "Suppression is the one rule with no exceptions on the campaign path. It exists because of Indonesian law (UU 27/2022) and, for European contacts, GDPR, and every campaign send path checks the list. The one-off test email in Settings is a diagnostic, not a campaign, and it does not. A single hot lead is never worth mailing someone who asked you to stop.",
+  "sv": "Spärrlistan är den enda regeln utan undantag i kampanjflödet. Den finns på grund av indonesisk lag (UU 27/2022) och, för europeiska kontakter, GDPR, och varje kampanjsändning kontrollerar listan. Testmejlet i inställningarna är en diagnostik och ingen kampanj, och det gör inte den kontrollen. En enda het kund är aldrig värd att mejla någon som bett dig att sluta."
  },
  "h_ramp": {
   "en": "Sending slowly on purpose",
@@ -129,8 +129,8 @@ const I18N_CRM = {
   "sv": "Testerna gick igenom, och klassificeraren var fel"
  },
  "bug_p1": {
-  "en": "The reply classifier is a set of regular expressions, and it had nine tests. All nine passed. Then I fed it sentences a real prospect would actually write, and it got three of them wrong:",
-  "sv": "Svarsklassificeraren är en uppsättning reguljära uttryck, och den hade nio tester. Alla nio gick igenom. Sedan matade jag den med meningar en riktig prospekt faktiskt skulle skriva, och den fick tre av dem fel:"
+  "en": "The reply classifier is a set of regular expressions, and it had nine tests. All nine passed. Then I fed it sentences a real prospect would actually write, and it got four of them wrong:",
+  "sv": "Svarsklassificeraren är en uppsättning reguljära uttryck, och den hade nio tester. Alla nio gick igenom. Sedan matade jag den med meningar en riktig prospekt faktiskt skulle skriva, och den fick fyra av dem fel:"
  },
  "bug_l1": {
   "en": "<strong>\"We have 550 employees in Jakarta, can you send pricing?\"</strong> read as a bounce, because <code>550</code> matched a bare SMTP error code. This is a qualified prospect asking to buy, and a bounce adds the address to the suppression list. One regex could have permanently silenced them.",
@@ -144,13 +144,17 @@ const I18N_CRM = {
   "en": "<strong>\"Please don't unsubscribe me, I'd like to learn more.\"</strong> read as an opt-out, because it contains the word \"unsubscribe\". Someone asking us to keep going would have been added to the suppression list.",
   "sv": "<strong>”Please don't unsubscribe me, I'd like to learn more.”</strong> lästes som en avregistrering, för att den innehåller ordet ”unsubscribe”. Någon som bad oss fortsätta hade hamnat på spärrlistan."
  },
+ "bug_l4": {
+  "en": "<strong>\"Kami belum tertarik, terima kasih.\"</strong> (Indonesian for \"we are not interested yet, thank you\") read as a hot lead for the same reason: the interest word matched and nothing checked for the negation.",
+  "sv": "<strong>”Kami belum tertarik, terima kasih.”</strong> (indonesiska för ”vi är inte intresserade ännu, tack”) lästes som en het lead av samma skäl: intresseordet matchade och ingenting kontrollerade om det var nekat."
+ },
  "bug_p2": {
   "en": "The tests passed because every test case was a sentence written to match the regexes. That is the real lesson, and it is the same one from the scoring engine post: a test that has never failed has not proven anything. Testing a classifier against its own author's examples tests the author's imagination, not the code.",
   "sv": "Testerna gick igenom för att varje testfall var en mening skriven för att matcha de reguljära uttrycken. Det är den riktiga lärdommen, och det är samma som i inlägget om matchningsmotorn: ett test som aldrig har fallerat har inte bevisat något. Att testa en klassificerare mot sin egen författares exempel testar författarens fantasi, inte koden."
  },
  "bug_p3": {
   "en": "The fixes: a bounce now has to say why delivery failed, because a number in a sentence is not an SMTP code. Interest only counts when nobody negated it. An opt-out does not count when the writer explicitly asked us not to opt them out. And there are now eight regression tests, all real sentences: the four the previous version got wrong, and four more guarding the edges of the fix. A reply that both declines and asks to be removed is still an opt-out, because a missed opt-out is the one error that costs real trust.",
-  "sv": "Rättelserna: en bounce måste nu säga varför leveransen misslyckades, för att ett tal i en mening inte är en SMTP-kod. Intresse räknas bara när ingen har nekat det. En avregistrering räknas inte när författaren uttryckligen bett oss att inte avregistrera. Och det finns nu åtta regressionstester, alla riktiga meningar: de fyra som den tidigare versionen fick fel, och fyra till som vakar kanterna på rättelsen. Ett svar som både tackar nej och ber att bli borttaget är fortfarande en avregistrering, för en missad avregistrering är det enda felet som kostar verklig tillit."
+  "sv": "Rättelserna: en bounce måste nu säga varför leveransen misslyckades, för att ett tal i en mening inte är en SMTP-kod. Intresse räknas bara när ingen har nekat det. En avregistrering räknas inte när författaren uttryckligen bett oss att inte avregistrera. Och det finns nu åtta regressionstester, alla riktiga meningar: de fyra som den tidigare versionen fick fel, och fyra till som vakar över kanterna på rättelsen. Ett svar som både tackar nej och ber att bli borttaget är fortfarande en avregistrering, för en missad avregistrering är det enda felet som kostar verklig tillit."
  },
  "h_gate": {
   "en": "The other bug: a kill switch anyone could arm",
@@ -173,16 +177,16 @@ const I18N_CRM = {
   "sv": "Vad som inte är byggt"
  },
  "next_l1": {
-  "en": "Sending is still off. The warm-up ramp, the caps and the suppression checks are all live and tested, but no cold email has been sent, because the domain is not authenticated yet and the mailbox is not warmed. The gate is deliberately closed until it is.",
-  "sv": "Sändning är fortfarande avstängd. Uppvärmningsrampen, taken och spärrkontrollerna är alla live och testade, men inget kallt mejl har skickats, för domänen är inte autentiserad ännu och brevlådan inte uppvärmd. Spärren är medvetet stängd tills den är det."
+  "en": "Sending is still off. The domain is set up: since 25 October the outbound subdomain has SPF, DKIM and DMARC records and an email-sending binding. But no mailbox is warmed, nothing schedules the sequence run (it is a manual request), and the gate is deliberately closed. The warm-up ramp, the caps and the suppression checks are live and tested, and no cold email has been sent.",
+  "sv": "Sändning är fortfarande avstängd. Domänen är uppsatt: sedan den 25 oktober har den utgående subdomänen SPF-, DKIM- och DMARC-poster och en binding för e-postsändning. Men ingen brevlåda är uppvärmd, ingenting schemalägger sekvenskörningen (den är en manuell förfrågan) och spärren är medvetet stängd. Uppvärmningsrampen, taken och spärrkontrollerna är live och testade, och inget kallt mejl har skickats."
  },
  "next_l2": {
-  "en": "No role permissions yet. Everyone signed in can do everything. For the small team using it that is fine; it is the first thing to fix if the team grows.",
-  "sv": "Inga rollbehörigheter ännu. Alla inloggade kan göra allt. För det lilla teamet som använder det går det bra; det är det första som bör fixas om teamet växer."
+  "en": "No per-feature permissions yet. Roles exist (owner and member), but they only decide who may choose the recipient of a test email. Everyone signed in can do everything else. For the small team using it that is fine; it is the first thing to fix if the team grows.",
+  "sv": "Inga behörigheter per funktion ännu. Roller finns (owner och member), men de avgör bara vem som får välja mottagare för ett testmejl. Alla inloggade kan göra allt annat. För det lilla teamet som använder det går det bra; det är det första som bör fixas om teamet växer."
  },
  "next_l3": {
-  "en": "No activity feed from other systems. Replies land in the CRM because they are emailed to it, not because anything is integrated. Anything else is still typed in.",
-  "sv": "Inget aktivitetsflöde från andra system. Svar hamnar i CRM:et för att de mejlas dit, inte för att något är integrerat. Allt annat skrivs fortfarande in."
+  "en": "No activity feed from other systems. Only website hiring requests arrive automatically: the hiring-request form on my site creates a company, a contact, a note and a follow-up, with a Discord alert and an inbound list in the CRM. Replies are not coming in yet, and anything else is still typed in.",
+  "sv": "Inget aktivitetsflöde från andra system. Bara anställningsförfrågningar från webbplatsen kommer in automatiskt: förfrågningsformuläret på min sajt skapar ett företag, en kontakt, en anteckning och en uppföljning, med en Discord-varning och en inkorgslista i CRM:et. Svar kommer inte in ännu, och allt annat skrivs fortfarande in."
  },
  "next_l4": {
   "en": "No reporting beyond the dashboard tiles. The questions that started this are answered, by queries somebody has to run.",
@@ -197,8 +201,8 @@ const I18N_CRM = {
   "sv": "<strong>Det minsta systemet som svarar på frågan slår det minsta systemet du kan bygga.</strong> En Worker och en databas är inte poängen; poängen är att ett ark inte kan räkna."
  },
  "les_l2": {
-  "en": "<strong>A test suite written by the author is not an adversarial review.</strong> The classifier had nine passing tests and was wrong on three real sentences. Feed it sentences you did not write.",
-  "sv": "<strong>En testsvit skriven av författaren är ingen utmanande granskning.</strong> Klassificeraren hade nio godkända tester och hade fel på tre riktiga meningar. Mata den med meningar du inte skrev."
+  "en": "<strong>A test suite written by the author is not an adversarial review.</strong> The classifier had nine passing tests and was wrong on four real sentences. Feed it sentences you did not write.",
+  "sv": "<strong>En testsvit skriven av författaren är ingen utmanande granskning.</strong> Klassificeraren hade nio godkända tester och hade fel på fyra riktiga meningar. Mata den med meningar du inte skrev."
  },
  "les_l3": {
   "en": "<strong>A safety gate must live somewhere the danger cannot reach.</strong> A form field is not a safety gate.",
@@ -209,8 +213,8 @@ const I18N_CRM = {
   "sv": "<strong>Logga aldrig en framgång du inte uppnådde.</strong> En sändning utan leverans är ingen sändning, och ett system som rapporterar annat är värre än ett som inte rapporterar något."
  },
  "les_l5": {
-  "en": "<strong>Compliance rules belong in the code, not in the process.</strong> \"Remember to check the list\" is not a policy. The check runs before any send, so it cannot be forgotten.",
-  "sv": "<strong>Efterlevnadsregler hör hemma i koden, inte i processen.</strong> ”Kom ihåg att kolla listan” är ingen policy. Kontrollen körs före varje sändning, så den kan inte glömmas bort."
+  "en": "<strong>Compliance rules belong in the code, not in the process.</strong> \"Remember to check the list\" is not a policy. The check runs before any campaign send, so it cannot be forgotten.",
+  "sv": "<strong>Efterlevnadsregler hör hemma i koden, inte i processen.</strong> ”Kom ihåg att kolla listan” är ingen policy. Kontrollen körs före varje kampanjsändning, så den kan inte glömmas bort."
  },
  "outro": {
   "en": "The CRM replaces the sheet, which was the whole job. The interesting part turned out to be everything that happened after the data was in: reading replies, respecting an opt-out, and sending slowly enough that the domain survives it. None of that needed a new framework. It needed somebody to test the parts that decide who gets emailed, with sentences a stranger would write.",

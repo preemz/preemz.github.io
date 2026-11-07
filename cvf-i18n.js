@@ -8,6 +8,10 @@ const I18N_CVF = {
   "en": "Primawan Satrio · October 2026 · ~12 min read",
   "sv": "Primawan Satrio · oktober 2026 · ca 12 min läsning"
  },
+ "upd": {
+  "en": "<strong>Update, November 2026:</strong> PDF text now goes through pdf.js first, and the hand-written reader described below is the fallback. The cost-routing A/B has been run, and the triage step stays parked because the benchmark did not support enabling it. For another KerjaBoard system design, see <a href=\"https://preemz.github.io/blog-kerjaboard-recommendations.html\">how it recommends jobs and candidates</a>.",
+  "sv": "<strong>Uppdatering, november 2026:</strong> PDF-text går nu först genom pdf.js, och den handskrivna läsaren som beskrivs nedan är reservvägen. A/B-körningen för kostnadsstyrning är gjord, och sorteringssteget förblir parkerat eftersom benchmarken inte stödde att slå på det. För ännu en systemdesign i KerjaBoard, se <a href=\"https://preemz.github.io/blog-kerjaboard-recommendations.html\">hur den rekommenderar jobb och kandidater</a>."
+ },
  "p1": {
   "en": "Every client of my recruiting agency wants candidate CVs in its own Word template. One wants a blind CV with the candidate's name in the header and the client's own contact block in place of the candidate's. Another wants the full profile, with a line for how long the candidate has worked in Singapore. When a client has no template, we send our own anonymous Satrio Consulting CV, so the client hires through us rather than around us. Before this tool, a recruiter retyped each CV into the right template by hand, for every candidate and every client.",
   "sv": "Varje kund hos min rekryteringsbyrå vill ha kandidaternas CV:n i sin egen Word-mall. En vill ha ett blint CV med kandidatens namn i sidhuvudet och kundens eget kontaktblock i stället för kandidatens. En annan vill ha hela profilen, med en rad för hur länge kandidaten har arbetat i Singapore. När en kund saknar mall skickar vi vårt eget anonyma Satrio Consulting-CV, så att kunden anställer genom oss i stället för att gå förbi oss. Innan verktyget fanns förde en rekryterare över varje CV för hand till rätt mall, för varje kandidat och varje kund."
@@ -21,8 +25,8 @@ const I18N_CVF = {
   "sv": "Pipelinens form"
  },
  "shape1": {
-  "en": "Eight stages across two requests. Everything runs on the same Cloudflare Worker as the rest of KerjaBoard, and the document path (PDF parsing, the model call, the Word renderer) uses no npm packages.",
-  "sv": "Åtta steg fördelade på två förfrågningar. Allt körs på samma Cloudflare Worker som resten av KerjaBoard, och dokumentflödet (PDF-tolkning, modellanropet, Word-renderaren) använder inga npm-paket."
+  "en": "Eight stages across two requests. Everything runs on the same Cloudflare Worker as the rest of KerjaBoard, and the document path has one npm package: pdf.js (through unpdf) reads PDFs. The model call and the Word renderer use none.",
+  "sv": "Åtta steg fördelade på två förfrågningar. Allt körs på samma Cloudflare Worker som resten av KerjaBoard, och dokumentflödet har ett enda npm-paket: pdf.js (via unpdf) läser PDF-filer. Modellanropet och Word-renderaren använder inga."
  },
  "fig1": {
   "en": "Figure 1. The reformatter pipeline. The first request ends at the review screen; the download is a second request, built only from what the recruiter approved.",
@@ -57,8 +61,8 @@ const I18N_CVF = {
   "sv": "Den första allvarliga buggrapporten sa att omformateraren var ”inte träffsäker”. Varje fält på granskningssidan visade <code>xxxx</code>. Det är inget träffsäkerhetsproblem; det är noll indata. PDF-tolken hade returnerat en tom sträng, modellen hade fått ingenting att läsa och hade helt riktigt svarat att det inte fanns något där. Att justera prompten hade inte ändrat något."
  },
  "ex2": {
-  "en": "PDF is not a text format. It is a set of drawing instructions, and the tools people use to make CVs store the letters in at least five different ways. The parser in <code>src/cv.js</code> learned each one from a real CV that came back empty or garbled:",
-  "sv": "PDF är inget textformat. Det är en uppsättning ritinstruktioner, och verktygen som folk gör CV:n i lagrar bokstäverna på minst fem olika sätt. Tolken i <code>src/cv.js</code> lärde sig vart och ett från ett riktigt CV som kom tillbaka tomt eller förvanskat:"
+  "en": "PDF is not a text format. It is a set of drawing instructions, and the tools people use to make CVs store the letters in at least five different ways. My first PDF reader, written by hand in <code>src/cv.js</code>, learned each one from a real CV that came back empty or garbled:",
+  "sv": "PDF är inget textformat. Det är en uppsättning ritinstruktioner, och verktygen som folk gör CV:n i lagrar bokstäverna på minst fem olika sätt. Min första PDF-läsare, handskriven i <code>src/cv.js</code>, lärde sig vart och ett från ett riktigt CV som kom tillbaka tomt eller förvanskat:"
  },
  "tbl.h0": {
   "en": "How the text is stored",
@@ -132,9 +136,13 @@ const I18N_CVF = {
   "en": "Read raw streams as they are; decode ASCII85 before inflating",
   "sv": "Läs råa strömmar som de är; avkoda ASCII85 före uppackning"
  },
+ "ex2b": {
+  "en": "That list kept growing, and on 2026-10-24 PDF text started going through pdf.js first. The hand-written reader is the fallback when pdf.js returns under 120 characters or text that fails <code>looksReadable</code>. In the measurement recorded in the code, on stored CVs the hand-written reader got usable text from 64 of 99 and pdf.js from 95; the other four are scans with no text layer. pdf.js reads only the first ten pages, and every compressed stream is inflated under a size cap first, because pdf.js has no limit of its own and a decompression bomb would exhaust the Worker's memory.",
+  "sv": "Den listan fortsatte växa, och den 2026-10-24 började PDF-text gå först genom pdf.js. Den handskrivna läsaren är reservväg när pdf.js ger under 120 tecken eller text som inte klarar <code>looksReadable</code>. I mätningen som finns antecknad i koden gav den handskrivna läsaren användbar text för 64 av 99 lagrade CV:n och pdf.js för 95; de övriga fyra är skannade filer utan textlager. pdf.js läser bara de tio första sidorna, och varje komprimerad ström packas upp under ett storlekstak först, eftersom pdf.js saknar eget tak och en dekompressionsbomb skulle tömma Workerns minne."
+ },
  "ex3": {
-  "en": "Row four was the subtle one. Scoring candidate offsets by letter count alone picks a neighbour three or four places away, which turns a heading into readable-looking nonsense. Adding vowel ratio and a small set of common English and Indonesian letter pairs is what broke those ties. That change was run against a corpus of about three thousand real CV files, old parser against new: it improved 265 and made none worse. Later extractor changes were checked the same way on smaller sets, and the newest class has its own test in CI.",
-  "sv": "Rad fyra var den lömska. Om man poängsätter tänkbara förskjutningar enbart efter antal bokstäver vinner ofta en granne tre eller fyra steg bort, vilket gör en rubrik till nonsens som ser läsbart ut. Det var vokalandelen och en liten uppsättning vanliga engelska och indonesiska bokstavspar som avgjorde de fallen. Den ändringen kördes mot en korpus på ungefär tretusen riktiga CV-filer, gammal tolk mot ny: den förbättrade 265 filer och försämrade ingen. Senare ändringar har kontrollerats på samma sätt mot mindre urval, och den senaste klassen har ett eget test i CI."
+  "en": "Row four was the subtle one, and the numbers below are from the hand-written reader's era. Scoring candidate offsets by letter count alone picks a neighbour three or four places away, which turns a heading into readable-looking nonsense. Adding vowel ratio and a small set of common English and Indonesian letter pairs is what broke those ties. That change was run against a corpus of about three thousand real CV files, old parser against new: it improved 265 and made none worse. Later extractor changes were checked the same way on smaller sets, and the newest class has its own test in CI.",
+  "sv": "Rad fyra var den lömska, och siffrorna nedan kommer från den handskrivna läsarens tid. Om man poängsätter tänkbara förskjutningar enbart efter antal bokstäver vinner ofta en granne tre eller fyra steg bort, vilket gör en rubrik till nonsens som ser läsbart ut. Det var vokalandelen och en liten uppsättning vanliga engelska och indonesiska bokstavspar som avgjorde de fallen. Den ändringen kördes mot en korpus på ungefär tretusen riktiga CV-filer, gammal tolk mot ny: den förbättrade 265 filer och försämrade ingen. Senare ändringar har kontrollerats på samma sätt mot mindre urval, och den senaste klassen har ett eget test i CI."
  },
  "ex4": {
   "en": "Two guards sit around the extractor. A <code>looksReadable</code> check refuses mojibake before the model call, with a message asking the recruiter to re-save the file as DOCX, because sending garbage to a model three times with retries just produces three empty answers. And each text operator is found with a linear scan before any pattern matching runs: one image-heavy Japanese CV form made the old regular expression quadratic, and the Worker ran out of CPU time.",
@@ -153,20 +161,20 @@ const I18N_CVF = {
   "sv": "Anropet går till Claude Sonnet med låg tankeinsats, eftersom tänkandet förbrukar samma utdatabudget som JSON-svaret behöver. Svaret tolkas tolerant: markdown-staket tas bort, och JSON som klippts av mitt i ett objekt stängs vid det sista hela elementet, så att ett långt CV ändå når granskningen med det mesta av sin data i stället för att avbrytas med ”Unexpected end of JSON input”. Ett avklippt svar rapporteras som slut på utdatautrymme och körs inte om, eftersom ett nytt försök skulle stanna på samma ställe. Vid tomma svar och serverfel görs upp till tre försök, med längre väntan före varje nytt försök."
  },
  "m3": {
-  "en": "Why not a free model? I measured it in August 2026 with the production prompt. On a clean CV, Claude and two free Workers AI models scored the same. On the same CV with its line breaks stripped and a section cut out, both free models returned nothing usable, while Claude still extracted five of six jobs and the correct GPA. A later re-run on newer cheap models did much better, so that verdict belongs to that generation of models, not to free models in general. The code now has a triage step that can send clean CVs to a cheaper model; it is built and switched off until an A/B run says it is safe.",
-  "sv": "Varför inte en gratis modell? Jag mätte det i augusti 2026 med produktionsprompten. På ett rent CV fick Claude och två gratis Workers AI-modeller samma resultat. På samma CV med radbrytningarna borttagna och en sektion bortklippt gav båda gratismodellerna ingenting användbart, medan Claude fortfarande fick ut fem av sex anställningar och rätt betygssnitt. En senare omkörning med nyare billiga modeller gick betydligt bättre, så det utslaget gäller den generationen modeller, inte gratismodeller i allmänhet. Koden har nu ett sorteringssteg som kan skicka rena CV:n till en billigare modell; det är byggt men avstängt tills en A/B-körning visar att det är säkert."
+  "en": "Why not a free model? I measured it in August 2026 with the production prompt. On a clean CV, Claude and two free Workers AI models scored the same. On the same CV with its line breaks stripped and a section cut out, both free models returned nothing usable, while Claude still extracted five of six jobs and the correct GPA. A later re-run on newer cheap models did much better, so that verdict belongs to that generation of models, not to free models in general. The code has a triage step that could send clean CVs to a cheaper model, and I ran the A/B in October 2026: four cheap models, three CV fixtures, each clean and stripped. The structural check did not predict what broke. The stripped variants scored 59 of 60 fields against 53 of 60 for the clean ones, while the real failures were random: empty responses, one run of all <code>xxxx</code>, a timeout. So triage and routing are parked and switched off.",
+  "sv": "Varför inte en gratis modell? Jag mätte det i augusti 2026 med produktionsprompten. På ett rent CV fick Claude och två gratis Workers AI-modeller samma resultat. På samma CV med radbrytningarna borttagna och en sektion bortklippt gav båda gratismodellerna ingenting användbart, medan Claude fortfarande fick ut fem av sex anställningar och rätt betygssnitt. En senare omkörning med nyare billiga modeller gick betydligt bättre, så det utslaget gäller den generationen modeller, inte gratismodeller i allmänhet. Koden har ett sorteringssteg som skulle kunna skicka rena CV:n till en billigare modell, och jag körde A/B-testet i oktober 2026: fyra billiga modeller, tre CV-underlag, vart och ett rent och avskalat. Den strukturella kontrollen förutsåg inte vad som gick sönder. De avskalade varianterna fick 59 av 60 fält mot 53 av 60 för de rena, medan de verkliga felen var slumpmässiga: tomma svar, en körning med bara <code>xxxx</code>, en timeout. Därför är sortering och styrning parkerade och avstängda."
  },
  "h_err": {
   "en": "Four errors, four causes",
   "sv": "Fyra fel, fyra orsaker"
  },
  "e1": {
-  "en": "Over two months the provider call failed in four different ways, and each one looked like a broken formatter to the recruiter who hit it:",
-  "sv": "Under två månader misslyckades anropet till leverantören på fyra olika sätt, och vart och ett såg ut som en trasig omformaterare för rekryteraren som drabbades:"
+  "en": "Over two months the provider call failed in four different ways, and each one looked like a broken formatter to whoever saw it:",
+  "sv": "Under två månader misslyckades anropet till leverantören på fyra olika sätt, och vart och ett såg ut som en trasig omformaterare för den som såg det:"
  },
  "e_l1": {
-  "en": "<strong>401:</strong> billing on the API account, not the key itself. A new key fixed it without a deploy.",
-  "sv": "<strong>401:</strong> faktureringen på API-kontot, inte själva nyckeln. En ny nyckel löste det utan driftsättning."
+  "en": "<strong>401 from my own health check:</strong> the key was valid all along. The check left out the workspace header that the formatter had always sent, so it reported a failure the formatter never hit.",
+  "sv": "<strong>401 från min egen hälsokontroll:</strong> nyckeln var giltig hela tiden. Kontrollen utelämnade den workspace-header som omformateraren alltid hade skickat, så den rapporterade ett fel som omformateraren aldrig drabbades av."
  },
  "e_l2": {
   "en": "<strong>404 naming the model:</strong> the model ID had been retired. It lived in two places, the config and a fallback in the code, and both had to change.",
@@ -181,8 +189,8 @@ const I18N_CVF = {
   "sv": "<strong>403 ”Request not allowed”:</strong> det utgående anropet från en Worker går ut från datacentret närmast besökaren, och leverantören nekar vissa regioner. Lösningen är ett Durable Object som skapas en gång med en platsangivelse för Västeuropa. Durable Objects stannar där de först skapades, så varje modellanrop går nu ut från samma region, vem som än klickar på knappen."
  },
  "e2": {
-  "en": "The lesson: read the status code and the body before touching anything. I also added an admin-only page that makes a real call with the configured model. Its first version left out the workspace header and reported a working key as broken. A health check has to send exactly what production sends, or it is worse than no check.",
-  "sv": "Lärdomen: läs statuskoden och svarstexten innan du rör något. Jag lade också till en sida, bara för admin, som gör ett riktigt anrop med den konfigurerade modellen. Dess första version utelämnade workspace-headern och rapporterade en fungerande nyckel som trasig. En hälsokontroll måste skicka exakt det som produktionen skickar, annars är den sämre än ingen kontroll alls."
+  "en": "The lesson: read the status code and the body before touching anything. I also added an admin-only page that makes a real call with the configured model. Its first version left out the workspace header and reported a working key as broken, which is the 401 above. A health check has to send exactly what production sends, or it is worse than no check.",
+  "sv": "Lärdomen: läs statuskoden och svarstexten innan du rör något. Jag lade också till en sida, bara för admin, som gör ett riktigt anrop med den konfigurerade modellen. Dess första version utelämnade workspace-headern och rapporterade en fungerande nyckel som trasig, vilket är 401:an ovan. En hälsokontroll måste skicka exakt det som produktionen skickar, annars är den sämre än ingen kontroll alls."
  },
  "h_review": {
   "en": "A review screen that shows the gaps",
@@ -257,8 +265,8 @@ const I18N_CVF = {
   "sv": "Omformateraren var från början bara för admin. När det interna teamet behövde den var det självklara att återanvända admin-routes, men <code>/admin</code>-sökvägarna ligger bakom en extra inloggning i nätverkskanten som bara admin klarar, så personalen stoppades innan appens egen behörighetskontroll ens kördes. Teamet fick parallella <code>/internal</code>-routes. Två buggar följde. Första försöket döpte om admins uppladdningsroute i stället för att lägga till en ny, vilket fick den att sluta fungera för admin. Senare skickade granskningsformuläret till en <code>/internal</code>-route för nedladdning som inte fanns, så teamet kunde ladda upp och granska ett CV och sedan få ”Page not found” vid sista klicket."
  },
  "ro2": {
-  "en": "After any route change I now send a request to every route in both namespaces and expect a login redirect, never a 404. The automated smoke test after each deploy covers only the admin page so far. The rule I took from it: when a second role needs a feature, add routes, never rename the existing ones.",
-  "sv": "Efter varje ändring av routes skickar jag nu en förfrågan till varje route i båda namnrymderna och förväntar mig en omdirigering till inloggningen, aldrig en 404. Det automatiska röktestet efter varje driftsättning täcker än så länge bara admin-sidan. Regeln jag tog med mig: när en andra roll behöver en funktion, lägg till routes och döp aldrig om de befintliga."
+  "en": "After any route change I try to send a request to every route in both namespaces and expect a login redirect, never a 404. That is a manual habit; no script does it. The automated smoke test after each deploy probes 24 anonymous GET routes, including <code>/admin/format-cv</code>, <code>/internal</code> and <code>/internal/tracker</code>, and CI also runs a staff-flow check. It still does not cover <code>/internal/format-cv</code> or the download POST, the route that broke. The rule I took from it: when a second role needs a feature, add routes, never rename the existing ones.",
+  "sv": "Efter varje ändring av routes försöker jag skicka en förfrågan till varje route i båda namnrymderna och förväntar mig en omdirigering till inloggningen, aldrig en 404. Det är en manuell vana; inget skript gör det. Det automatiska röktestet efter varje driftsättning provar 24 anonyma GET-routes, bland dem <code>/admin/format-cv</code>, <code>/internal</code> och <code>/internal/tracker</code>, och CI kör också en kontroll av personalflödet. Det täcker fortfarande inte <code>/internal/format-cv</code> eller POST för nedladdning, den route som gick sönder. Regeln jag tog med mig: när en andra roll behöver en funktion, lägg till routes och döp aldrig om de befintliga."
  },
  "h_next": {
   "en": "What is not solved",
@@ -269,8 +277,8 @@ const I18N_CVF = {
   "sv": "<strong>Skannade CV:n.</strong> En PDF som bara består av bilder saknar textlager, och det finns ingen OCR-väg än. Rekryteraren ombeds skaffa en textbaserad fil."
  },
  "n_l2": {
-  "en": "<strong>Cost routing.</strong> The triage step that would send clean CVs to a cheaper model stays off until an A/B run on real CVs shows that the cheap path does not miss or invent fields.",
-  "sv": "<strong>Kostnadsstyrning.</strong> Sorteringssteget som skulle skicka rena CV:n till en billigare modell förblir avstängt tills en A/B-körning på riktiga CV:n visar att den billiga vägen inte missar eller hittar på fält."
+  "en": "<strong>Cost routing.</strong> The triage step that would send clean CVs to a cheaper model is built but off. The October benchmark did not support enabling it, so every CV still goes to Claude.",
+  "sv": "<strong>Kostnadsstyrning.</strong> Sorteringssteget som skulle skicka rena CV:n till en billigare modell är byggt men avstängt. Oktoberns benchmark stödde inte att slå på det, så varje CV går fortfarande till Claude."
  },
  "n_l3": {
   "en": "<strong>The name on the download request</strong>, as described above.",

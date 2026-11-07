@@ -17,11 +17,12 @@
   "headline": "An End-to-End AI Recruiting Pipeline in Production",
   "author": { "@type": "Person", "name": "Primawan Satrio", "url": "https://preemz.github.io/" },
   "datePublished": "2026-08-24",
+  "dateModified": "2026-11-07",
   "keywords": ["AI recruiting", "LLM pipeline", "RAG", "explainable AI", "forward deployed engineering"],
   "mainEntityOfPage": "https://preemz.github.io/blog-ai-recruiting-pipeline.html"
 }
 </script>
-<title>An End-to-End AI Recruiting Pipeline in Production Primawan Satrio</title>
+<title>An End-to-End AI Recruiting Pipeline in Production | Primawan Satrio</title>
 <style>
   :root {
     --bg: #0b0e14; --surface: #12161f; --border: #232a38;
@@ -73,6 +74,8 @@
   <h1 data-i18n="b.title">An End-to-End AI Recruiting Pipeline in Production</h1>
   <div class="meta" data-i18n="b.meta">Primawan Satrio · August 2026 · ~10 min read</div>
 
+  <blockquote data-i18n="b.update"><strong>Update, November 2026:</strong> I wrote this post in August, and several claims have moved since. The CV reformatter ran on Gemini for a day (the config switch worked, but Google refused every model on that account, so it went back to Anthropic) and now runs Claude Sonnet 5.5 through a small Durable Object in Western Europe. I also added an AI fit assessment next to the rule-based score; it is described in Stage 2. The sections below are corrected to match. For more on the matching and the reformatter, see the posts on <a href="https://preemz.github.io/blog-kerjaboard-recommendations.html">KerjaBoard's recommendation system</a> and the <a href="https://preemz.github.io/blog-cv-reformatter.html">CV reformatter</a>.</blockquote>
+
   <p data-i18n="b.p1">Most AI demos die in the demo. The interesting question is not <em>can a model do this once</em>, but <em>can it run inside a live business every day, without a human babysitting every step</em>. I run a headhunting agency across the Indonesia–Japan corridor, and instead of bolting AI onto the side, I rebuilt our recruiting pipeline around it: parsing resumes, scoring candidate fit, and reformatting CVs into client templates.</p>
   <p data-i18n="b.p2">This post explains how the pipeline works, why each stage is designed the way it is, and what I learned deploying LLMs where mistakes cost real placements. It runs on Cloudflare Workers with D1 for data and R2 for document storage, with no origin server anywhere.</p>
 
@@ -80,7 +83,7 @@
   <p data-i18n="b.p3">A candidate's journey through our system touches four AI-assisted stages before a recruiter ever picks up the phone:</p>
 
   <div class="diagram">
-    <svg viewBox="0 0 720 150" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,sans-serif">
+    <svg viewBox="0 0 720 125" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,sans-serif">
       <defs>
         <marker id="arw" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#4f8cff"/></marker>
       </defs>
@@ -99,10 +102,8 @@
         <line x1="578" y1="75" x2="596" y2="75"/>
       </g>
       <text x="360" y="20" text-anchor="middle" fill="#8b93a5" font-size="11.5">human-in-the-loop only where judgment matters</text>
-      <path d="M 300 118 C 340 138, 400 138, 440 118" stroke="#7c5cff" stroke-width="1" fill="none" stroke-dasharray="4 4" opacity=".6"/>
-      <text x="370" y="142" text-anchor="middle" fill="#7c5cff" font-size="10.5">recruiter edits feed back into template schema</text>
     </svg>
-    <div class="caption" data-i18n="b.fig1">Figure 1. The production pipeline. Stages 2 and 4 are fully automated; stage 3 is deliberately human.</div>
+    <div class="caption" data-i18n="b.fig1">Figure 1. The production pipeline. Stage 2 (score and AI fit assessment) runs on its own but never rejects anyone; stage 3 is the human decision; in stage 4 a model drafts and a recruiter reviews.</div>
   </div>
 
   <h2 data-i18n="b.h2b">Stage 1: Reading any resume reliably</h2>
@@ -116,7 +117,7 @@
 
   <h2 data-i18n="b.h2c">Stage 2: Explainable fit scoring</h2>
   <p data-i18n="b.s2.p1">Given a job order and a parsed resume, the scoring engine estimates how well this candidate fits. But the design constraint that shaped everything was <strong>explainability</strong>: every point in the score must come with a reason a recruiter can read, agree or disagree with, and act on.</p>
-  <p data-i18n="b.s2.p2">The weighting scheme has a subtlety worth flagging. Each component only counts when the job order expresses that dimension, and its weight is removed from the denominator otherwise, so the remaining weights re-normalize automatically. That avoids punishing candidates for requirements nobody asked for, but it also means a sparse job order (one that mentions almost nothing) concentrates all the weight on whichever dimensions happen to be present, which can amplify weak signals into large score swings. In practice our job orders are written against a client intake template that always covers skills and experience, so the degenerate case is rare; if you borrow this idea, add a validation check for orders that specify too few dimensions rather than trusting re-normalization to sort it out.</p>
+  <p data-i18n="b.s2.p2">The weighting scheme has a subtlety worth flagging. Each component only counts when the job order expresses that dimension, and its weight is removed from the denominator otherwise, so the remaining weights re-normalize automatically. That avoids punishing candidates for requirements nobody asked for, but it also means a sparse job order (one that mentions almost nothing) concentrates all the weight on whichever dimensions happen to be present, which can amplify weak signals into large score swings. In practice sparse orders are not rare: the matcher's own code comments (October 2026) say most live orders list only skills its vocabulary does not know, and that for most orders with a years requirement it sits only in the free-text Requirements block, so early versions scored many orders on very little. The validation check this post first suggested is now partly implemented as caps: a score cannot exceed 35 when an order states no must-have skills or none are evidenced, nor 55 when fewer than half are evidenced, and there is a cap of 60 when too little can be scored at all. Free-text skills are now evidenced by the candidate's own phrasing, and the Requirements block is read for years. If you borrow re-normalization, add caps like these rather than trusting it alone.</p>
 
   <div class="diagram">
     <svg viewBox="0 0 720 210" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,sans-serif">
@@ -145,23 +146,25 @@
     <div class="caption" data-i18n="b.fig2">Figure 2. Weighted components with dynamic re-normalization. Weights only count when the job order expresses that dimension.</div>
   </div>
 
+  <p data-i18n="b.s2.fit">Alongside the rule-based score there is a second, slower read: an AI fit assessment. Claude reads one application at a time (the CV the candidate applied with, their answers, the job posting, and the client brief and team notes where the order has them) and returns a verdict (strong fit, good fit, possible fit or not a fit), a one-line reason naming the requirement that decided it, and strengths and considerations. Each point can carry a quote from the CV or the posting, shown only if those words really appear in the source text, so an invented citation is dropped. Staff see it on the applicant card, and a freelancer sees it for their own submissions only. The cron assesses three applications per 15-minute tick, newest first, for recent applications on open orders the team is still working, and each result is stored in <code>application_fit</code>. It informs the recruiter; it does not move a card, reject anyone or assign an owner.</p>
+
   <h3 data-i18n="b.s2.fair.h">Fairness guardrails are a feature, not a checkbox</h3>
-  <p>We collect date of birth for client paperwork. The scoring module never reads it and there is a test asserting two identical candidates with different birth dates receive identical scores. Name, gender, nationality, photo, and university prestige are likewise excluded by construction, not by prompt politeness. If you're deploying models on people, this class of guarantee belongs in your test suite, next to your business logic.</p>
+  <p data-i18n="b.s2.fair">We collect date of birth for client paperwork. The scoring module never reads it, and the match tests assert that candidates who differ only in birth date, gender, nationality, name, marital status, university or GPA receive identical scores. That is the strongest guarantee in the pipeline, and it is a test, not a promise. The AI fit assessment is weaker, and I would rather say so. Its input goes through a scrub that removes contact details, the name, and labelled personal particulars such as birth date, age, nationality, gender, religion and marital status, and the prompt forbids using protected characteristics, university or GPA. That is a pattern-based filter plus an instruction: it is tested against lists of text that must and must not get through, but no test shows that two otherwise identical candidates receive the same assessment, and a regex can miss a particular written in an unexpected way. Work authorisation is deliberately not excluded: a stated visa gap can cap a match score, because someone who cannot legally be hired cannot be placed. If you're deploying models on people, put the guarantees you can test in your test suite, and be exact about the ones you cannot.</p>
 
   <h2 data-i18n="b.h2d">Stage 3: The human in the loop, on purpose</h2>
   <p data-i18n="b.s3.p1">The recruiter sees the score <em>with its reasons</em>. This matters because a naked number invites either blind trust or blind dismissal; reasons invite calibration. Over time recruiters learn where the model over-weights and where their own judgment should override, which is exactly the collaboration pattern you want between humans and automated screening.</p>
-  <p data-i18n="b.s3.p2">Ownership stays manual by design: no application is ever auto-assigned or auto-rejected. Automation triages; humans decide. In recruiting, a false negative (rejecting someone who would have placed) costs more than a few minutes of recruiter time.</p>
+  <p data-i18n="b.s3.p2">Automation triages; humans decide. No application is auto-rejected: the score and the fit assessment are shown, and a recruiter moves the card. The one hard rule sits on the apply form: where an employer cannot sponsor a visa, the applicant has to confirm the right to work there before the form files. That is a rule, not a model. Ownership is mostly manual, with three automatic exceptions, all driven by who brought the candidate rather than by any model: a tracked referral link assigns the sharing recruiter as owner at apply time (an internal owner, or a freelancer claim with a fee window); a candidate with a standing freelance claim carries it into a new application; and an off-board click-through with no link goes to a house owner, so nobody is left unowned. In recruiting, a false negative (rejecting someone who would have placed) costs more than a few minutes of recruiter time.</p>
 
   <h2 data-i18n="b.h2e">Stage 4: LLM-powered CV reformatting</h2>
   <p data-i18n="b.s4.p1">When a candidate advances, each client expects their own submission format: a specific DOCX template with particular sections and phrasing. Historically recruiters retyped resumes into these formats by hand, which is slow, repetitive work on every placement. Now:</p>
   <ol>
     <li data-i18n="b.s4.l1">Each client format is declared as a <strong>schema</strong>: field keys, labels, groupings, hints, repeating blocks (employment history).</li>
-    <li data-i18n="b.s4.l2">The schema generates three artifacts from one source of truth: the <strong>LLM prompt</strong>, the <strong>recruiter review form</strong>, and the <strong>template fill</strong>.</li>
-    <li data-i18n="b.s4.l3">The LLM (OpenAI or Anthropic, provider-swappable via config) receives the raw CV text plus the target schema and returns structured JSON.</li>
-    <li data-i18n="b.s4.l4">A tolerant JSON parser handles the reality of LLM output: markdown fences, trailing commas, chatty preambles.</li>
+    <li data-i18n="b.s4.l2">The schema generates the <strong>LLM prompt</strong> and the <strong>recruiter review form</strong>, and fixes the key names the <strong>template fill</strong> must use.</li>
+    <li data-i18n="b.s4.l3">The LLM receives the raw CV text plus the target schema and returns structured JSON. Production uses Claude Sonnet 5.5 through a Durable Object in Western Europe; the code can also call Workers AI through AI Gateway, Gemini, or any OpenAI-compatible endpoint, chosen by config.</li>
+    <li data-i18n="b.s4.l4">A tolerant JSON parser handles the common failures of LLM output: markdown fences, chatty preambles, and output cut off mid-object (it keeps everything up to the last complete element). It does not repair a trailing comma: a complete object that has one fails with a 'malformed JSON' error and the recruiter retries.</li>
     <li data-i18n="b.s4.l5">The recruiter reviews extracted fields in the browser and corrects anything wrong; the corrected data fills the client's DOCX.</li>
   </ol>
-  <p data-i18n="b.s4.p2">The schema-driven approach is the key trick: adding a new client format means writing one declarative object, not new prompt engineering. The prompt can't drift out of sync with the form or the template, because they're all projections of the same definition.</p>
+  <p data-i18n="b.s4.p2">The schema-driven approach is the key trick: adding a new client format means writing one declarative object, not new prompt engineering. The prompt and the review form can't drift apart, because both are generated from the same definition. The template is only as in sync as its tokens: it has to use the same field keys, and a renamed key leaves a blank section in the client's DOCX.</p>
 
   <div class="diagram">
     <svg viewBox="0 0 720 190" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,sans-serif">
@@ -179,17 +182,17 @@
         <rect x="270" y="102" width="180" height="44" rx="8" fill="#12161f" stroke="#232a38"/><text x="360" y="122" text-anchor="middle">Review form UI</text><text x="360" y="137" text-anchor="middle" fill="#8b93a5" font-size="10.5">(recruiter corrections)</text>
         <rect x="485" y="102" width="180" height="44" rx="8" fill="#12161f" stroke="#232a38"/><text x="575" y="122" text-anchor="middle">Template fill</text><text x="575" y="137" text-anchor="middle" fill="#8b93a5" font-size="10.5">(client DOCX output)</text>
       </g>
-      <text x="360" y="175" text-anchor="middle" fill="#8b93a5" font-size="11">one source of truth, so the three artifacts can never disagree</text>
+      <text x="360" y="175" text-anchor="middle" fill="#8b93a5" font-size="11">one definition drives the prompt and the form; the template must use the same keys</text>
     </svg>
-    <div class="caption" data-i18n="b.fig3">Figure 3. Schema-as-single-source-of-truth for prompt, UI, and output generation.</div>
+    <div class="caption" data-i18n="b.fig3">Figure 3. One format definition drives the prompt and the review form, and fixes the keys the DOCX template must use.</div>
   </div>
 
   <h2 data-i18n="b.h2f">What production taught me</h2>
   <ul>
     <li data-i18n="b.l1"><strong>Deterministic-first architecture pays twice.</strong> Rules handle the structured 80% of a resume cheaply and consistently; the LLM handles the messy 20%. Costs stay predictable and failures stay debuggable.</li>
     <li data-i18n="b.l2"><strong>Explainability is a product requirement, not an ethics poster.</strong> Recruiters adopted the scoring engine because they could interrogate it. A black-box score would have been ignored correctly.</li>
-    <li data-i18n="b.l3"><strong>Provider abstraction is cheap insurance.</strong> Supporting OpenAI-compatible and Anthropic APIs behind one interface was a small one-time cost, and it means model swaps are now config changes rather than code changes. I have not needed to switch providers under pressure yet, so treat this as insurance I have bought but not cashed in.</li>
-    <li data-i18n="b.l4"><strong>Human-in-the-loop is where trust compounds.</strong> Every recruiter correction is implicit labeled data. The pipeline gets better not by retraining, but because the design routes uncertainty to the person best placed to resolve it.</li>
+    <li data-i18n="b.l3"><strong>Provider abstraction is worth having, but swapping is not free.</strong> The reformatter can call Anthropic, Workers AI through AI Gateway, Gemini, or any OpenAI-compatible endpoint, chosen by config, and I have now swapped for real. On 23 September I flipped it to Gemini and back to Anthropic the same day: the flip was a config change, but Google refused every model on that account. On 3 October I added a gateway path that falls back to the direct API. It is parked, because with no gateway credits every call failed, and its fallback sent the gateway's model id to Anthropic, which answers 404 to that spelling, so an upload failed until 13 October. The move to Sonnet 5.5 that day took code as well as config: it thinks by default, thinking spends the output budget, a refusal arrives as a normal response with no text, and older models reject the effort setting it needs. The next day Anthropic answered 403 to a staff member routed through a region it does not serve, so the call now leaves from a Durable Object in Western Europe. The AI fit assessment only calls Anthropic, so it would not follow a config swap. The abstraction was cheap to write; each real swap exposed a difference it did not hide.</li>
+    <li data-i18n="b.l4"><strong>Human-in-the-loop is where trust compounds.</strong> The design routes uncertainty to the person best placed to resolve it: the recruiter sees extracted fields before anything goes to a client, and the score with its reasons before anything moves. What I have not built is a loop that learns from those corrections. The download route stores nothing, and the agree or disagree feedback on match scores is shown to staff but not used for tuning. Treating recruiter edits as labeled data is an idea for later, not a feature.</li>
     <li data-i18n="b.l5"><strong>Fairness constraints belong in tests.</strong> If a protected attribute must not influence a decision, prove it with an assertion, not a policy memo.</li>
   </ul>
 
@@ -201,7 +204,7 @@
     <li><strong>Buolamwini &amp; Gebru, "Gender Shades" (FAT* 2018)</strong> <a href="http://proceedings.mlr.press/v81/buolamwini18a.html">PMLR v81</a>. The canonical demonstration that systems processing people carry bias unless audited. Motivates testing fairness properties explicitly.</li>
     <li><strong>Raji et al., "Closing the AI Accountability Gap: Defining an End-to-End Framework for Internal Algorithmic Auditing" (2020)</strong> <a href="https://arxiv.org/abs/2001.00973">arXiv:2001.00973</a>. How to build audit scaffolding (like our birth-date-blindness test) into the development lifecycle.</li>
     <li><strong>Amershi et al., "Guidelines for Human-AI Interaction" (CHI 2019)</strong> <a href="https://www.microsoft.com/en-us/research/publication/guidelines-for-human-ai-interaction/">Microsoft Research</a>. Eighteen concrete design guidelines for human-AI systems; our "show reasons, keep the decision human" pattern maps directly onto several of them.</li>
-    <li><strong>Decorte et al., "Skill Detection in Job Profiles" (2021)</strong> <a href="https://arxiv.org/abs/2111.13319">arXiv:2111.13319</a>. Extracting and normalizing skills from noisy professional text, the same problem as the skill-canonicalization layer described above.</li>
+    <li><strong>Decorte et al., "Design of Negative Sampling Strategies for Distantly Supervised Skill Extraction" (RecSys in HR 2022)</strong> <a href="https://arxiv.org/abs/2209.05987">arXiv:2209.05987</a>. Skill extraction by literal matching against a skill taxonomy, and the limit of that approach: the paper cites a report that over 85% of the unique skills job ads require are never stated explicitly. Our alias map has the same limit. It credits a skill only when the CV names it, and a skill the CV only implies is not scored.</li>
   </ul>
 
   <h2 data-i18n="b.h2h">Wrapping up</h2>

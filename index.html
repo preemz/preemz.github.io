@@ -208,16 +208,6 @@
         <p data-i18n="card.sc.p">A headhunting and recruitment firm for professionals moving across borders: contingency executive search, international placement, and an employer-of-record service letting foreign companies hire Indonesian talent locally or remotely without setting up a legal entity. Clients across APAC (Indonesia, Japan, Singapore), Europe (Poland, the UK, Germany, the Netherlands), and the US.</p>
         <div class="tagrow"><span class="tag">Recruitment</span><span class="tag">EoR</span><span class="tag">B2B sales</span><span class="tag">APAC</span></div>
       </div>
-      <div class="card" data-href="/blog-scoring-engine.html">
-        <h3 data-i18n="card.fit.t">Explainable Candidate Fit Scoring (in production) 📖</h3>
-        <p data-i18n="card.fit.p">Scoring engine that weighs each candidate's resume against a job order across must-have skills, language, years of experience, tenure, seniority, and commercial fit, then ranks candidates with the reasons behind every point. Built with fairness guardrails: age, name, gender, and nationality never touch the score, and a test enforces it before every CI deploy.</p>
-        <div class="tagrow"><span class="tag">Scoring engine</span><span class="tag">NLP</span><span class="tag">Responsible AI</span></div>
-      </div>
-      <div class="card" data-href="/blog-cv-reformatter.html">
-        <h3 data-i18n="card.cv.t">AI Resume Intelligence (in production) 📖</h3>
-        <p data-i18n="card.cv.p">LLM pipeline inside my agency's job board that reads a candidate's CV (PDF, DOCX or text), extracts structured data and fills each client's exact submission template, so most of the manual document work shrinks to a quick recruiter review.</p>
-        <div class="tagrow"><span class="tag">Claude</span><span class="tag">PDF parsing</span><span class="tag">Docx generation</span></div>
-      </div>
       <div class="card" data-href="https://apply.satriocs.com">
         <h3 data-i18n="card.kb.t">KerjaBoard ↗</h3>
         <p data-i18n="card.kb.p">The production job board powering my agency: GDPR-ready for EU postings, an LLM pipeline that reformats candidate CVs into client templates, explainable fit scoring, and a recruiter console for the full placement workflow.</p>
@@ -227,7 +217,7 @@
       </div>
       <div class="card" data-href="https://crm.satriocs.com">
         <h3 data-i18n="card.crm.t">Satrio CRM ↗</h3>
-        <p data-i18n="card.crm.p">Internal client CRM for my agency's business development team, replacing two years of Google Sheets: companies, contacts, outreach, and an outbound engine that reads replies, honours opt-outs, and warms a mailbox before it sends. One Cloudflare Worker, one D1 database, no framework.</p>
+        <p data-i18n="card.crm.p">Internal client CRM for my agency's business development team, replacing two years of Google Sheets: companies, contacts, outreach, and an outbound engine with a reply classifier, a suppression list and a warm-up ramp, built and switched off until a mailbox is warmed. One Cloudflare Worker, one D1 database, no framework.</p>
         <div class="tagrow"><span class="tag">Cloudflare Workers</span><span class="tag">D1</span><span class="tag">Internal tool</span></div>
       </div>
       <div class="card" data-href="https://bayarkerja.com">

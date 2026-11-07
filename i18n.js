@@ -59,16 +59,6 @@ const I18N = {
     en: "A headhunting and recruitment firm for professionals moving across borders: contingency executive search, international placement, and an employer-of-record service letting foreign companies hire Indonesian talent locally or remotely without setting up a legal entity. Clients across APAC (Indonesia, Japan, Singapore), Europe (Poland, the UK, Germany, the Netherlands), and the US.",
     sv: "En headhunting- och rekryteringsfirma för yrkesverksamma som rör sig över landsgränser: provisionbaserad executive search, internationell placering och en employer-of-record-tjänst som låter utländska företag anställa indonesisk talang lokalt eller på distans utan eget bolag. Kunder i APAC (Indonesien, Japan, Singapore), Europa (Polen, Storbritannien, Tyskland, Nederländerna) och USA."
   },
-  'card.fit.t': { en: 'Explainable Candidate Fit Scoring (in production) 📖', sv: 'Förklarbar kandidatmatchning (i produktion) 📖' },
-  'card.fit.p': {
-    en: "Scoring engine that weighs each candidate's resume against a job order across must-have skills, language, years of experience, tenure, seniority, and commercial fit, then ranks candidates with the reasons behind every point. Built with fairness guardrails: age, name, gender, and nationality never touch the score, and a test enforces it before every CI deploy.",
-    sv: "Poängmotor som väger varje kandidats CV mot en jobborder utifrån obligatoriska färdigheter, språk, års erfarenhet, anställningstid, senioritet och kommersiell matchning, och rangordnar kandidaterna med skälen bakom varje poäng. Byggd med rättvisespärrar: ålder, namn, kön och nationalitet påverkar aldrig poängen, och ett test kontrollerar det före varje driftsättning i CI."
-  },
-  'card.cv.t': { en: 'AI Resume Intelligence (in production) 📖', sv: 'AI CV-analys (i produktion) 📖' },
-  'card.cv.p': {
-    en: "LLM pipeline inside my agency's job board that reads a candidate's CV (PDF, DOCX or text), extracts structured data and fills each client's exact submission template, so most of the manual document work shrinks to a quick recruiter review.",
-    sv: "LLM-pipeline i min byrås jobbplattform som läser en kandidats CV (PDF, DOCX eller text), extraherar strukturerad data och fyller i varje kunds exakta mall, så att det mesta av det manuella dokumentarbetet krymper till en snabb granskning av rekryteraren."
-  },
   'card.kb.t': { en: 'KerjaBoard ↗', sv: 'KerjaBoard ↗' },
   'card.kb.p': {
     en: "The production job board powering my agency: GDPR-ready for EU postings, an LLM pipeline that reformats candidate CVs into client templates, explainable fit scoring, and a recruiter console for the full placement workflow.",
@@ -78,8 +68,8 @@ const I18N = {
   'card.kb.rec': { en: 'How the recommendations work 📖', sv: 'Så fungerar rekommendationerna 📖' },
   'card.crm.t': { en: 'Satrio CRM ↗', sv: 'Satrio CRM ↗' },
   'card.crm.p': {
-    en: "Internal client CRM for my agency's business development team, replacing two years of Google Sheets: companies, contacts, outreach, and an outbound engine that reads replies, honours opt-outs, and warms a mailbox before it sends. One Cloudflare Worker, one D1 database, no framework.",
-    sv: "Internt kund-CRM för min byrås affärsutvecklingsteam, som ersätter två år med Google Sheets: företag, kontakter, utmailningar och en utgående motor som läser svar, respekterar avregistreringar och värmer en brevlåda innan den skickar. En Cloudflare Worker, en D1-databas, inget ramverk."
+    en: "Internal client CRM for my agency's business development team, replacing two years of Google Sheets: companies, contacts, outreach, and an outbound engine with a reply classifier, a suppression list and a warm-up ramp, built and switched off until a mailbox is warmed. One Cloudflare Worker, one D1 database, no framework.",
+    sv: "Internt kund-CRM för min byrås affärsutvecklingsteam, som ersätter två år med Google Sheets: företag, kontakter, utmailningar och en utgående motor med svarsklassificerare, avregistreringslista och uppvärmningsramp, byggd och avstängd tills en brevlåda är uppvärmd. En Cloudflare Worker, en D1-databas, inget ramverk."
   },
   'card.bk.t': { en: 'BayarKerja ↗', sv: 'BayarKerja ↗' },
   'card.bk.p': {
