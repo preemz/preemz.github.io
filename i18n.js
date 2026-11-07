@@ -75,6 +75,7 @@ const I18N = {
     sv: "Produktionsjobbbrädet som driver min byrå: GDPR-klart för EU-annonser, en LLM-pipeline som formaterar om kandidat-CV:n till klientmallar, förklarbar matchningspoäng och en rekrytärkonsol för hela placeringsflödet."
   },
   'card.kb.deck': { en: 'See the AI features deck ↗', sv: 'Se presentationen om AI-funktionerna ↗' },
+  'card.kb.rec': { en: 'How the recommendations work 📖', sv: 'Så fungerar rekommendationerna 📖' },
   'card.crm.t': { en: 'Satrio CRM ↗', sv: 'Satrio CRM ↗' },
   'card.crm.p': {
     en: "Internal client CRM for my agency's business development team, replacing two years of Google Sheets: companies, contacts, outreach, and an outbound engine that reads replies, honours opt-outs, and warms a mailbox before it sends. One Cloudflare Worker, one D1 database, no framework.",
@@ -143,6 +144,11 @@ const I18N = {
   'blog4.p': {
     en: "Region-aware compliance for thousands of candidates on one Worker: EU and Indonesian privacy regimes side by side, opt-in consent for EU match emails, Article 21 objection as a button, and EU pay-transparency validation on job postings.",
     sv: "Regionmedveten efterlevnad för tusentals kandidater på en Worker: EU:s och Indonesiens integritetsregimer sida vid sida, opt-in-samtycke för EU-matchmejl, artikel 21-invändning som knapp och EU-löntransparensvalidering på jobbannonser."
+  },
+
+  'blog9.p': {
+    en: "The system around the score: two scoring passes writing one table, an email gate with a hard cap, visa-capped jobs ranked low and badged instead of hidden, stamped scores that get re-scored when the rules change, and the ways it went quiet.",
+    sv: "Systemet runt poängen: två poängkörningar som skriver till en tabell, en mejlspärr med ett hårt tak, visumbegränsade jobb som rankas lågt och märks i stället för att döljas, stämplade poäng som räknas om när reglerna ändras, och sätten det blev tyst på."
   },
 
   'blog8.p': {

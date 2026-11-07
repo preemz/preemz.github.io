@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How KerjaBoard Recommends Jobs and Candidates: Two Passes, One Table · Primawan Satrio</title>
+<meta name="description" content="How the KerjaBoard recommendation system works: two scoring passes writing one table, delivery rules that cap email, region and visa handling, rubric-stamped re-scoring, and the ways it failed silently.">
+<link rel="canonical" href="https://preemz.github.io/blog-kerjaboard-recommendations.html">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://preemz.github.io/blog-kerjaboard-recommendations.html">
+<meta property="og:title" content="How KerjaBoard Recommends Jobs and Candidates">
+<meta property="og:description" content="How the KerjaBoard recommendation system works: two scoring passes writing one table, delivery rules that cap email, region and visa handling, rubric-stamped re-scoring, and the ways it failed silently.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="How KerjaBoard Recommends Jobs and Candidates">
+<meta name="twitter:description" content="How the KerjaBoard recommendation system works: two scoring passes writing one table, delivery rules that cap email, region and visa handling, rubric-stamped re-scoring, and the ways it failed silently.">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BlogPosting",
+ "headline": "How KerjaBoard Recommends Jobs and Candidates: Two Passes, One Table",
+ "description": "How the KerjaBoard recommendation system works: two scoring passes writing one table, delivery rules that cap email, region and visa handling, rubric-stamped re-scoring, and the ways it failed silently.",
+ "datePublished": "2026-11-07",
+ "inLanguage": "en",
+ "url": "https://preemz.github.io/blog-kerjaboard-recommendations.html",
+ "mainEntityOfPage": "https://preemz.github.io/blog-kerjaboard-recommendations.html",
+ "author": {
+  "@type": "Person",
+  "name": "Primawan Satrio",
+  "url": "https://preemz.github.io/"
+ }
+}
+</script>
+<style>
+  :root {
+    --bg: #0b0e14; --surface: #12161f; --border: #232a38;
+    --text: #e6e9ef; --muted: #8b93a5; --accent: #4f8cff; --accent2: #7c5cff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+    line-height: 1.75; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 60px 24px 80px; }
+  .back { font-size: 14px; }
+  .back a { color: var(--accent); text-decoration: none; }
+  h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.2; letter-spacing: -.02em; margin: 18px 0 10px; }
+  .meta { color: var(--muted); font-size: 14px; margin-bottom: 40px; }
+  h2 { font-size: 22px; letter-spacing: -.01em; margin: 44px 0 14px; }
+  p { margin-bottom: 16px; color: #c4cad6; }
+  p strong, li strong { color: var(--text); }
+  a { color: var(--accent); }
+  ul, ol { margin: 0 0 16px 22px; color: #c4cad6; }
+  li { margin-bottom: 8px; }
+  code {
+    font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; font-size: .88em;
+    background: rgba(79,140,255,.09); color: #9cc0ff; border-radius: 5px; padding: 1.5px 6px;
+  }
+  blockquote {
+    border-left: 3px solid var(--accent); background: var(--surface);
+    padding: 12px 18px; border-radius: 0 10px 10px 0; margin: 18px 0; color: var(--muted); font-size: 15px;
+  }
+  table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); }
+  th { color: var(--text); }
+  td { color: var(--muted); }
+  .diagram {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px 16px; margin: 22px 0; overflow-x: auto;
+  }
+  .diagram svg { display: block; min-width: 560px; width: 100%; height: auto; }
+  .caption { font-size: 13px; color: var(--muted); text-align: center; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="back"><a href="/">← preemz.github.io</a><button id="lang-toggle" aria-label="Switch language" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:3px 10px;font-size:13px;cursor:pointer;margin-left:12px;float:right;">SV</button></div>
+
+  <h1 data-i18n="t">How KerjaBoard Recommends Jobs and Candidates: Two Passes, One Table</h1>
+  <div class="meta" data-i18n="meta">Primawan Satrio · November 2026 · ~9 min read</div>
+  <p data-i18n="p1">KerjaBoard is the job board my recruiting agency runs on. Its recommendation system answers three questions: which jobs a candidate should see, which candidates a recruiter should call about a job, and who gets an email when a job goes live. An <a href="/blog-scoring-engine.html">earlier post</a> covers how one candidate and one job become a score. This post covers everything around the score: when it runs, where it is stored, who is told, and how we keep it honest.</p>
+  <p data-i18n="p2">The scoring is deterministic. There is no model call per pair, so the same candidate and the same job always produce the same number, and every number carries its reasons. That keeps the system cheap to run across thousands of candidates and makes every failure inspectable. It also means the system is only as good as its rules, which the last section is honest about.</p>
+  <h2 data-i18n="h_table">One table, two writers</h2>
+  <p data-i18n="table_p1">Every score lives in one table, <code>job_candidate_matches</code>, with one row per job and candidate pair. A row holds the percent, a label, a confidence level, a two-decimal <code>rankKey</code> that breaks ties between equal percents, the rubric version that produced it, a <code>visaGap</code> reason when work authorisation capped the score, and three timestamps recording who has already been told: the candidate emailed, the previous owner nudged, the team announced.</p>
+  <p data-i18n="table_p2">Two code paths write to it, one in each direction.</p>
+  <div class="diagram"><svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,sans-serif"><rect x="10" y="40" width="150" height="56" rx="10" fill="#161b26" stroke="#232a38"/><text x="85.0" y="65.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">Job goes live</text><text x="85.0" y="81.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">published or approved</text><rect x="10" y="170" width="150" height="56" rx="10" fill="#161b26" stroke="#232a38"/><text x="85.0" y="195.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">Candidate changes</text><text x="85.0" y="211.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">CV, application, work status</text><rect x="205" y="40" width="150" height="56" rx="10" fill="#161b26" stroke="#4f8cff"/><text x="280.0" y="65.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">Job pass</text><text x="280.0" y="81.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">1 job vs all candidates</text><rect x="205" y="170" width="150" height="56" rx="10" fill="#161b26" stroke="#7c5cff"/><text x="280.0" y="195.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">Candidate pass</text><text x="280.0" y="211.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">1 candidate vs all live jobs</text><rect x="400" y="40" width="130" height="186" rx="10" fill="#161b26" stroke="#232a38"/><text x="465" y="112" text-anchor="middle" fill="#e6e9ef" font-size="12.5">job_candidate</text><text x="465" y="128" text-anchor="middle" fill="#e6e9ef" font-size="12.5">_matches</text><text x="465" y="150" text-anchor="middle" fill="#8b93a5" font-size="10.5">percent, rankKey</text><text x="465" y="165" text-anchor="middle" fill="#8b93a5" font-size="10.5">rubric, visaGap</text><rect x="575" y="0" width="135" height="48" rx="10" fill="#161b26" stroke="#ff9b9b"/><text x="642.5" y="21.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">Delivery</text><text x="642.5" y="37.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">email, owner nudge</text><rect x="575" y="92" width="135" height="56" rx="10" fill="#161b26" stroke="#232a38"/><text x="642.5" y="117.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">Staff lists</text><text x="642.5" y="133.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">ranked, 60%+ highlight</text><rect x="575" y="176" width="135" height="56" rx="10" fill="#161b26" stroke="#232a38"/><text x="642.5" y="201.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">Candidate pages</text><text x="642.5" y="217.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">For you, 40%+</text><path d="M160 68 L205 68 m-6 -5 l6 5 l-6 5" stroke="#8b93a5" fill="none"/><path d="M160 198 L205 198 m-6 -5 l6 5 l-6 5" stroke="#8b93a5" fill="none"/><path d="M355 68 L400 68 m-6 -5 l6 5 l-6 5" stroke="#8b93a5" fill="none"/><path d="M355 198 L400 198 m-6 -5 l6 5 l-6 5" stroke="#8b93a5" fill="none"/><path d="M530 120 L575 120 m-6 -5 l6 5 l-6 5" stroke="#8b93a5" fill="none"/><path d="M530 204 L575 204 m-6 -5 l6 5 l-6 5" stroke="#8b93a5" fill="none"/><path d="M280 40 L280 24 L575 24 m-6 -5 l6 5 l-6 5" stroke="#ff9b9b" stroke-dasharray="4 3" fill="none"/><text x="430" y="17" text-anchor="middle" fill="#ff9b9b" font-size="11">only this pass sends anything</text></svg></div>
+  <div class="caption" data-i18n="fig1">Figure 1. Both passes write the same table. Readers do not care which pass produced a row, with one exception: only the candidate pass writes <code>visaGap</code>. Only the job pass is allowed to send mail or post to the team.</div>
+  <ul>
+    <li data-i18n="pass_l1"><strong>The job pass.</strong> When a job goes live, whether a recruiter publishes it or an admin approves an employer’s post, the job is scored against every eligible candidate, which leaves out anyone who objected to sourcing and, for EU orders, anyone who declared a region outside the EU. This is the only pass that can send anything.</li>
+    <li data-i18n="pass_l2"><strong>The candidate pass.</strong> When a candidate saves a CV, applies to a job or answers the work-status questions, that candidate is scored against every live job. It writes rows and nothing else. It never emails and never announces.</li>
+  </ul>
+  <p data-i18n="why_both">Why both? The job pass alone leaves a gap: a candidate who registers on Tuesday has no scores against jobs published on Monday. The candidate pass alone cannot tell a recruiter who to call the moment a job goes live. Each covers the other’s blind spot, and because both write the same rows under the same rubric, readers rarely need to know which one ran. The one difference is that the visa reason is written only by the candidate pass.</p>
+  <h2 data-i18n="h_delivery">Delivery belongs to one writer</h2>
+  <p data-i18n="deliv_p1">Two writers risk a double send. A candidate pass that re-scores a pair must never clear the flag saying that pair was already emailed. Both upserts list the columns they refresh, and the three notification timestamps are not among them, so one CV upload cannot re-mail old matches. The delete that prunes a candidate’s stale rows also skips any row that has been emailed.</p>
+  <p data-i18n="deliv_p2">A new job emails a candidate only if the match clears every gate below.</p>
+  <table>
+    <tr><th data-i18n="gates.h0">Gate</th><th data-i18n="gates.h1">Rule</th><th data-i18n="gates.h2">Why</th></tr>
+    <tr><td data-i18n="gates.r0c0">Score</td><td data-i18n="gates.r0c1">72% or more</td><td data-i18n="gates.r0c2">Raised from 70 when the rubric became graded. The threshold alone is never the anti-spam control</td></tr>
+    <tr><td data-i18n="gates.r1c0">Confidence</td><td data-i18n="gates.r1c1">Not low</td><td data-i18n="gates.r1c2">A high score built on thin data is a likely source of junk mail</td></tr>
+    <tr><td data-i18n="gates.r2c0">Must-have coverage</td><td data-i18n="gates.r2c1">At least 60% of the order’s must-have skills evidenced, when it lists any</td><td data-i18n="gates.r2c2">A total can be assembled from tenure, location and salary while the hard requirements are missing</td></tr>
+    <tr><td data-i18n="gates.r3c0">Consent</td><td data-i18n="gates.r3c1">EU candidates: opt-in only. Everyone else: opt-out. Anyone who objected to sourcing: never</td><td data-i18n="gates.r3c2">The GDPR region rules decide, not the score</td></tr>
+    <tr><td data-i18n="gates.r4c0">Volume</td><td data-i18n="gates.r4c1">At most 25 emails per publish, strongest first</td><td data-i18n="gates.r4c2">A thin requirement block lets a lot of people clear the other gates</td></tr>
+    <tr><td data-i18n="gates.r5c0">Once</td><td data-i18n="gates.r5c1">One email per job and candidate pair</td><td data-i18n="gates.r5c2">The notification timestamp on the row</td></tr>
+  </table>
+  <p data-i18n="cap_story">The volume cap had a bug worth telling. It first counted emails sent. Candidates who had already been notified were skipped without using a slot, so every re-publish or admin “re-run the engine” press could mail up to 25 more people. Four presses, a hundred emails. The cap now counts everyone who qualifies, whether or not they are mailed this time, so repeating the run cannot exceed it.</p>
+  <p data-i18n="team_p">The same pass also tells the team. A strong match whose previous owner’s three-month ownership window has expired produces a nudge to that owner, in one channel for internal staff and another for freelancers. A strong match with no owner is announced so someone can claim the candidate. Staff also see a count of strong matches on the job page. Candidates never see that count.</p>
+  <h2 data-i18n="h_show">Region and visa: rank, badge, never hide</h2>
+  <p data-i18n="show_p1">What a candidate sees is a read of stored rows, never a computation inside the page request. Three surfaces read them: a short list on the homepage, an Apply next block after an application, and a full For you page. They use a lower floor than staff do, 40% against 60%, because after the skill caps a candidate can honestly have nothing above 60, and an empty block makes the feature look broken. Possible fits rank below strong ones. On the site, candidates see a fit label, not the percentage.</p>
+  <p data-i18n="visa_p1">Work authorisation shows how two correct layers can build a trap. The scorer caps a match at 30% when a candidate needs sponsorship the order does not offer, and at 20% when they cannot work in the region. The display floor is 40%. So the capped jobs were dropped before the page rendered them, and the visa badge written to explain them could never appear. Each layer was right on its own.</p>
+  <p data-i18n="visa_p2">The fix records the reason when the score is computed. The row stores <code>visaGap</code>, the list waives the floor for rows that carry one, and it orders them after every uncapped match. The candidate sees the job, ranked low, with a badge saying why. The product rule is now: show every job, rank the ones the candidate cannot legally take lower, and say why.</p>
+  <p data-i18n="region_p">Region follows the same rule. The list keeps roles in the candidate’s own region, roles marked global, and roles whose location says remote. The rest move to a separate section on the For you page, with a count on the homepage. An early version of the “show the hidden roles” link only dropped the filter and kept the three-card limit. The hidden rows were visa-capped and sorted last, so the same three cards came back and it looked as if recommendations ignored region. A link that promises N rows has to open a list that contains them.</p>
+  <p data-i18n="null_p">One SQL detail cost a debugging session. An unlabelled job has a NULL region, and <code>NOT (NULL)</code> is NULL, so such a job landed in neither the in-region list nor the outside list, while a count written with <code>CASE WHEN</code> still counted it. The page said one, the database said forty-one. Every region test in the recommendation queries now goes through <code>IFNULL(regulatoryRegion, 'ID')</code>.</p>
+  <h2 data-i18n="h_honest">Keeping scores honest after the rules change</h2>
+  <p data-i18n="stamp_p1">A score stored under old rules is a promise nobody can keep. The rubric has a version number and both directions stamp it. Candidate pages only show rows carrying the current version, and when none qualify they fall back to a keyword search instead of quoting a number we no longer stand behind. (The <a href="/blog-scoring-engine.html">earlier post</a> tells how a missing job-side half of this once left a flat 100% on an order after the rubric had changed.)</p>
+  <p data-i18n="sweep_intro">Two sweeps in the 15-minute cron drain the backlog after a version bump.</p>
+  <ul>
+    <li data-i18n="sweep_l1"><strong>Candidate warm-up.</strong> It walks 20 candidates per tick whose stamp is missing or older, and parses at most 8 CVs per tick, because a parse costs a storage read plus a PDF decode. A candidate without cached CV text waits for the next tick instead of being stamped current on thin data.</li>
+    <li data-i18n="sweep_l2"><strong>Job sweep.</strong> It takes one live order per tick, newest first, and rewrites up to 200 of its stale rows, strongest score first, because the top of a list is what recruiters read.</li>
+  </ul>
+  <p data-i18n="stamp_p2">The candidate-side stamp sits on the user, not on the match rows. A row-level stamp would keep anyone whose CV legitimately matches nothing in the queue for ever, parsing their resume every tick without ever writing a row to satisfy it.</p>
+  <p data-i18n="cron_cost">The sweeps must not become the problem themselves. D1 runs one query at a time, and after a bump the stale set is large. A count over it on every tick blocked logins and tracker moves, which failed with D1 internal errors at quarter past. A per-order <code>EXISTS</code> probe fixed it: the cost of a tick no longer grows with the size of the backlog. A related planner trap: <code>rubric IS NULL OR rubric &lt; V</code> made D1 read the whole table, about 256,000 rows, to find about 6,000. Splitting it into two <code>UNION ALL</code> halves brought the count query down to about 6,400 rows read.</p>
+  <h2 data-i18n="h_worker">Fitting inside a Worker</h2>
+  <p data-i18n="worker_p">The first version of the job pass scored every candidate inside the publish request, parsing each resume from storage. It died with Cloudflare’s “exceeded resource limits” error (1102) once the candidate base grew into the thousands. Four changes made it fit.</p>
+  <ul>
+    <li data-i18n="w_l1"><strong>Parse once.</strong> Each candidate carries a cached copy of their CV text and terms, filled when the CV is uploaded. Scoring reads the cache instead of fetching and decoding a PDF.</li>
+    <li data-i18n="w_l2"><strong>Write in batches.</strong> D1 allows about 100 bound parameters per statement, so the chunk size is the cap divided by parameters per row, rounded down: 11 rows at 9 parameters. At 10 parameters it is 9, one under what the arithmetic allows, because 10 rows would land exactly on the cap. A chunk of 18 rows, sized before two columns were added, once became 126 variables and failed on every publish. The arithmetic now sits in a comment beside the constant.</li>
+    <li data-i18n="w_l3"><strong>Skip pairs with no signal.</strong> A zero score writes no row, and on the candidate side it prunes the row it replaces.</li>
+    <li data-i18n="w_l4"><strong>Run it after the response.</strong> Publishing hands the job to <code>waitUntil</code>, so a slow or broken recommender cannot fail the publish.</li>
+  </ul>
+  <h2 data-i18n="h_silent">How it fails silently</h2>
+  <p data-i18n="silent_p1">Because publishing must never fail on account of the recommender, its errors are caught and turned into a metric, and the publisher still sees “the job is live”. That is the right call for the person publishing and a risky one for the system: nothing on the publish screen shows that scoring died, and a broken scorer produces the same empty result as a candidate base with no matches.</p>
+  <p data-i18n="silent_p2">In September a change to the job pass read a block-scoped constant after its <code>try</code> block. On the first scored candidate it threw a ReferenceError. Publishing still said the job went live. The pass wrote no rows, sent no emails and announced nothing, and the interface said nothing about it. The only trace was an error line in the monitoring channel, easy to read as noise. No test in the suite calls the pass, so nothing failed before the deploy.</p>
+  <p data-i18n="silent_p3">Two habits came out of it. After any change to the pass, I run the real module in Node with a stubbed data layer and assert that it finishes and writes one row per scored candidate. And background work needs a positive signal, not only an error alarm: the pass logs candidates, scored and matching counts on every run, so a pass that did nothing shows up as a missing line.</p>
+  <p data-i18n="silent_p4">The sweeps have the same disease. A sweep that throws every tick, and one that runs and does nothing, look just like one with nothing to do. So a watchdog compares the two: if an open order still has stale rows the sweep could rewrite and the tick rewrote none, it posts to the monitoring channel.</p>
+  <p data-i18n="silent_p5">The loudest alert can be as bad as none. The first metric wrapper posted one line per scored candidate to the team’s monitoring channel, in bursts of twenty from the warm-up. Success lines now go to the logs, and the channel only hears about error-class events.</p>
+  <p data-i18n="silent_p6">The last silent failure is the input. Some PDFs use fonts that decode one-to-one to the wrong letters, so “Government” arrives as punctuation soup that is still plain ASCII. A sales director’s CV parsed into exactly two terms, C# and R, and scored 93% against a foodtech R&amp;D role. A readability gate now rejects text that is under about half letters, and the scorer falls back to the profile alone instead of inventing matches.</p>
+  <h2 data-i18n="h_weak">What is still weak</h2>
+  <ul>
+    <li data-i18n="weak_l1"><strong>The thresholds are judgment, not calibration.</strong> The cut-offs (72 to email, 60 to highlight, 40 to show) came from reading real lists. Recruiters can mark a fit score as right or wrong, and that table is empty, so there is no disagreement rate to tune against. Application outcomes are a noisy substitute, since a rejection can be about salary or a filled seat. So far there is no human-labelled set of pairs to measure against.</li>
+    <li data-i18n="weak_l2"><strong>Team notifications are not capped like email.</strong> The ceiling is 25 emails per publish, but owner nudges and unowned-candidate announcements run for every strong match. A thin order can make that channel loud.</li>
+    <li data-i18n="weak_l3"><strong>The passes have no automated test.</strong> The scorer has invariant tests and the For you page runs real handlers against the real schema. Neither pass, the delivery rules nor the sweeps has a guard in CI. The stub check above is something I run by hand.</li>
+    <li data-i18n="weak_l4"><strong>It matches words, not meaning.</strong> Skills and years are read from text, so a candidate who describes the same work in different words scores lower. An AI-written fit note exists, but only for submitted applications and as a separate read for recruiters. It does not feed recommendations.</li>
+  </ul>
+  <p data-i18n="outro" style="margin-top:28px;">The score was the easy part. Most of the work went into who gets told, whether a stored number still means what it says, and making failure audible.</p>
+  <p style="margin-top:36px;"><a href="/" data-i18n="back">← Back to portfolio</a></p>
+</div>
+<script src="rec-i18n.js"></script>
+</body>
+</html>
