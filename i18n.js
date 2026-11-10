@@ -117,6 +117,16 @@ const I18N = {
 
   // ---- BLOG ----
   'blog.h2': { en: 'Writing', sv: 'Skriver' },
+  'blog11.p': {
+    en: "Hybrid BM25 and embedding search over candidate CVs on Cloudflare: a scrub for text that is stored and shown, a review that found three blockers, a pre-set benchmark gate that the new search failed, and why it shipped as a search box anyway.",
+    sv: "Hybrid BM25- och inbäddningssökning över kandidaters CV på Cloudflare: en rensning för text som lagras och visas, en granskning som hittade tre blockerande fel, en förhandsbestämd benchmarkgräns som den nya sökningen inte klarade, och varför den ändå blev en sökruta."
+  },
+
+  'blog10.p': {
+    en: "How I measured the AI fit assessment against 302 recruiter decisions: labels you can and cannot trust, agreement that equals always guessing the majority, a cheaper model that failed on grounding, and the privacy bug the measurement turned up.",
+    sv: "Hur jag mätte AI-bedömningen av passning mot 302 rekryterarbeslut: etiketter man kan och inte kan lita på, överensstämmelse som motsvarar att alltid gissa majoriteten, en billigare modell som föll på grundning och integritetsfelet som mätningen avslöjade."
+  },
+
   'blog1.p': {
     en: "How my agency runs on AI I built myself: LLM resume parsing, explainable fit scoring with fairness guardrails, and the schema trick that keeps prompts and templates in sync. With diagrams and the research papers behind the design choices.",
     sv: "Hur min byrå drivs på AI jag byggt själv: LLM-tolkning av CV:n, förklarbar matchningspoäng med rättvisespärrar och schema-tricket som håller prompts och mallar i synk. Med diagram och forskningsartiklarna bakom designvalen."

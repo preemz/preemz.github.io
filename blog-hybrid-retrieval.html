@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Searching Candidate CVs by Words and by Meaning: A Benchmark That Said Not to Replace the Ranking · Primawan Satrio</title>
+<meta name="description" content="Building hybrid BM25 and embedding search over candidate CVs on Cloudflare: a scrub for text that is stored and shown, a review that found three blockers, a pre-set benchmark gate that the new search failed, and why it shipped as a search box anyway.">
+<link rel="canonical" href="https://preemz.github.io/blog-hybrid-retrieval.html">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://preemz.github.io/blog-hybrid-retrieval.html">
+<meta property="og:title" content="Searching Candidate CVs by Words and by Meaning">
+<meta property="og:description" content="Building hybrid BM25 and embedding search over candidate CVs on Cloudflare: a scrub for text that is stored and shown, a review that found three blockers, a pre-set benchmark gate that the new search failed, and why it shipped as a search box anyway.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Searching Candidate CVs by Words and by Meaning">
+<meta name="twitter:description" content="Building hybrid BM25 and embedding search over candidate CVs on Cloudflare: a scrub for text that is stored and shown, a review that found three blockers, a pre-set benchmark gate that the new search failed, and why it shipped as a search box anyway.">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BlogPosting",
+ "headline": "Searching Candidate CVs by Words and by Meaning: A Benchmark That Said Not to Replace the Ranking",
+ "description": "Building hybrid BM25 and embedding search over candidate CVs on Cloudflare: a scrub for text that is stored and shown, a review that found three blockers, a pre-set benchmark gate that the new search failed, and why it shipped as a search box anyway.",
+ "datePublished": "2026-11-10",
+ "inLanguage": "en",
+ "url": "https://preemz.github.io/blog-hybrid-retrieval.html",
+ "mainEntityOfPage": "https://preemz.github.io/blog-hybrid-retrieval.html",
+ "author": {
+  "@type": "Person",
+  "name": "Primawan Satrio",
+  "url": "https://preemz.github.io/"
+ }
+}
+</script>
+<style>
+  :root {
+    --bg: #0b0e14; --surface: #12161f; --border: #232a38;
+    --text: #e6e9ef; --muted: #8b93a5; --accent: #4f8cff; --accent2: #7c5cff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+    line-height: 1.75; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 60px 24px 80px; }
+  .back { font-size: 14px; }
+  .back a { color: var(--accent); text-decoration: none; }
+  h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.2; letter-spacing: -.02em; margin: 18px 0 10px; }
+  .meta { color: var(--muted); font-size: 14px; margin-bottom: 40px; }
+  h2 { font-size: 22px; letter-spacing: -.01em; margin: 44px 0 14px; }
+  p { margin-bottom: 16px; color: #c4cad6; }
+  p strong, li strong { color: var(--text); }
+  a { color: var(--accent); }
+  ul, ol { margin: 0 0 16px 22px; color: #c4cad6; }
+  li { margin-bottom: 8px; }
+  code {
+    font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; font-size: .88em;
+    background: rgba(79,140,255,.09); color: #9cc0ff; border-radius: 5px; padding: 1.5px 6px;
+  }
+  blockquote {
+    border-left: 3px solid var(--accent); background: var(--surface);
+    padding: 12px 18px; border-radius: 0 10px 10px 0; margin: 18px 0; color: var(--muted); font-size: 15px;
+  }
+  table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); }
+  th { color: var(--text); }
+  td { color: var(--muted); }
+  .diagram {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px 16px; margin: 22px 0; overflow-x: auto;
+  }
+  .diagram svg { display: block; min-width: 560px; width: 100%; height: auto; }
+  .caption { font-size: 13px; color: var(--muted); text-align: center; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="back"><a href="/">← preemz.github.io</a><button id="lang-toggle" aria-label="Switch language" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:3px 10px;font-size:13px;cursor:pointer;margin-left:12px;float:right;">SV</button></div>
+
+  <h1 data-i18n="t">Searching Candidate CVs by Words and by Meaning: A Benchmark That Said Not to Replace the Ranking</h1>
+  <div class="meta" data-i18n="meta">Primawan Satrio · November 2026 · ~10 min read</div>
+  <p data-i18n="p1">KerjaBoard, the job board my recruiting agency runs on, ranks candidates for an order with rules over fields it has parsed: years, skills, languages, salary. That works until a recruiter wants someone who "built payment systems" and the CV says "settlement platform". The rules match skills and years as words, so they cannot connect the two. So I built a search over the text of CVs, with two retrieval methods fused, and asked a question I could answer with data: would it find the people the team actually advanced better than the existing order does?</p>
+  <p data-i18n="p2">I wrote the answer rule down before running anything: the new search replaces the order on the matches page only if it beats the old order on recall at 50 with non-overlapping 95% intervals. Otherwise it ships as a search box. It failed the rule. This post covers how it is built, what a review found before the first push, and why the result still tells me something.</p>
+  <h2 data-i18n="h_pipe">The CV text is stored, embedded and shown, so I treat it as published</h2>
+  <div class="diagram"><svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pipeline: CV file, text, scrub twice, chunks, then D1 with FTS5 and Vectorize" font-family="-apple-system,sans-serif"><rect x="0" y="70" width="110" height="56" rx="10" fill="#161b26" stroke="#232a38"/><text x="55.0" y="95.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">CV file</text><text x="55.0" y="111.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">PDF or Word, in R2</text><rect x="135" y="70" width="110" height="56" rx="10" fill="#161b26" stroke="#232a38"/><text x="190.0" y="95.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">Text</text><text x="190.0" y="111.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">extract, join lines</text><rect x="270" y="70" width="120" height="56" rx="10" fill="#161b26" stroke="#ff9b9b"/><text x="330.0" y="95.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">Scrub, twice</text><text x="330.0" y="111.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">identity and contacts</text><rect x="415" y="70" width="110" height="56" rx="10" fill="#161b26" stroke="#232a38"/><text x="470.0" y="95.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">Chunks</text><text x="470.0" y="111.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">~250 words, max 8</text><rect x="555" y="10" width="165" height="56" rx="10" fill="#161b26" stroke="#4f8cff"/><text x="637.5" y="35.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">D1 + FTS5</text><text x="637.5" y="51.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">text for BM25</text><rect x="555" y="130" width="165" height="56" rx="10" fill="#161b26" stroke="#7c5cff"/><text x="637.5" y="155.0" text-anchor="middle" fill="#e6e9ef" font-size="12.5">Vectorize</text><text x="637.5" y="171.0" text-anchor="middle" fill="#8b93a5" font-size="10.5">bge-m3, 1024 numbers</text><path d="M110 98 L135 98 m-6 -5 l6 5 l-6 5" stroke="#8b93a5" fill="none"/><path d="M245 98 L270 98 m-6 -5 l6 5 l-6 5" stroke="#8b93a5" fill="none"/><path d="M390 98 L415 98 m-6 -5 l6 5 l-6 5" stroke="#8b93a5" fill="none"/><path d="M525 98 L540 98 L540 38 L555 38 m-6 -5 l6 5 l-6 5" stroke="#8b93a5" fill="none"/><path d="M525 98 L540 98 L540 158 L555 158 m-6 -5 l6 5 l-6 5" stroke="#8b93a5" fill="none"/><text x="330" y="150" text-anchor="middle" fill="#ff9b9b" font-size="11">only scrubbed text goes on</text></svg></div>
+  <div class="caption" data-i18n="fig1">Figure 1. A CV goes in; only scrubbed text reaches the database, the embedding model and the vector index.</div>
+  <p data-i18n="pipe_p1">Each CV is read from storage, turned into text, scrubbed, cut into passages of about 250 words (at most eight per candidate, with a 40-word overlap), and written twice: the text into a D1 table with an FTS5 index for BM25, and one 1024-number embedding per passage into Vectorize. The embedding model is bge-m3, which handles Indonesian and English in one space. Every search is one embedding call, one vector query and a handful of database reads.</p>
+  <p data-i18n="pipe_p2">The scrub matters more here than anywhere else in the system. The AI fit assessment reads a scrubbed CV once and forgets it. This index keeps the text, ships it to an embedding model, and later shows passages to staff and to freelancers. So before the first push I had an independent reviewer, an automated review agent, attack it with realistic constructed layouts. They found three blockers:</p>
+  <ul>
+    <li data-i18n="blk_l1"><strong>Contact data survived.</strong> The existing scrub, built to filter one transient prompt, missed scheme-less social links (<code>t.me/x</code>, <code>linktr.ee/x</code>), personal domains, emails wrapped across lines, phone numbers with en dashes or zero-width characters, and passport numbers. The fix runs a second scrub that reuses the freelancer-preview blackout and strips the account's own stored email and phone by value.</li>
+    <li data-i18n="blk_l2"><strong>An empty account name switched off name removal.</strong> The scrub removes the candidate's name from the CV by matching the account name; with no name on the account there was nothing to match. Such accounts are now not indexed at all.</li>
+    <li data-i18n="blk_l3"><strong>The BM25 query was quadratic.</strong> Joined the natural way, the planner scanned the whole FTS table once per chunk: 1.8 s at 2,000 chunks and 16.5 s at 8,000 in a local test. Running the match first, in a subquery, returned the same rows in 27 ms at 8,000. My tests had seven users and could not see it, and D1 runs one query at a time, so I expect one slow search would have stalled other requests. There is now a test over 12,000 chunks with a time bound and a plan check.</li>
+  </ul>
+  <p data-i18n="pipe_p3">The review also caught a retention bug: if a candidate deletes their account while their CV is being indexed, the vector write can land after the cleanup and nothing ever removes it. The indexer now re-checks the account after writing, and the cleanup queue keeps each entry for an hour. Candidates in the EU are not indexed at all, because the EU privacy notice promises that CVs stay in the EU at rest and I cannot show that for the embedding service or the vector index. The notice now describes the index, and says plainly that the scrub cannot catch everything: a sentence about religion, health or family in the body of a CV is not recognisable as such.</p>
+  <p data-i18n="pipe_p4">Two operational details bit me on the first backfill. Vectorize rate-limits writes, and my first indexer sent a delete before every first-time upsert and a delete for every candidate without a CV, which turned the backfill into a wall of "Too Many Requests" errors; a candidate never indexed has no vectors to delete, and skipping that call fixed it. And the cron tick has a fixed cost by design: it probes an index for never-indexed candidates and scans a fixed window of ids for stale ones, so the work per tick does not grow with the number of candidates.</p>
+  <h2 data-i18n="h_fuse">Two legs, one fusion</h2>
+  <p data-i18n="fuse_p1">BM25 ranks passages by how many of the query's words they contain and how rare those words are. The embedding leg ranks them by closeness in meaning. Their scores are on different scales, so I fuse ranks, not scores: reciprocal-rank fusion gives each candidate the sum of 1 / (60 + rank) over the lists it appears in. Each candidate is represented by their best passage, and the passage shown is the BM25 one when both legs found the candidate, because it holds the query's own words. A candidate who objected to sourcing, is suspended or has been erased is dropped on every read, whatever the index still holds.</p>
+  <h2 data-i18n="h_bench">The benchmark, and the rule I set first</h2>
+  <p data-i18n="bench_p1">Ground truth is what the team did: the candidates it advanced to "Request to send profile" or further, on orders where such a candidate has an indexed CV. That is 75 advanced candidate and order pairs (70 distinct people) on 23 orders; 7 more advanced candidates have no indexed CV and are left out for every method alike. The query for an order is its title, the must-have skills the rule engine parsed, and its requirements, never the client brief. Every method ranks the same pool of candidates with an indexed CV. I compared six rankings: the stored rule order, BM25, embeddings, the two fused, the fused list re-ordered by the stored rule score, and the fused top 50 re-ordered by a cross-encoder reranker.</p>
+  <div class="diagram"><svg viewBox="0 0 720 245" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Recall at 50 for six ranking methods, with 95 percent intervals; values are in the table below" font-family="-apple-system,sans-serif"><path d="M190.0 14 L190.0 214" stroke="#232a38"/><text x="190.0" y="232" text-anchor="middle" fill="#8b93a5" font-size="10.5">0.0</text><path d="M257.1 14 L257.1 214" stroke="#232a38"/><text x="257.1" y="232" text-anchor="middle" fill="#8b93a5" font-size="10.5">0.1</text><path d="M324.3 14 L324.3 214" stroke="#232a38"/><text x="324.3" y="232" text-anchor="middle" fill="#8b93a5" font-size="10.5">0.2</text><path d="M391.4 14 L391.4 214" stroke="#232a38"/><text x="391.4" y="232" text-anchor="middle" fill="#8b93a5" font-size="10.5">0.3</text><path d="M458.6 14 L458.6 214" stroke="#232a38"/><text x="458.6" y="232" text-anchor="middle" fill="#8b93a5" font-size="10.5">0.4</text><path d="M525.7 14 L525.7 214" stroke="#232a38"/><text x="525.7" y="232" text-anchor="middle" fill="#8b93a5" font-size="10.5">0.5</text><path d="M592.9 14 L592.9 214" stroke="#232a38"/><text x="592.9" y="232" text-anchor="middle" fill="#8b93a5" font-size="10.5">0.6</text><path d="M660.0 14 L660.0 214" stroke="#232a38"/><text x="660.0" y="232" text-anchor="middle" fill="#8b93a5" font-size="10.5">0.7</text><text x="178" y="38" text-anchor="end" fill="#e6e9ef" font-size="12">Rule order</text><rect x="190" y="24" width="120.2" height="20" fill="#ff9b9b" opacity=".85"/><path d="M233.6 34 L400.8 34 M233.6 28 L233.6 40 M400.8 28 L400.8 40" stroke="#e6e9ef" stroke-width="1.5"/><text x="178" y="70" text-anchor="end" fill="#e6e9ef" font-size="12">BM25</text><rect x="190" y="56" width="283.3" height="20" fill="#4f8cff" opacity=".85"/><path d="M359.9 66 L590.2 66 M359.9 60 L359.9 72 M590.2 60 L590.2 72" stroke="#e6e9ef" stroke-width="1.5"/><text x="178" y="102" text-anchor="end" fill="#e6e9ef" font-size="12">Embeddings</text><rect x="190" y="88" width="212.2" height="20" fill="#7c5cff" opacity=".85"/><path d="M301.5 98 L506.9 98 M301.5 92 L301.5 104 M506.9 92 L506.9 104" stroke="#e6e9ef" stroke-width="1.5"/><text x="178" y="134" text-anchor="end" fill="#e6e9ef" font-size="12">Fused (RRF)</text><rect x="190" y="120" width="289.4" height="20" fill="#9cc0ff" opacity=".85"/><path d="M369.9 130 L594.2 130 M369.9 124 L369.9 136 M594.2 124 L594.2 136" stroke="#e6e9ef" stroke-width="1.5"/><text x="178" y="166" text-anchor="end" fill="#e6e9ef" font-size="12">Fused, then rule order</text><rect x="190" y="152" width="282.7" height="20" fill="#8b93a5" opacity=".85"/><path d="M358.5 162 L581.4 162 M358.5 156 L358.5 168 M581.4 156 L581.4 168" stroke="#e6e9ef" stroke-width="1.5"/><text x="178" y="198" text-anchor="end" fill="#e6e9ef" font-size="12">Fused + cross-encoder</text><rect x="190" y="184" width="289.4" height="20" fill="#5c6475" opacity=".85"/><path d="M369.9 194 L594.2 194 M369.9 188 L369.9 200 M594.2 188 L594.2 200" stroke="#e6e9ef" stroke-width="1.5"/></svg></div>
+  <div class="caption" data-i18n="fig2">Figure 2. Recall at 50, averaged over orders, with 95% bootstrap intervals over orders. The rule order is averaged over 22 orders (one order has no stored scores); every other method over all 23.</div>
+  <table>
+    <tr><th data-i18n="res.h0">Method</th><th data-i18n="res.h1">recall@20</th><th data-i18n="res.h2">recall@50</th><th data-i18n="res.h3">recall@100</th><th data-i18n="res.h4">MRR</th><th data-i18n="res.h5">nDCG@20</th></tr>
+    <tr><td data-i18n="res.r0c0">Rule order</td><td data-i18n="res.r0c1">0.10</td><td data-i18n="res.r0c2">0.18</td><td data-i18n="res.r0c3">0.31</td><td data-i18n="res.r0c4">0.20</td><td data-i18n="res.r0c5">0.09</td></tr>
+    <tr><td data-i18n="res.r1c0">BM25</td><td data-i18n="res.r1c1">0.19</td><td data-i18n="res.r1c2">0.42</td><td data-i18n="res.r1c3">0.52</td><td data-i18n="res.r1c4">0.08</td><td data-i18n="res.r1c5">0.09</td></tr>
+    <tr><td data-i18n="res.r2c0">Embeddings</td><td data-i18n="res.r2c1">0.18</td><td data-i18n="res.r2c2">0.32</td><td data-i18n="res.r2c3">0.43</td><td data-i18n="res.r2c4">0.07</td><td data-i18n="res.r2c5">0.07</td></tr>
+    <tr><td data-i18n="res.r3c0">Fused (RRF)</td><td data-i18n="res.r3c1">0.17</td><td data-i18n="res.r3c2">0.43</td><td data-i18n="res.r3c3">0.54</td><td data-i18n="res.r3c4">0.09</td><td data-i18n="res.r3c5">0.08</td></tr>
+    <tr><td data-i18n="res.r4c0">Fused, then rule order</td><td data-i18n="res.r4c1">0.19</td><td data-i18n="res.r4c2">0.42</td><td data-i18n="res.r4c3">0.58</td><td data-i18n="res.r4c4">0.20</td><td data-i18n="res.r4c5">0.13</td></tr>
+    <tr><td data-i18n="res.r5c0">Fused + cross-encoder</td><td data-i18n="res.r5c1">0.18</td><td data-i18n="res.r5c2">0.43</td><td data-i18n="res.r5c3">0.58</td><td data-i18n="res.r5c4">0.06</td><td data-i18n="res.r5c5">0.07</td></tr>
+  </table>
+  <p data-i18n="bench_p2">On recall at 50, the fused search finds 45% of the advanced candidates per order against 18% for the rule order (on the 22 orders where both have a ranking; on all 23 orders the fused search is at 43%). But the intervals (0.28 to 0.62 against 0.07 to 0.31) overlap, so by the rule I set, <strong>it fails and the matches page keeps the old order</strong>. A paired comparison on the 22 orders where both have a ranking gives a difference of +0.27 with an interval of 0.11 to 0.44, which excludes zero. Overlapping separate intervals are a stricter test than a paired one, and I chose the strict one before seeing the data. I am keeping the decision I made, and I am reporting the paired number next to it so a reader can judge for themselves.</p>
+  <p data-i18n="bench_p3">The table says something the pass or fail does not. The rule order has the better MRR, 0.20 against 0.09 for the fused list, but that comes from 4 of its 22 orders, where a candidate the team advanced is ranked first; on 10 of the 22, none of them is in its list of 300 at all, and its recall at 20 is the lowest of the six. Retrieval is better in depth: recall at 100 is 0.54 against 0.31. Re-ordering the fused list by the rule score keeps both, with the best nDCG at 20 (0.13), though every interval overlaps. The cross-encoder reranker made the top worse (MRR 0.06); it is not trained for Indonesian and these CVs mix Indonesian and English, which may be why, though I did not test that, and I dropped it. Candidates that the team sourced or a freelancer submitted, 14 of the 75, show the same pattern (recall at 50 on 8 orders: 0.03 for the rule order, 0.41 for BM25, 0.28 for the fused search; informational only, the gate was not re-run on it), and the rule engine had no application answers for them, which is a plausible reason I did not test.</p>
+  <p data-i18n="bench_p4">Read this with its limits. 23 orders and 75 positive pairs is small. The positives are candidates the team already screened with the old order in view, so recall against them rewards agreeing with that screen. The embedding leg returns at most 100 passages per query, about 90 candidates, so its recall at 100 is capped. The index holds at most eight passages per candidate, about the first 1,500 to 2,000 words of a CV, so anything later in a long CV cannot be found. And the benchmark ran on the index as first built; the only scrub change since is removing leftover contact labels.</p>
+  <h2 data-i18n="h_ship">What shipped, and a leak check I did live</h2>
+  <p data-i18n="ship_p1">The search shipped as a box, "Search by description", for the internal team and for freelance recruiters, with a how-to page that states the benchmark result and its limits. Staff open the candidate's profile from a result. A freelancer gets the same card as in the existing name search, and sees the matched passage only for a candidate that nobody owns or has claimed, the same scope as the preview before claiming, with the same contact blackout applied on top. Searches are rate limited, tighter for freelancers, because each one is an embedding call.</p>
+  <p data-i18n="ship_p2">Before announcing it, I created a throwaway freelancer account, searched for six real orders, and read what came back. No email, phone number, LinkedIn link or nationality appeared in a passage. It did show me a flaw. A stray label such as "LinkedIn:" left in the stored text, with its value already removed, made the freelancer blackout black out ordinary hyphenated words after it, like "infrastructure-as-code" and "zero-downtime". The scrub now removes those leftover labels, and I re-indexed everything and repeated the check on eight orders: 53 passages, no contact detail, no nationality, no blackout characters. The throwaway account and its session were deleted afterwards.</p>
+  <h2 data-i18n="h_lessons">What I take from it</h2>
+  <ul>
+    <li data-i18n="les_l1"><strong>Write the pass rule before the run.</strong> A +0.27 paired difference is tempting. The rule I set kept the old order in place while the data was still thin.</li>
+    <li data-i18n="les_l2"><strong>The two methods are complements, not rivals.</strong> The rule order sometimes nails the first place and is blind to CV text; retrieval reaches deeper and is blind to years and visas. The best next experiment is a combination that mixes the rule score with the retrieval score instead of only re-ordering by it, on more orders.</li>
+    <li data-i18n="les_l3"><strong>Test with the size you will have.</strong> A query plan that is fine at seven users and broken at eight thousand chunks is invisible to a normal test suite; a testdatae of that size is cheap.</li>
+    <li data-i18n="les_l4"><strong>Text you keep is text you must be able to defend.</strong> A scrub designed for one prompt is not good enough for a table, a vector index and a results page. The residuals (prose about religion or health) are now written into the privacy notice instead of being left for someone to discover.</li>
+  </ul>
+  <p data-i18n="outro" style="margin-top:28px;">The search is live. The ranking stays as it was. The benchmark supports exactly that much: the search finds more of the people the team advanced, with a sample too small to prove it. How useful it is in daily work I cannot say yet, and I would rather ship that than the version of the story where the new thing wins.</p>
+  <p style="margin-top:36px;"><a href="/" data-i18n="back">← Back to portfolio</a></p>
+</div>
+<script src="hybrid-i18n.js"></script>
+</body>
+</html>

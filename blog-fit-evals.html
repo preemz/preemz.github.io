@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Measuring an AI Fit Assessment: 302 Frozen Decisions, 99 I Trust · Primawan Satrio</title>
+<meta name="description" content="How I measured the AI fit assessment in KerjaBoard against 302 frozen recruiter decisions, 99 of them trusted: where the labels come from, why agreement is meaningless without a baseline, a cheaper model that failed on grounding, and the bugs the measurement found.">
+<link rel="canonical" href="https://preemz.github.io/blog-fit-evals.html">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://preemz.github.io/blog-fit-evals.html">
+<meta property="og:title" content="Measuring an AI Fit Assessment">
+<meta property="og:description" content="How I measured the AI fit assessment in KerjaBoard against 302 frozen recruiter decisions, 99 of them trusted: where the labels come from, why agreement is meaningless without a baseline, a cheaper model that failed on grounding, and the bugs the measurement found.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Measuring an AI Fit Assessment">
+<meta name="twitter:description" content="How I measured the AI fit assessment in KerjaBoard against 302 frozen recruiter decisions, 99 of them trusted: where the labels come from, why agreement is meaningless without a baseline, a cheaper model that failed on grounding, and the bugs the measurement found.">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BlogPosting",
+ "headline": "Measuring an AI Fit Assessment: 302 Frozen Decisions, 99 I Trust",
+ "description": "How I measured the AI fit assessment in KerjaBoard against 302 frozen recruiter decisions, 99 of them trusted: where the labels come from, why agreement is meaningless without a baseline, a cheaper model that failed on grounding, and the bugs the measurement found.",
+ "datePublished": "2026-11-10",
+ "inLanguage": "en",
+ "url": "https://preemz.github.io/blog-fit-evals.html",
+ "mainEntityOfPage": "https://preemz.github.io/blog-fit-evals.html",
+ "author": {
+  "@type": "Person",
+  "name": "Primawan Satrio",
+  "url": "https://preemz.github.io/"
+ }
+}
+</script>
+<style>
+  :root {
+    --bg: #0b0e14; --surface: #12161f; --border: #232a38;
+    --text: #e6e9ef; --muted: #8b93a5; --accent: #4f8cff; --accent2: #7c5cff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+    line-height: 1.75; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 60px 24px 80px; }
+  .back { font-size: 14px; }
+  .back a { color: var(--accent); text-decoration: none; }
+  h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.2; letter-spacing: -.02em; margin: 18px 0 10px; }
+  .meta { color: var(--muted); font-size: 14px; margin-bottom: 40px; }
+  h2 { font-size: 22px; letter-spacing: -.01em; margin: 44px 0 14px; }
+  p { margin-bottom: 16px; color: #c4cad6; }
+  p strong, li strong { color: var(--text); }
+  a { color: var(--accent); }
+  ul, ol { margin: 0 0 16px 22px; color: #c4cad6; }
+  li { margin-bottom: 8px; }
+  code {
+    font-family: "SF Mono", ui-monospace, Menlo, Consolas, monospace; font-size: .88em;
+    background: rgba(79,140,255,.09); color: #9cc0ff; border-radius: 5px; padding: 1.5px 6px;
+  }
+  blockquote {
+    border-left: 3px solid var(--accent); background: var(--surface);
+    padding: 12px 18px; border-radius: 0 10px 10px 0; margin: 18px 0; color: var(--muted); font-size: 15px;
+  }
+  table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); }
+  th { color: var(--text); }
+  td { color: var(--muted); }
+  .diagram {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 22px 16px; margin: 22px 0; overflow-x: auto;
+  }
+  .diagram svg { display: block; min-width: 560px; width: 100%; height: auto; }
+  .caption { font-size: 13px; color: var(--muted); text-align: center; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="back"><a href="/">← preemz.github.io</a><button id="lang-toggle" aria-label="Switch language" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:3px 10px;font-size:13px;cursor:pointer;margin-left:12px;float:right;">SV</button></div>
+
+  <h1 data-i18n="t">Measuring an AI Fit Assessment: 302 Frozen Decisions, 99 I Trust</h1>
+  <div class="meta" data-i18n="meta">Primawan Satrio · November 2026 · ~10 min read</div>
+  <p data-i18n="p1">Under the applications the team is working on KerjaBoard, my recruiting agency's job board, an AI model writes a short fit assessment: a verdict (Strong fit, Good fit, Possible fit or Not a fit), a few strengths and concerns, and for each one a quote from the CV or the posting that it rests on. The model is Claude Sonnet 5.5. I put it in production, the team uses it, and until this week nobody had measured whether it is any good. This post is about how I measured it, and what the measurement found, including the parts that do not flatter it.</p>
+  <p data-i18n="p2">The short version: on the cases where I trust the labels, the model agrees with the team 79.8% of the time (reading Possible fit as advance; 41.4% reading it as reject), and always guessing "advance" agrees 78.8% of the time. The interesting results are elsewhere.</p>
+  <h2 data-i18n="h_labels">The label is a recruiter's decision, and decisions are messy</h2>
+  <p data-i18n="labels_p1">There is no answer key for "is this candidate a fit". What exists is what the team did: it moved a card to <code>Request to send profile</code> (or further: Submitted, Interview, Offering, Hired), or it rejected the application. I turn that into a label, and most of the work was deciding which decisions deserve to be called labels:</p>
+  <ul>
+    <li data-i18n="lab_l1"><strong>Advanced</strong> means the card reached Request to send profile or later. That is an <code>advance</code> label.</li>
+    <li data-i18n="lab_l2"><strong>Rejected after an advance</strong> gets no label at all. The client may have turned the candidate down after we sent the profile, and that says nothing about the model.</li>
+    <li data-i18n="lab_l3"><strong>Rejected before any advance</strong> is a <code>reject</code> label, but only <em>trusted</em> if the move is in the activity log. That log started on 26 October. Earlier rejections might have been the client's call, so they are tagged <code>status-unlogged</code>, reported separately and never counted in the headline number.</li>
+    <li data-i18n="lab_l4"><strong>A staff Disagree</strong> on the fit panel is a third source, <code>feedback</code>. These are the cases where a person overrode the model, so they are selected for the model being wrong. They are kept apart and never pooled into a model comparison.</li>
+  </ul>
+  <p data-i18n="labels_p2">A review pass before the first run found that my query counted the Today page's bulk close-out, which sweeps stale cards to Rejected, as a trusted rejection. Nobody screened those cards. The fix was one condition on the log row's kind and one test row; without the review that mistake would have sat inside the headline number.</p>
+  <p data-i18n="labels_p3">Each decided application that has a CV file is frozen into a golden set together with its label and a copy of the job as it read that day, because an upstream sync rewrites job requirements and client briefs every day and a case must not change under the model. That gave <strong>302 frozen cases</strong> on 64 orders: 91 advanced, 24 trusted rejections, 187 untrusted ones. Thirty-two had no readable CV (the CV text was missing or too short to assess), which leaves 270 that can be scored, and 99 of them carry a trusted label: 78 advances and 21 rejections.</p>
+  <h2 data-i18n="h_runner">A runner that cannot touch production</h2>
+  <p data-i18n="runner_p1">An eval run re-assesses the frozen cases with a chosen model. It writes to its own eval tables, plus one setting that feeds a footnote on the staff panel when the run is the production baseline, and nowhere else: not the stored assessments staff see, not the activity log, no email. A test drives the real route handlers with a data layer that records every write, and fails if a run writes anything outside that short list.</p>
+  <p data-i18n="runner_p2">A Worker request has a time limit, so a run is advanced five cases at a time by pressing one route, and a small driver script presses it until nothing is left. A full Sonnet run of 302 cases took about eight minutes. The part that took thought was failure, because a measurement that quietly loses cases is worse than none:</p>
+  <ul>
+    <li data-i18n="run_l1"><strong>Nothing to assess</strong> (no readable CV) is stored as that case's final result.</li>
+    <li data-i18n="run_l2"><strong>The request itself is wrong for every case</strong> (a bad key, a model name the API does not know) stops the step with the reason and stores nothing. This happened for real: Haiku rejects the thinking-effort parameter the production setup sends, the driver stopped on its first press and printed the API's message. Effort is now an option on the run.</li>
+    <li data-i18n="run_l3"><strong>An outage or a rate limit</strong> is not stored. The case stays pending, and the driver stops after three presses with no progress.</li>
+    <li data-i18n="run_l4"><strong>The model's own bad answer</strong> (malformed JSON, an empty answer) is retried and becomes final after three attempts, so a run always ends.</li>
+  </ul>
+  <p data-i18n="runner_p3">The review found one more: the production CV reader swallows every storage error and returns an empty string, which an eval would have stored as a permanent "No readable CV". A storage blip would have silently deleted cases from the measurement. Runs now read CVs with a strict reader that throws.</p>
+  <h2 data-i18n="h_agree">Agreement is meaningless without a baseline</h2>
+  <p data-i18n="agree_p1">Of the 99 cases with a trusted label, 78 were advances. A "model" that says advance every time agrees with the team on 78.8% of them. Sonnet agrees on 79.8% (95% interval 70.7 to 86.7), with Cohen's kappa 0.50 (interval 0.17 to 0.67). That is not distinguishable from guessing the majority class, and the report script now prints a warning whenever agreement is at or below that baseline.</p>
+  <p data-i18n="agree_p2">There is a second trap in the verdict itself. Possible fit is neither an advance nor a reject, so every number is reported twice, once reading it as advance and once as reject. Read as reject, Sonnet agrees on only 41.4% (kappa 0.13), because the model rated 42 of the 78 candidates the team advanced as Possible fit. The honest figure is the pair, and any single number that hides which way Possible fit was read is a choice dressed as a result.</p>
+  <div class="diagram"><svg viewBox="0 0 720 160" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,sans-serif"><text x="158" y="31" text-anchor="end" fill="#e6e9ef" font-size="12.5">Team advanced</text><text x="158" y="47" text-anchor="end" fill="#8b93a5" font-size="10.5">n = 78</text><rect x="170.0" y="14" width="32.1" height="38" fill="#4f8cff"/><text x="186.0" y="38" text-anchor="middle" fill="#ffffff" font-size="12">5</text><rect x="202.1" y="14" width="96.2" height="38" fill="#7c5cff"/><text x="250.1" y="38" text-anchor="middle" fill="#ffffff" font-size="12">15</text><rect x="298.2" y="14" width="269.2" height="38" fill="#8b93a5"/><text x="432.8" y="38" text-anchor="middle" fill="#0b0e14" font-size="12">42</text><rect x="567.4" y="14" width="102.6" height="38" fill="#ff9b9b"/><text x="618.7" y="38" text-anchor="middle" fill="#0b0e14" font-size="12">16</text><text x="158" y="91" text-anchor="end" fill="#e6e9ef" font-size="12.5">Team rejected</text><text x="158" y="107" text-anchor="end" fill="#8b93a5" font-size="10.5">n = 21</text><rect x="170.0" y="74" width="95.2" height="38" fill="#8b93a5"/><text x="217.6" y="98" text-anchor="middle" fill="#0b0e14" font-size="12">4</text><rect x="265.2" y="74" width="404.8" height="38" fill="#ff9b9b"/><text x="467.6" y="98" text-anchor="middle" fill="#0b0e14" font-size="12">17</text><rect x="170" y="132" width="12" height="12" rx="2" fill="#4f8cff"/><text x="188" y="142" fill="#8b93a5" font-size="11.5">Strong fit</text><rect x="295" y="132" width="12" height="12" rx="2" fill="#7c5cff"/><text x="313" y="142" fill="#8b93a5" font-size="11.5">Good fit</text><rect x="420" y="132" width="12" height="12" rx="2" fill="#8b93a5"/><text x="438" y="142" fill="#8b93a5" font-size="11.5">Possible fit</text><rect x="545" y="132" width="12" height="12" rx="2" fill="#ff9b9b"/><text x="563" y="142" fill="#8b93a5" font-size="11.5">Not a fit</text></svg></div>
+  <div class="caption" data-i18n="fig1">Figure 1. What the model said, by what the team did, on the 99 trusted cases. None of the 21 trusted rejections got Strong fit or Good fit, and 17 got Not a fit. But the team advanced 16 of the 33 cases the model called Not a fit.</div>
+  <p data-i18n="agree_p3">That last sentence is the useful finding. In this sample the model never gave Strong fit or Good fit to a trusted rejection, but a Not a fit is not safe to act on alone: the team advanced about half of the cases it called that (16 of 33). Three caveats belong next to every number here. First, the team could see the assessment on the card when it decided (the feature went live on 22 October, and older or out-of-scope cards may never have had one), so agreement is flattered by an amount I cannot measure afterwards. Second, the 21 trusted rejections all come from the weeks since the log began, while the 78 advances come from all time. That mix inflates the 78.8% baseline and the one-in-two figure alike, and none of it is a clean sample. Third, 0 of 21 is consistent with a true rate of up to about 14%.</p>
+  <p data-i18n="agree_p4">Intervals come from a bootstrap that resamples whole orders, not single applications, because the applications of one order are not independent: they share a job description and a recruiter's taste. Resampling cases one by one would give intervals that are too narrow.</p>
+  <h2 data-i18n="h_haiku">A cheaper model, and why I am not switching</h2>
+  <p data-i18n="haiku_p1">The product question was cost: can Claude Haiku 4.5 do this job? Same prompt, same 302 frozen cases, same code path. Haiku costs less than half as much per assessment. On the trusted cases its agreement is indistinguishable from Sonnet's when Possible fit is read as advance (a paired McNemar test gives p = 0.77), and clearly higher when it is read as reject (p below 0.0001), though as I explain below that second result is an artefact of how Haiku hands out verdicts. If agreement were the whole story, I would switch.</p>
+  <table>
+    <tr><th data-i18n="res.h0"></th><th data-i18n="res.h1">Sonnet 5.5</th><th data-i18n="res.h2">Haiku 4.5</th></tr>
+    <tr><td data-i18n="res.r0c0">Cost per assessment</td><td data-i18n="res.r0c1">$0.0174</td><td data-i18n="res.r0c2">$0.0077</td></tr>
+    <tr><td data-i18n="res.r1c0">Quotes that passed grounding</td><td data-i18n="res.r1c1">96.6%</td><td data-i18n="res.r1c2">72.0%</td></tr>
+    <tr><td data-i18n="res.r2c0">Protected-word keyword hits in 270 assessments</td><td data-i18n="res.r2c1">1</td><td data-i18n="res.r2c2">10</td></tr>
+    <tr><td data-i18n="res.r3c0">Latency p50 / p95</td><td data-i18n="res.r3c1">6.2 s / 7.4 s</td><td data-i18n="res.r3c2">10.9 s / 14.4 s</td></tr>
+    <tr><td data-i18n="res.r4c0">Strong fit verdicts (of 270)</td><td data-i18n="res.r4c1">18</td><td data-i18n="res.r4c2">50</td></tr>
+    <tr><td data-i18n="res.r5c0">Agreement, trusted labels, Possible fit as advance</td><td data-i18n="res.r5c1">79.8%</td><td data-i18n="res.r5c2">81.8%</td></tr>
+    <tr><td data-i18n="res.r6c0">Agreement, trusted labels, Possible fit as reject</td><td data-i18n="res.r6c1">41.4%</td><td data-i18n="res.r6c2">69.7%</td></tr>
+    <tr><td data-i18n="res.r7c0">Always say advance (baseline)</td><td data-i18n="res.r7c1">78.8%</td><td data-i18n="res.r7c2">78.8%</td></tr>
+  </table>
+  <p data-i18n="haiku_p2">But "grounding" is the property that makes the assessment safe to show. Every strength and concern carries a quote from the CV or the posting, and the server checks each quote against the source and drops the ones it cannot find, so a reader never sees a quote that is not in the source. Sonnet had 3.4% of its quotes dropped. Haiku had 28%. It also produced ten keyword hits for protected words (age, nationality, religion and the like) in its prose, spread over six assessments, against one hit in one Sonnet assessment (a keyword match over-counts, for example on "race condition", so these are hits to read, not confirmed leaks), it ran slower with the thinking setting off, and it handed out Strong fit almost three times as often. The apparent edge for Haiku when Possible fit is read as reject comes from exactly that generosity: it turned Sonnet's Possible fits into Good fits. I am staying on Sonnet, for grounding and leakage, not for agreement.</p>
+  <p data-i18n="haiku_p3">To check how much the model disagrees with itself, I re-ran Sonnet on a 40-case sample. Three had no CV; of the other 37, one verdict changed (2.7%). That is a small sample: the 95% interval for the true rate runs from under 1% to about 14%.</p>
+  <h2 data-i18n="h_found">What turned up that had nothing to do with the score</h2>
+  <p data-i18n="found_p1">While building a second feature that reads the same scrubbed CV text, I read exactly what the model is sent, and that turned up a privacy bug. Before the model reads a CV, KerjaBoard strips the name, contact details and the lines that state nationality, age and similar. A CV extracted from a PDF with one word per line carried a phone number split across lines, and the scrub that looks for phone numbers works line by line, so the number survived into the prompt. The fix joins the lines first and scrubs second, with a test that failed before the change. That bug had been live, and it surfaced because I was reading the pipeline for another reason, not because anything flagged it.</p>
+  <p data-i18n="found_p2">Three things carry on after the experiment. Staff get Agree and Disagree buttons under each assessment, so the golden set keeps growing from real corrections (an Agree is not a label, because the person already read the verdict). A daily check compares the share of dropped quotes in the last week with the 23 days before, and also flags an error rate above 10%; it posts to a monitoring channel only when one of those two thresholds is crossed. And the privacy notice now says that past applications are sometimes re-run through the model to check accuracy, with no CV text kept.</p>
+  <h2 data-i18n="h_limits">What this does not show</h2>
+  <ul>
+    <li data-i18n="lim_l1"><strong>It says nothing about candidates the team never decided.</strong> The labels exist only where a person acted.</li>
+    <li data-i18n="lim_l2"><strong>Rejections are not all about fit.</strong> A salary mismatch or a closed order is a reject label too, so agreement cannot reach 100% even for a perfect model.</li>
+    <li data-i18n="lim_l3"><strong>I did not test whether the client brief moves the verdict</strong>, or any second prompt. The runner has a switch for hiding the brief, which I have not used; a second prompt needs a code change, and the prompt version is recorded so runs on different prompts are never compared as one.</li>
+    <li data-i18n="lim_l4"><strong>99 trusted cases is small.</strong> The agreement interval is 16 points wide, and every comparison here that looks like a difference should be read against that.</li>
+  </ul>
+  <p data-i18n="outro" style="margin-top:28px;">The assessment rarely rates a trusted rejection highly, but a Not a fit is wrong about as often as it is right, and more than half of the candidates the team advanced were rated only Possible fit. I know that now with an interval attached, which is more than I could say last week.</p>
+  <p style="margin-top:36px;"><a href="/" data-i18n="back">← Back to portfolio</a></p>
+</div>
+<script src="fit-evals-i18n.js"></script>
+</body>
+</html>
